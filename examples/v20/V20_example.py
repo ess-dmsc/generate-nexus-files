@@ -1,8 +1,6 @@
 from collections import OrderedDict
 from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
-import csv
-import numpy as np
 import h5py
 
 
@@ -38,31 +36,6 @@ def __copy_existing_data():
          ('raw_data_1/detector_1_events/event_time_zero', event_group_path + 'event_time_zero'),
          ('raw_data_1/detector_1_events/event_time_offset', event_group_path + 'event_time_offset')
          ]))
-
-
-def __get_spectrum_number_to_detector_id_map(map_filename):
-    csv.register_dialect('myDialect',
-                         delimiter=' ',
-                         skipinitialspace=True)
-    with open(map_filename, mode='r') as map_file:
-        # Skip the three header lines
-        for n in range(3):
-            map_file.readline()
-        reader = csv.reader(map_file, dialect='myDialect')
-        spectrum_to_detector_map = {int(rows[1]): int(rows[0]) for rows in reader}
-        return spectrum_to_detector_map
-
-
-def __convert_spectrum_numbers_to_detector_ids(ids):
-    """
-    ids are input as spectrum numbers and output as detector IDs (done in place)
-
-    :param ids: numpy array of spectrum numbers
-    :return: numpy array of detector IDs
-    """
-    det_spec_map = __get_spectrum_number_to_detector_id_map('spectrum_gastubes_01.dat')
-    for id in np.nditer(ids, op_flags=['readwrite']):
-        id[...] = det_spec_map[int(id)]
 
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
@@ -107,21 +80,20 @@ def __copy_and_convert_logs(builder, nx_entry_name):
 
 if __name__ == '__main__':
     output_filename = 'V20_example.nxs'
-    input_filename = 'SANS2D_ISIS_original.nxs'  # None
+    input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
-                      idf_file='SANS2D_Definition_Tubes.xml', compress_type='gzip', compress_opts=1) as builder:
-        builder.add_instrument_geometry_from_idf()
+                      idf_file=None, compress_type='gzip', compress_opts=1) as builder:
+
+        # TODO Add DENEX detector geometry
+        # TODO Copy event data into detector
+        # TODO Add choppers
+        # TODO Copy chopper TDCs into logs in the appropriate chopper
+        # TODO Add guides
 
         __copy_existing_data()
         __copy_and_convert_logs(builder, nx_entry_name)
-
-    with h5py.File(input_filename, 'r') as input_file:
-        with h5py.File(output_filename, 'r+') as output_file:
-            event_id = input_file['raw_data_1/detector_1_events/event_id'][...]
-            __convert_spectrum_numbers_to_detector_ids(event_id)
-            output_file[nx_entry_name + '/instrument/detector_1/event_data/event_id'] = event_id
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
