@@ -7,34 +7,15 @@ import numpy as np
 
 def __copy_existing_data():
     """
-    Copy data from the existing NeXus file to flesh out the example file
+    Copy data from the existing NeXus file
     """
-    event_group_path = nx_entry_name + '/instrument/detector_1/event_data/'
+    raw_event_path = nx_entry_name + '/instrument/detector_1/raw_event_data/'
     builder.copy_items(OrderedDict(
-        [('raw_data_1/instrument/moderator', nx_entry_name + '/instrument/moderator'),
-         ('raw_data_1/instrument/moderator/distance', nx_entry_name + '/instrument/moderator/distance'),
-         ('raw_data_1/instrument/source/probe', nx_entry_name + '/instrument/source/probe'),
-         ('raw_data_1/instrument/source/type', nx_entry_name + '/instrument/source/type'),
-         ('raw_data_1/sample/name', nx_entry_name + '/sample/name'),
-         ('raw_data_1/sample/type', nx_entry_name + '/sample/type'),
-         ('raw_data_1/duration', nx_entry_name + '/duration'),
-         ('raw_data_1/start_time', nx_entry_name + '/start_time'),
-         ('raw_data_1/end_time', nx_entry_name + '/end_time'),
-         ('raw_data_1/run_cycle', nx_entry_name + '/run_cycle'),
-         ('raw_data_1/title', nx_entry_name + '/title'),
-         ('raw_data_1/monitor_1/data', nx_entry_name + '/instrument/monitor_1/data'),
-         ('raw_data_1/monitor_1/time_of_flight', nx_entry_name + '/instrument/monitor_1/time_of_flight'),
-         ('raw_data_1/monitor_2/data', nx_entry_name + '/instrument/monitor_2/data'),
-         ('raw_data_1/monitor_2/time_of_flight', nx_entry_name + '/instrument/monitor_2/time_of_flight'),
-         ('raw_data_1/monitor_3/data', nx_entry_name + '/instrument/monitor_3/data'),
-         ('raw_data_1/monitor_3/time_of_flight', nx_entry_name + '/instrument/monitor_3/time_of_flight'),
-         ('raw_data_1/monitor_4/data', nx_entry_name + '/instrument/monitor_4/data'),
-         ('raw_data_1/monitor_4/time_of_flight', nx_entry_name + '/instrument/monitor_4/time_of_flight'),
-         ('raw_data_1/detector_1_events/', event_group_path),
-         #('raw_data_1/detector_1_events/event_id', event_group_path + 'event_id'),
-         ('raw_data_1/detector_1_events/event_index', event_group_path + 'event_index'),
-         ('raw_data_1/detector_1_events/event_time_zero', event_group_path + 'event_time_zero'),
-         ('raw_data_1/detector_1_events/event_time_offset', event_group_path + 'event_time_offset')
+        [('entry-01/Delayline_events', nx_entry_name + '/instrument/detector_1/raw_event_data'),
+         ('entry-01/Delayline_events/event_id', raw_event_path + 'event_id'),
+         ('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
+         ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset'),
+         ('entry-01/Delayline_events/event_time_zero', raw_event_path + 'event_time_zero')
          ]))
 
 
@@ -85,29 +66,28 @@ if __name__ == '__main__':
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
-
         builder.add_instrument('V20', 'instrument')
         builder.add_user('Too many users to count', 'ESS and collaborators')
 
         # Add DENEX (delay line) detector geometry
         pixels_per_axis = 150  # 65535 (requires int64)
-        detector_ids = np.reshape(np.arange(0, pixels_per_axis**2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
+        detector_ids = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
         single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
         x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
-        offsets = np.reshape(np.arange(0, pixels_per_axis**2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
+        offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
         builder.add_detector('DENEX_detector', 1, detector_ids,
-                             {'x_pixel_offsets': x_pixel_offsets, 'y_pixel_offsets': y_pixel_offsets},
+                             {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
                              x_pixel_size=0.002, y_pixel_size=0.002)
 
-        # TODO Copy event data into detector
-        # once without downconversion of detector IDs to 150 by 150, once with conversion
+        # Copy event data into detector
+        # TODO once without downconversion of detector IDs to 150 by 150, once with conversion
+        __copy_existing_data()
 
-        # TODO Add choppers
-        # TODO Copy chopper TDCs into logs in the appropriate chopper
-        # TODO Add guides
+        # TODO Add choppers - use diagram for positions
+        # TODO Copy chopper TDCs from chopper_tdc_file.hdf into logs in the appropriate chopper
+        # TODO Add guides, shutters, anything else known
 
-        #__copy_existing_data()
-        #__copy_and_convert_logs(builder, nx_entry_name)
+        # __copy_and_convert_logs(builder, nx_entry_name)
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
