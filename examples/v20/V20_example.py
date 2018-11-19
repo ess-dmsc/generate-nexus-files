@@ -2,13 +2,13 @@ from collections import OrderedDict
 from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
 import h5py
+import numpy as np
 
 
 def __copy_existing_data():
     """
     Copy data from the existing NeXus file to flesh out the example file
     """
-    builder.add_user('Too many users to count', 'ESS and collaborators')
     event_group_path = nx_entry_name + '/instrument/detector_1/event_data/'
     builder.copy_items(OrderedDict(
         [('raw_data_1/instrument/moderator', nx_entry_name + '/instrument/moderator'),
@@ -86,14 +86,28 @@ if __name__ == '__main__':
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
 
-        # TODO Add DENEX detector geometry
+        builder.add_instrument('V20', 'instrument')
+        builder.add_user('Too many users to count', 'ESS and collaborators')
+
+        # Add DENEX (delay line) detector geometry
+        pixels_per_axis = 150  # 65535 (requires int64)
+        detector_ids = np.reshape(np.arange(0, pixels_per_axis**2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
+        single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
+        x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
+        offsets = np.reshape(np.arange(0, pixels_per_axis**2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
+        builder.add_detector('DENEX_detector', 1, detector_ids,
+                             {'x_pixel_offsets': x_pixel_offsets, 'y_pixel_offsets': y_pixel_offsets},
+                             x_pixel_size=0.002, y_pixel_size=0.002)
+
         # TODO Copy event data into detector
+        # once without downconversion of detector IDs to 150 by 150, once with conversion
+
         # TODO Add choppers
         # TODO Copy chopper TDCs into logs in the appropriate chopper
         # TODO Add guides
 
-        __copy_existing_data()
-        __copy_and_convert_logs(builder, nx_entry_name)
+        #__copy_existing_data()
+        #__copy_and_convert_logs(builder, nx_entry_name)
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
