@@ -79,6 +79,8 @@ if __name__ == '__main__':
                              {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
                              x_pixel_size=0.002, y_pixel_size=0.002)
 
+        # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
+
         # Copy event data into detector
         # TODO once without downconversion of detector IDs to 150 by 150, once with conversion
         __copy_existing_data()
