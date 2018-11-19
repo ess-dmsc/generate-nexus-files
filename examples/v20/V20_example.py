@@ -75,7 +75,7 @@ if __name__ == '__main__':
         single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
         x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
         offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
-        builder.add_detector('DENEX_detector', 1, detector_ids,
+        builder.add_detector('DENEX delay line detector', 1, detector_ids,
                              {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
                              x_pixel_size=0.002, y_pixel_size=0.002)
 
