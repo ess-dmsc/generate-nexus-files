@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
-        builder.add_instrument('V20', 'instrument')
+        instrument_group = builder.add_instrument('V20', 'instrument')
         builder.add_user('Too many users to count', 'ESS and collaborators')
 
         # Add DENEX (delay line) detector geometry
@@ -82,10 +82,15 @@ if __name__ == '__main__':
         # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
 
         # Copy event data into detector
-        # TODO once without downconversion of detector IDs to 150 by 150, once with conversion
+        # TODO once without downconversion of detector IDs to 150 by 150, once with conversion?
         __copy_existing_data()
 
-        # TODO Add choppers - use diagram for positions
+        # TODO Add choppers - use diagram for positions, numbered from source end of beamline
+        chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
+        builder.add_dataset(chopper_group_1, 'rotation_speed', 14.0, {'units': 'Hz'})
+        builder.add_dataset(chopper_group_1, 'distance', -1*(46.2-21.7), {'units': 'm'})
+        builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+
         # TODO Copy chopper TDCs from chopper_tdc_file.hdf into logs in the appropriate chopper
         # TODO Add guides, shutters, anything else known
 
