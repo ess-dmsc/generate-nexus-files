@@ -34,31 +34,6 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
          (source_group + '/value', destination_group + '/value')]))
 
 
-def __copy_and_convert_logs(builder, nx_entry_name):
-    __copy_log(builder, 'raw_data_1/selog/Guide_Pressure/value_log',
-               nx_entry_name + '/instrument/guide_1/pressure', 'NXguide')
-    __copy_log(builder, 'raw_data_1/framelog/proton_charge',
-               nx_entry_name + '/instrument/source/proton_charge')
-    __copy_log(builder, 'raw_data_1/runlog/dae_beam_current',
-               nx_entry_name + '/instrument/source/beam_current')
-    __copy_log(builder, 'raw_data_1/selog/Det_Temp_FLB/value_log',
-               nx_entry_name + '/instrument/thermocouple_1/value_log', 'NXsensor')
-    builder.add_dataset('instrument/thermocouple_1', 'measurement', 'temperature')
-    builder.add_dataset('instrument/thermocouple_1', 'name', 'front-detector,left,bottom')
-    __copy_log(builder, 'raw_data_1/selog/Det_Temp_FRB/value_log',
-               nx_entry_name + '/instrument/thermocouple_2/value_log', 'NXsensor')
-    builder.add_dataset('instrument/thermocouple_2', 'measurement', 'temperature')
-    builder.add_dataset('instrument/thermocouple_2', 'name', 'front-detector,right,bottom')
-    __copy_log(builder, 'raw_data_1/selog/Det_Temp_FLT/value_log',
-               nx_entry_name + '/instrument/thermocouple_3/value_log', 'NXsensor')
-    builder.add_dataset('instrument/thermocouple_3', 'measurement', 'temperature')
-    builder.add_dataset('instrument/thermocouple_3', 'name', 'front-detector,left,top')
-    __copy_log(builder, 'raw_data_1/selog/Det_Temp_FRT/value_log',
-               nx_entry_name + '/instrument/thermocouple_4/value_log', 'NXsensor')
-    builder.add_dataset('instrument/thermocouple_4', 'measurement', 'temperature')
-    builder.add_dataset('instrument/thermocouple_4', 'name', 'front-detector,right,top')
-
-
 def __add_choppers(builder):
     # TODO Add choppers - use diagram for positions, numbered from source end of beamline
     chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
@@ -102,9 +77,9 @@ def __add_users(builder):
     user_group = builder.add_user('Nicklas Holmberg', 'ESS', 5)
     builder.add_dataset(user_group, 'role', 'Timing system')
     user_group = builder.add_user('Irina Stefanescu', 'ESS', 6)
-    builder.add_dataset(user_group, 'role', '	DG contact')
+    builder.add_dataset(user_group, 'role', 'DG contact')
     user_group = builder.add_user('Gregor Nowak', 'ESS', 7)
-    builder.add_dataset(user_group, 'role', '	BEER detector team')
+    builder.add_dataset(user_group, 'role', 'BEER detector team')
     user_group = builder.add_user('Michael Hart', 'STFC', 8)
     builder.add_dataset(user_group, 'role', 'V20 NICOS')
     user_group = builder.add_user('Matthew Jones', 'STFC', 9)
@@ -125,6 +100,11 @@ def __add_users(builder):
     builder.add_dataset(user_group, 'role', 'ECP visitor')
 
 
+def __add_monitors(builder):
+    monitor_group_1 = builder.add_nx_group(instrument_group, 'monitor_1', 'NXmonitor')
+    monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
+
+
 if __name__ == '__main__':
     output_filename = 'V20_example_2.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
@@ -136,14 +116,12 @@ if __name__ == '__main__':
         __add_users(builder)
         __add_detector(builder)
         __add_choppers(builder)
+        __add_monitors(builder)
 
         # Copy event data into detector
         __copy_existing_data()
 
-        # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
         # TODO Add guides, shutters, anything else known
-
-        # __copy_and_convert_logs(builder, nx_entry_name)
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
