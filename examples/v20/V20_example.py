@@ -121,7 +121,13 @@ if __name__ == '__main__':
         # Copy event data into detector
         __copy_existing_data()
 
-        # TODO Add guides, shutters, anything else known
+        # TODO Add guides, shutters, any other known components
+
+        geometry_note = builder.add_nx_group(builder.get_root(), 'note_on_geometry', 'NXnote')
+        builder.add_dataset(geometry_note, 'data', 'Geometry is altered slightly from reality such that analysis '
+                                                   'does not require handling the curved guides and can '
+                                                   'treat the neutron paths as straight lines between source and '
+                                                   'sample, and sample and detector.')
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
