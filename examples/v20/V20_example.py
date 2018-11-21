@@ -77,7 +77,7 @@ def __add_choppers(builder):
         tdc_log['time'].attrs.create('units', 'ns', dtype='|S2')
 
 
-def __add_detector():
+def __add_detector(builder):
     # Add description of V20's DENEX (delay line) detector
 
     pixels_per_axis = 150  # 65535 (requires int64)
@@ -90,22 +90,55 @@ def __add_detector():
                          x_pixel_size=0.002, y_pixel_size=0.002)
 
 
+def __add_users(builder):
+    user_group = builder.add_user('Tobias Richter', 'ESS', 1)
+    builder.add_dataset(user_group, 'role', 'Project Owner')
+    user_group = builder.add_user('Jonas Nilsson', 'ESS', 2)
+    builder.add_dataset(user_group, 'role', 'Detector and Monitor DAQ')
+    user_group = builder.add_user('Peter Kadletz', 'HZB', 3)
+    builder.add_dataset(user_group, 'role', 'Beamline Responsible')
+    user_group = builder.add_user('Robin Woracek', 'HZB', 4)
+    builder.add_dataset(user_group, 'role', 'Beamline Responsible')
+    user_group = builder.add_user('Nicklas Holmberg', 'ESS', 5)
+    builder.add_dataset(user_group, 'role', 'Timing system')
+    user_group = builder.add_user('Irina Stefanescu', 'ESS', 6)
+    builder.add_dataset(user_group, 'role', '	DG contact')
+    user_group = builder.add_user('Gregor Nowak', 'ESS', 7)
+    builder.add_dataset(user_group, 'role', '	BEER detector team')
+    user_group = builder.add_user('Michael Hart', 'STFC', 8)
+    builder.add_dataset(user_group, 'role', 'V20 NICOS')
+    user_group = builder.add_user('Matthew Jones', 'STFC', 9)
+    builder.add_dataset(user_group, 'role', 'Streaming')
+    user_group = builder.add_user('Owen Arnold', 'STFC', 10)
+    builder.add_dataset(user_group, 'role', 'Mantid')
+    user_group = builder.add_user('Neil Vaytet', 'ESS', 11)
+    builder.add_dataset(user_group, 'role', 'Mantid Reduction, WFM treatment')
+    user_group = builder.add_user('Torben Nielsen', 'ESS', 12)
+    builder.add_dataset(user_group, 'role', 'Mantid/McStas')
+    user_group = builder.add_user('Will Smith', 'STFC', 13)
+    builder.add_dataset(user_group, 'role', 'Set-up of timing system')
+    user_group = builder.add_user('Andrew Jackson', 'ESS', 14)
+    builder.add_dataset(user_group, 'role', 'Observer')
+    user_group = builder.add_user('Vendula Maulerova', 'ESS', 15)
+    builder.add_dataset(user_group, 'role', 'Monitor tests')
+    user_group = builder.add_user('Dominic Oram', 'STFC', 16)
+    builder.add_dataset(user_group, 'role', 'ECP visitor')
+
+
 if __name__ == '__main__':
-    output_filename = 'V20_example_1.nxs'
+    output_filename = 'V20_example_2.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
-        builder.add_user('Too many users to count', 'ESS and collaborators')
-
-        __add_detector()
+        __add_users(builder)
+        __add_detector(builder)
+        __add_choppers(builder)
 
         # Copy event data into detector
         __copy_existing_data()
-
-        __add_choppers(builder)
 
         # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
         # TODO Add guides, shutters, anything else known
