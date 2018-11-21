@@ -88,8 +88,12 @@ if __name__ == '__main__':
         # TODO Add choppers - use diagram for positions, numbered from source end of beamline
         chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
         builder.add_dataset(chopper_group_1, 'rotation_speed', 14.0, {'units': 'Hz'})
-        builder.add_dataset(chopper_group_1, 'distance', -1*(46.2-21.7), {'units': 'm'})
-        builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+        tdc_log = builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+
+        with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
+            builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/time'], tdc_log.name + '/time')
+            builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/value'], tdc_log.name + '/value')
+            #tdc_log['time'].add
 
         # TODO Copy chopper TDCs from chopper_tdc_file.hdf into logs in the appropriate chopper
         # TODO Add guides, shutters, anything else known
