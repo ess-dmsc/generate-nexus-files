@@ -59,8 +59,39 @@ def __copy_and_convert_logs(builder, nx_entry_name):
     builder.add_dataset('instrument/thermocouple_4', 'name', 'front-detector,right,top')
 
 
+def __add_choppers(builder):
+    # TODO Add choppers - use diagram for positions, numbered from source end of beamline
+    chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_2', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_3', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_4', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_5', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_6', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_7', 'NXdisk_chopper')
+    builder.add_nx_group(instrument_group, 'chopper_8', 'NXdisk_chopper')
+    builder.add_dataset(chopper_group_1, 'rotation_speed', 14.0, {'units': 'Hz'})
+    tdc_log = builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+    with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
+        builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/time'], tdc_log.name + '/time')
+        builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/value'], tdc_log.name + '/value')
+        tdc_log['time'].attrs.create('units', 'ns', dtype='|S2')
+
+
+def __add_detector():
+    # Add description of V20's DENEX (delay line) detector
+
+    pixels_per_axis = 150  # 65535 (requires int64)
+    detector_ids = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
+    single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
+    x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
+    offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
+    builder.add_detector('DENEX delay line detector', 1, detector_ids,
+                         {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
+                         x_pixel_size=0.002, y_pixel_size=0.002)
+
+
 if __name__ == '__main__':
-    output_filename = 'V20_example.nxs'
+    output_filename = 'V20_example_1.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -69,33 +100,14 @@ if __name__ == '__main__':
         instrument_group = builder.add_instrument('V20', 'instrument')
         builder.add_user('Too many users to count', 'ESS and collaborators')
 
-        # Add DENEX (delay line) detector geometry
-        pixels_per_axis = 150  # 65535 (requires int64)
-        detector_ids = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
-        single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
-        x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
-        offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
-        builder.add_detector('DENEX delay line detector', 1, detector_ids,
-                             {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
-                             x_pixel_size=0.002, y_pixel_size=0.002)
-
-        # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
+        __add_detector()
 
         # Copy event data into detector
-        # TODO once without downconversion of detector IDs to 150 by 150, once with conversion?
         __copy_existing_data()
 
-        # TODO Add choppers - use diagram for positions, numbered from source end of beamline
-        chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
-        builder.add_dataset(chopper_group_1, 'rotation_speed', 14.0, {'units': 'Hz'})
-        tdc_log = builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+        __add_choppers(builder)
 
-        with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
-            builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/time'], tdc_log.name + '/time')
-            builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/value'], tdc_log.name + '/value')
-            #tdc_log['time'].add
-
-        # TODO Copy chopper TDCs from chopper_tdc_file.hdf into logs in the appropriate chopper
+        # TODO add two monitors and copy event data from adc_test8_half_cover_w_waveforms.nxs
         # TODO Add guides, shutters, anything else known
 
         # __copy_and_convert_logs(builder, nx_entry_name)
