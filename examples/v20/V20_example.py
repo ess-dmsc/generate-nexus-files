@@ -60,9 +60,14 @@ def __add_detector(builder):
     single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
     x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
     offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
-    return builder.add_detector('DENEX delay line detector', 1, detector_ids,
-                                {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
-                                x_pixel_size=0.002, y_pixel_size=0.002)
+    detector_group = builder.add_detector('DENEX delay line detector', 1, detector_ids,
+                                          {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
+                                          x_pixel_size=0.002, y_pixel_size=0.002)
+    # Add detector position
+    detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
+    location_dataset = builder.add_transformation(detector_transformations,
+                                                  'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
+    builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
 
 def __add_users(builder):
@@ -114,18 +119,12 @@ if __name__ == '__main__':
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
         __add_users(builder)
-        detector_group = __add_detector(builder)
+        __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description',
                             'We\'re not sure what it is, but it glows with a mysterious green light...')
-
-        # Add detector position
-        detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-        location_dataset = builder.add_transformation(detector_transformations,
-                                                      'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
-        builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
         # TODO Add more details on the sample
 
