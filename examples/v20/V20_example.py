@@ -60,9 +60,9 @@ def __add_detector(builder):
     single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
     x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
     offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
-    builder.add_detector('DENEX delay line detector', 1, detector_ids,
-                         {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
-                         x_pixel_size=0.002, y_pixel_size=0.002)
+    return builder.add_detector('DENEX delay line detector', 1, detector_ids,
+                                {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
+                                x_pixel_size=0.002, y_pixel_size=0.002)
 
 
 def __add_users(builder):
@@ -106,7 +106,7 @@ def __add_monitors(builder):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_2.nxs'
+    output_filename = 'V20_example_3.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -114,12 +114,20 @@ if __name__ == '__main__':
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
         __add_users(builder)
-        __add_detector(builder)  # TODO add position for detector
+        detector_group = __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
-        builder.add_sample()
+        sample_group = builder.add_sample()
+        builder.add_dataset(sample_group, 'description',
+                            'We\'re not sure what it is, but it glows with a mysterious green light...')
 
-        # TODO Add more details on the chosen sample
+        # Add detector position
+        detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
+        location_dataset = builder.add_transformation(detector_transformations,
+                                                      'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
+        builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
+
+        # TODO Add more details on the sample
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
