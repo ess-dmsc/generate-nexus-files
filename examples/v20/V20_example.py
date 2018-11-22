@@ -114,20 +114,30 @@ if __name__ == '__main__':
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
         __add_users(builder)
-        __add_detector(builder)
+        __add_detector(builder)  # TODO add position for detector
         __add_choppers(builder)
         __add_monitors(builder)
+        builder.add_sample()
+
+        # TODO Add more details on the chosen sample
+
+        # Add a source at the position of the first chopper
+        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
 
         # Copy event data into detector
         __copy_existing_data()
 
+        # TODO add an NXenvironment for the Lakeshore Peltier
+
         # TODO Add guides, shutters, any other known components
 
-        geometry_note = builder.add_nx_group(builder.get_root(), 'note_on_geometry', 'NXnote')
-        builder.add_dataset(geometry_note, 'data', 'Geometry is altered slightly from reality such that analysis '
-                                                   'does not require handling the curved guides and can '
-                                                   'treat the neutron paths as straight lines between source and '
-                                                   'sample, and sample and detector.')
+        ## Notes on geometry:
+
+        # Geometry is altered slightly from reality such that analysis does not require handling the curved guides
+        # and can treat the neutron paths as straight lines between source and sample, and sample and detector.
+
+        # Since we will use timestamps from the first (furthest from detector) chopper as the pulse timestamps,
+        # the "source" is placed at the position of the first chopper
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
