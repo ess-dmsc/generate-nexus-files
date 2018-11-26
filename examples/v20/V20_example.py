@@ -101,8 +101,6 @@ def __add_users(builder):
     builder.add_dataset(user_group, 'role', 'Observer')
     user_group = builder.add_user('Vendula Maulerova', 'ESS', 15)
     builder.add_dataset(user_group, 'role', 'Monitor tests')
-    user_group = builder.add_user('Dominic Oram', 'STFC', 16)
-    builder.add_dataset(user_group, 'role', 'ECP visitor')
 
 
 def __add_monitors(builder):
@@ -111,7 +109,7 @@ def __add_monitors(builder):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_3.nxs'
+    output_filename = 'V20_example_2.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -127,6 +125,8 @@ if __name__ == '__main__':
                             'We\'re not sure what it is, but it glows with a mysterious green light...')
 
         # TODO Add more details on the sample
+
+        # TODO Add example event data for monitors
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
