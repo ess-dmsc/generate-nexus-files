@@ -3,6 +3,8 @@ from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
 import h5py
 import numpy as np
+import nexusformat.nexus as nexus
+from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 
 
 def __copy_existing_data():
@@ -108,6 +110,24 @@ def __add_monitors(builder):
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
 
 
+def __create_json(filepath):
+    event_data_path = "/entry/instrument/detector_1/raw_event_data"
+    event_data_stream_options = {
+        "topic": "V20_events",
+        "source": "V20",
+        "module": "ev42",
+        "nexus_path": event_data_path
+    }
+    streams = {event_data_path: event_data_stream_options}
+
+    converter = NexusToDictConverter()
+    nexus_file = nexus.nxload(filepath)
+    tree = converter.convert(nexus_file, streams)
+    write_command, stop_command = create_writer_commands(tree, "V20_example_output.nxs")
+    object_to_json_file(write_command, "V20_example.json")
+    object_to_json_file(stop_command, "stop_V20_example.json")
+
+
 if __name__ == '__main__':
     output_filename = 'V20_example_2.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
@@ -145,6 +165,8 @@ if __name__ == '__main__':
 
         # Since we will use timestamps from the first (furthest from detector) chopper as the pulse timestamps,
         # the "source" is placed at the position of the first chopper
+
+    __create_json(output_filename)
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
