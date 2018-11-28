@@ -37,7 +37,7 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
 
 
 def __add_choppers(builder):
-    # TODO Add choppers - use diagram for positions, numbered from source end of beamline
+    # TODO use diagram for positions, numbered from source end of beamline
     chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
     builder.add_nx_group(instrument_group, 'chopper_2', 'NXdisk_chopper')
     builder.add_nx_group(instrument_group, 'chopper_3', 'NXdisk_chopper')
@@ -105,14 +105,9 @@ def __add_monitors(builder):
 
 
 def __create_file_writer_command(filepath):
-    event_data_path = "/entry/instrument/detector_1/raw_event_data"
-    event_data_stream_options = {
-        "topic": "V20_events",
-        "source": "V20",
-        "module": "ev42",
-        "nexus_path": event_data_path
-    }
-    streams = {event_data_path: event_data_stream_options}
+    streams = {}
+    __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
+                      '/entry/instrument/detector_1/raw_event_data', 'ev42')
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
@@ -122,12 +117,14 @@ def __create_file_writer_command(filepath):
     object_to_json_file(stop_command, "stop_V20_example.json")
 
 
-def __add_event_data_stream():
-    pass
-
-
-def __add_log_data_stream():
-    pass
+def __add_data_stream(streams, topic, source, path, module):
+    options = {
+        "topic": topic,
+        "source": source,
+        "module": module,
+        "nexus_path": path
+    }
+    streams[path] = options
 
 
 if __name__ == '__main__':
