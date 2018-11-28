@@ -73,36 +73,30 @@ def __add_detector(builder):
 
 
 def __add_users(builder):
-    user_group = builder.add_user('Tobias Richter', 'ESS', 1)
-    builder.add_dataset(user_group, 'role', 'Project Owner')
-    user_group = builder.add_user('Jonas Nilsson', 'ESS', 2)
-    builder.add_dataset(user_group, 'role', 'Detector and Monitor DAQ')
-    user_group = builder.add_user('Peter Kadletz', 'HZB', 3)
-    builder.add_dataset(user_group, 'role', 'Beamline Responsible')
-    user_group = builder.add_user('Robin Woracek', 'HZB', 4)
-    builder.add_dataset(user_group, 'role', 'Beamline Responsible')
-    user_group = builder.add_user('Nicklas Holmberg', 'ESS', 5)
-    builder.add_dataset(user_group, 'role', 'Timing system')
-    user_group = builder.add_user('Irina Stefanescu', 'ESS', 6)
-    builder.add_dataset(user_group, 'role', 'DG contact')
-    user_group = builder.add_user('Gregor Nowak', 'ESS', 7)
-    builder.add_dataset(user_group, 'role', 'BEER detector team')
-    user_group = builder.add_user('Michael Hart', 'STFC', 8)
-    builder.add_dataset(user_group, 'role', 'V20 NICOS')
-    user_group = builder.add_user('Matthew Jones', 'STFC', 9)
-    builder.add_dataset(user_group, 'role', 'Streaming')
-    user_group = builder.add_user('Owen Arnold', 'STFC', 10)
-    builder.add_dataset(user_group, 'role', 'Mantid')
-    user_group = builder.add_user('Neil Vaytet', 'ESS', 11)
-    builder.add_dataset(user_group, 'role', 'Mantid Reduction, WFM treatment')
-    user_group = builder.add_user('Torben Nielsen', 'ESS', 12)
-    builder.add_dataset(user_group, 'role', 'Mantid/McStas')
-    user_group = builder.add_user('Will Smith', 'STFC', 13)
-    builder.add_dataset(user_group, 'role', 'Set-up of timing system')
-    user_group = builder.add_user('Andrew Jackson', 'ESS', 14)
-    builder.add_dataset(user_group, 'role', 'Observer')
-    user_group = builder.add_user('Vendula Maulerova', 'ESS', 15)
-    builder.add_dataset(user_group, 'role', 'Monitor tests')
+    user_names = ['Tobias Richter', 'Jonas Nilsson', 'Nicklas Holmberg', 'Irina Stefanescu', 'Gregor Nowak',
+                  'Neil Vaytet', 'Torben Nielsen', 'Andrew Jackson', 'Vendula Maulerova']
+    roles = ['Project Owner', 'Detector and Monitor DAQ', 'Timing system', 'DG contact', 'BEER detector team',
+             'Mantid Reduction, WFM treatment', 'Mantid/McStas', 'Observer', 'Monitor tests']
+    __add_user_group(builder, user_names, roles, 'ESS')
+
+    user_names = ['Peter Kadletz', 'Robin Woracek']
+    roles = ['Beamline Responsible', 'Beamline Responsible']
+    __add_user_group(builder, user_names, roles, 'HZB')
+
+    user_names = ['Michael Hart', 'Matthew Jones', 'Owen Arnold', 'Will Smith']
+    roles = ['V20 NICOS', 'Streaming', 'Mantid', 'Set-up of timing system']
+    __add_user_group(builder, user_names, roles, 'STFC')
+
+
+def __add_user_group(builder, user_names, roles, institution):
+    users = builder.add_nx_group(builder.get_root(), institution + '_users', 'NXuser')
+    user_names_ascii = [n.encode("ascii", "ignore") for n in user_names]
+    roles_ascii = [n.encode("ascii", "ignore") for n in roles]
+    users.create_dataset("name", (len(user_names_ascii),), '|S' + str(len(max(user_names_ascii, key=len))),
+                         user_names_ascii)
+    users.create_dataset("role", (len(roles_ascii),), '|S' + str(len(max(roles_ascii, key=len))),
+                         roles_ascii)
+    builder.add_dataset(users, 'affiliation', institution)
 
 
 def __add_monitors(builder):
@@ -110,7 +104,7 @@ def __add_monitors(builder):
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
 
 
-def __create_json(filepath):
+def __create_file_writer_command(filepath):
     event_data_path = "/entry/instrument/detector_1/raw_event_data"
     event_data_stream_options = {
         "topic": "V20_events",
@@ -126,6 +120,14 @@ def __create_json(filepath):
     write_command, stop_command = create_writer_commands(tree, "V20_example_output.nxs")
     object_to_json_file(write_command, "V20_example.json")
     object_to_json_file(stop_command, "stop_V20_example.json")
+
+
+def __add_event_data_stream():
+    pass
+
+
+def __add_log_data_stream():
+    pass
 
 
 if __name__ == '__main__':
@@ -158,7 +160,7 @@ if __name__ == '__main__':
 
         # TODO Add guides, shutters, any other known components
 
-        ## Notes on geometry:
+        # Notes on geometry:
 
         # Geometry is altered slightly from reality such that analysis does not require handling the curved guides
         # and can treat the neutron paths as straight lines between source and sample, and sample and detector.
@@ -166,7 +168,7 @@ if __name__ == '__main__':
         # Since we will use timestamps from the first (furthest from detector) chopper as the pulse timestamps,
         # the "source" is placed at the position of the first chopper
 
-    __create_json(output_filename)
+    __create_file_writer_command(output_filename)
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
