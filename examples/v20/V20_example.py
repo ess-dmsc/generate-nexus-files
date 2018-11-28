@@ -77,6 +77,9 @@ def __add_detector(builder):
                                                   'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
+    builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
+    builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
+
 
 def __add_users(builder):
     user_names = ['Tobias Richter', 'Jonas Nilsson', 'Nicklas Holmberg', 'Irina Stefanescu', 'Gregor Nowak',
@@ -107,16 +110,35 @@ def __add_user_group(builder, user_names, roles, institution):
 
 def __add_monitors(builder):
     monitor_group_1 = builder.add_nx_group(instrument_group, 'monitor_1', 'NXmonitor')
+    builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
+    builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
+    builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
+    builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
 
 
 def __create_file_writer_command(filepath):
     streams = {}
     __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
+    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector',
+                      '/entry/instrument/detector_1/waveform_data_1', 'senv')
+    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector',
+                      '/entry/instrument/detector_1/waveform_data_2', 'senv')
+
+    __add_data_stream(streams, 'V20_rawEvents', 'monitor_1',
+                      '/entry/instrument/monitor_1/raw_event_data', 'ev42')
+    __add_data_stream(streams, 'V20_waveforms', 'monitor_1',
+                      '/entry/instrument/monitor_1/waveform_data', 'senv')
+    __add_data_stream(streams, 'V20_rawEvents', 'monitor_2',
+                      '/entry/instrument/monitor_2/raw_event_data', 'ev42')
+    __add_data_stream(streams, 'V20_waveforms', 'monitor_2',
+                      '/entry/instrument/monitor_2/waveform_data', 'senv')
     for chopper_number in range(1, 9):
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number),
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre', 'f142')
+
+    # TODO Add f142 streams for the lakeshore logs
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
@@ -153,8 +175,6 @@ if __name__ == '__main__':
                             'We\'re not sure what it is, but it glows with a mysterious green light...')
 
         # TODO Add more details on the sample
-
-        # TODO Add example event data for monitors
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
