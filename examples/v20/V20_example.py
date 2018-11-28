@@ -108,6 +108,8 @@ def __create_file_writer_command(filepath):
     streams = {}
     __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
+    __add_data_stream(streams, 'V20_choppers', 'chopper_1',
+                      '/entry/instrument/chopper_1/top_dead_centre', 'f142')
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
