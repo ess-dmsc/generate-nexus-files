@@ -36,18 +36,24 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
          (source_group + '/value', destination_group + '/value')]))
 
 
+def __add_chopper(builder, name, speed=None):
+    chopper_group = builder.add_nx_group(instrument_group, name, 'NXdisk_chopper')
+    if speed is not None:
+        builder.add_dataset(chopper_group, 'rotation_speed', speed, {'units': 'Hz'})
+    return builder.add_nx_group(chopper_group, 'top_dead_centre', 'NXlog')
+
+
 def __add_choppers(builder):
     # TODO use diagram for positions, numbered from source end of beamline
-    chopper_group_1 = builder.add_nx_group(instrument_group, 'chopper_1', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_2', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_3', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_4', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_5', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_6', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_7', 'NXdisk_chopper')
-    builder.add_nx_group(instrument_group, 'chopper_8', 'NXdisk_chopper')
-    builder.add_dataset(chopper_group_1, 'rotation_speed', 14.0, {'units': 'Hz'})
-    tdc_log = builder.add_nx_group(chopper_group_1, 'top_dead_centre', 'NXlog')
+    tdc_log = __add_chopper(builder, 'chopper_1', 14.0)
+    __add_chopper(builder, 'chopper_2')
+    __add_chopper(builder, 'chopper_3')
+    __add_chopper(builder, 'chopper_4')
+    __add_chopper(builder, 'chopper_5')
+    __add_chopper(builder, 'chopper_6')
+    __add_chopper(builder, 'chopper_7')
+    __add_chopper(builder, 'chopper_8')
+
     with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
         builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/time'], tdc_log.name + '/time')
         builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/value'], tdc_log.name + '/value')
@@ -108,8 +114,9 @@ def __create_file_writer_command(filepath):
     streams = {}
     __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_choppers', 'chopper_1',
-                      '/entry/instrument/chopper_1/top_dead_centre', 'f142')
+    for chopper_number in range(1, 9):
+        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number),
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre', 'f142')
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
