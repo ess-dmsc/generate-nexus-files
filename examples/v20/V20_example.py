@@ -144,22 +144,6 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix_stringin',
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unixstring', 'f142')
 
-    lakeshore_pvs = [
-        'Huginn:SUBCRYO_READYTOMEAS',
-        'Huginn:SUBCRYO_SETP',
-        'Huginn:SUBCRYO_SETP_S',
-        'Huginn_LS:INNAME0',
-        'Huginn_LS:INNAME1',
-        'Huginn_LS:INNAME2',
-        'Huginn_LS:INNAME3',
-        'Huginn_LS:KRDG0',
-        'Huginn_LS:KRDG1',
-        'Huginn_LS:KRDG2',
-        'Huginn_LS:KRDG3',
-        'Huginn:MAINCRYO_SETP',
-        'Huginn:SUBCRYO_ONOFF',
-        'Huginn:SUBCRYO_SETP_MAX'
-    ]
     for pv in lakeshore_pvs:
         log_name = pv.split(':')[-1]
         __add_data_stream(streams, 'V20_logs', pv,
@@ -215,6 +199,25 @@ if __name__ == '__main__':
 
         lakeshore_group = __add_sample_env_device('temperature_controller', 'Lakeshore Huginn',
                                                   'Lakeshore Huginn temperature controller')
+        lakeshore_pvs = [
+            'Huginn:SUBCRYO_READYTOMEAS',
+            'Huginn:SUBCRYO_SETP',
+            'Huginn:SUBCRYO_SETP_S',
+            'Huginn_LS:INNAME0',
+            'Huginn_LS:INNAME1',
+            'Huginn_LS:INNAME2',
+            'Huginn_LS:INNAME3',
+            'Huginn_LS:KRDG0',
+            'Huginn_LS:KRDG1',
+            'Huginn_LS:KRDG2',
+            'Huginn_LS:KRDG3',
+            'Huginn:MAINCRYO_SETP',
+            'Huginn:SUBCRYO_ONOFF',
+            'Huginn:SUBCRYO_SETP_MAX'
+        ]
+        for pv in lakeshore_pvs:
+            log_name = pv.split(':')[-1]
+            builder.add_nx_group('/entry/instrument/temperature_controller/', log_name, 'NXlog')
 
         # TODO Add guides, shutters, any other known components
         #   Add more details on the sample
