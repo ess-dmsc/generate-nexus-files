@@ -121,18 +121,18 @@ def __create_file_writer_command(filepath):
     streams = {}
     __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector',
+    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector_wf',  # different source name due to DM-1129 (JIRA)
                       '/entry/instrument/detector_1/waveform_data_1', 'senv')
-    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector',
+    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector_wf',
                       '/entry/instrument/detector_1/waveform_data_2', 'senv')
 
     __add_data_stream(streams, 'V20_rawEvents', 'monitor_1',
                       '/entry/instrument/monitor_1/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'monitor_1',
+    __add_data_stream(streams, 'V20_waveforms', 'monitor_1_wf',
                       '/entry/instrument/monitor_1/waveform_data', 'senv')
     __add_data_stream(streams, 'V20_rawEvents', 'monitor_2',
                       '/entry/instrument/monitor_2/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'monitor_2',
+    __add_data_stream(streams, 'V20_waveforms', 'monitor_2_wf',
                       '/entry/instrument/monitor_2/waveform_data', 'senv')
     for chopper_number in range(1, 9):
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number),
