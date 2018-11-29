@@ -101,11 +101,11 @@ def __add_users(builder):
 
 def __add_user_group(builder, user_names, roles, institution):
     users = builder.add_nx_group(builder.get_root(), institution + '_users', 'NXuser')
-    user_names_ascii = [n.encode("ascii", "ignore") for n in user_names]
-    roles_ascii = [n.encode("ascii", "ignore") for n in roles]
-    users.create_dataset("name", (len(user_names_ascii),), '|S' + str(len(max(user_names_ascii, key=len))),
+    user_names_ascii = [n.encode('ascii', 'ignore') for n in user_names]
+    roles_ascii = [n.encode('ascii', 'ignore') for n in roles]
+    users.create_dataset('name', (len(user_names_ascii),), '|S' + str(len(max(user_names_ascii, key=len))),
                          user_names_ascii)
-    users.create_dataset("role", (len(roles_ascii),), '|S' + str(len(max(roles_ascii, key=len))),
+    users.create_dataset('role', (len(roles_ascii),), '|S' + str(len(max(roles_ascii, key=len))),
                          roles_ascii)
     builder.add_dataset(users, 'affiliation', institution)
 
@@ -152,17 +152,18 @@ def __create_file_writer_command(filepath):
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
     tree = converter.convert(nexus_file, streams)
-    write_command, stop_command = create_writer_commands(tree, "V20_example_output.nxs")
-    object_to_json_file(write_command, "V20_example.json")
-    object_to_json_file(stop_command, "stop_V20_example.json")
+    # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
+    write_command, stop_command = create_writer_commands(tree, 'V20_example_output.nxs', broker='192.168.1.80:9092')
+    object_to_json_file(write_command, 'V20_example.json')
+    object_to_json_file(stop_command, 'stop_V20_example.json')
 
 
 def __add_data_stream(streams, topic, source, path, module):
     options = {
-        "topic": topic,
-        "source": source,
-        "module": module,
-        "nexus_path": path
+        'topic': topic,
+        'source': source,
+        'module': module,
+        'nexus_path': path
     }
     streams[path] = options
 
