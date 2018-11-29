@@ -40,7 +40,10 @@ def __add_chopper(builder, name, speed=None):
     chopper_group = builder.add_nx_group(instrument_group, name, 'NXdisk_chopper')
     if speed is not None:
         builder.add_dataset(chopper_group, 'rotation_speed', speed, {'units': 'Hz'})
-    return builder.add_nx_group(chopper_group, 'top_dead_centre', 'NXlog')
+    builder.add_nx_group(chopper_group, 'top_dead_centre_unix', 'NXlog')
+    epics_log = builder.add_nx_group(chopper_group, 'top_dead_centre_epics', 'NXlog')
+    builder.add_nx_group(chopper_group, 'top_dead_centre_unixstring', 'NXlog')
+    return epics_log
 
 
 def __add_choppers(builder):
@@ -135,8 +138,12 @@ def __create_file_writer_command(filepath):
     __add_data_stream(streams, 'V20_waveforms', 'monitor_2_wf',
                       '/entry/instrument/monitor_2/waveform_data', 'senv')
     for chopper_number in range(1, 9):
-        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number),
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre', 'f142')
+        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix',
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142')
+        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Epics',
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_epics', 'f142')
+        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix_stringin',
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unixstring', 'f142')
 
     # TODO Add f142 streams for the lakeshore logs
 
@@ -158,6 +165,14 @@ def __add_data_stream(streams, topic, source, path, module):
     streams[path] = options
 
 
+def __add_sample_env_device(group_name, name, description=None):
+    env_group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXenvironment')
+    builder.add_dataset(env_group, 'name', name)
+    if description is not None:
+        builder.add_dataset(env_group, 'description', description)
+    return env_group
+
+
 if __name__ == '__main__':
     output_filename = 'V20_example_2.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
@@ -174,17 +189,17 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'description',
                             'We\'re not sure what it is, but it glows with a mysterious green light...')
 
-        # TODO Add more details on the sample
-
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
 
         # Copy event data into detector
         __copy_existing_data()
 
-        # TODO add an NXenvironment for the Lakeshore Peltier
+        lakeshore_group = __add_sample_env_device('temperature_controller', 'Lakeshore Huginn',
+                                                  'Lakeshore Huginn temperature controller')
 
         # TODO Add guides, shutters, any other known components
+        #   Add more details on the sample
 
         # Notes on geometry:
 
