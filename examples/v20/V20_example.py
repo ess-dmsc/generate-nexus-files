@@ -177,7 +177,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_2.nxs'
+    output_filename = 'V20_example_3.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
