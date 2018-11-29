@@ -47,7 +47,6 @@ def __add_chopper(builder, name, speed=None):
 
 
 def __add_choppers(builder):
-    # TODO use diagram for positions, numbered from source end of beamline
     tdc_log = __add_chopper(builder, 'chopper_1', 14.0)
     __add_chopper(builder, 'chopper_2')
     __add_chopper(builder, 'chopper_3')
@@ -145,7 +144,26 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix_stringin',
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unixstring', 'f142')
 
-    # TODO Add f142 streams for the lakeshore logs
+    lakeshore_pvs = [
+        'Huginn:SUBCRYO_READYTOMEAS',
+        'Huginn:SUBCRYO_SETP',
+        'Huginn:SUBCRYO_SETP_S',
+        'Huginn_LS:INNAME0',
+        'Huginn_LS:INNAME1',
+        'Huginn_LS:INNAME2',
+        'Huginn_LS:INNAME3',
+        'Huginn_LS:KRDG0',
+        'Huginn_LS:KRDG1',
+        'Huginn_LS:KRDG2',
+        'Huginn_LS:KRDG3',
+        'Huginn:MAINCRYO_SETP',
+        'Huginn:SUBCRYO_ONOFF',
+        'Huginn:SUBCRYO_SETP_MAX'
+    ]
+    for pv in lakeshore_pvs:
+        log_name = pv.split(':')[-1]
+        __add_data_stream(streams, 'V20_logs', pv,
+                          '/entry/instrument/temperature_controller/' + log_name, 'f142')
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
