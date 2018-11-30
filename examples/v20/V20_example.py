@@ -7,6 +7,18 @@ import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 
 
+def __copy_and_transform_dataset(source_path, target_path, transformation):
+    source_data = builder.source_file[source_path][...]
+    # transformed_data = np.apply_over_axes(transformation, source_data, 0)
+    transformed_data = transformation(source_data)
+    target_dataset = builder.target_file.create_dataset(target_path, transformed_data.shape,
+                                                        dtype=transformed_data.dtype,
+                                                        compression=builder.compress_type,
+                                                        compression_opts=builder.compress_opts)
+    target_dataset[...] = transformed_data
+    return target_dataset
+
+
 def __copy_existing_data():
     """
     Copy data from the existing NeXus file
@@ -16,9 +28,18 @@ def __copy_existing_data():
         [('entry-01/Delayline_events', nx_entry_name + '/instrument/detector_1/raw_event_data'),
          ('entry-01/Delayline_events/event_id', raw_event_path + 'event_id'),
          ('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
-         ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset'),
-         ('entry-01/Delayline_events/event_time_zero', raw_event_path + 'event_time_zero')
+         ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
          ]))
+
+    def shift_time(timestamps):
+        first_timestamp = 59120017391465
+        new_start_time = 1543584772000000000
+        return timestamps - first_timestamp + new_start_time
+
+    event_time_zero_ds = __copy_and_transform_dataset('entry-01/Delayline_events/event_time_zero',
+                                                      raw_event_path + 'event_time_zero',
+                                                      shift_time)
+    event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
