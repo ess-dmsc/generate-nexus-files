@@ -23,9 +23,9 @@ def __copy_existing_data():
     Copy data from the existing NeXus file
     """
     raw_event_path = nx_entry_name + '/instrument/detector_1/raw_event_data/'
+    builder.add_nx_group(builder.get_root()['instrument/detector_1'], 'raw_event_data', 'NXevent_data')
     builder.copy_items(OrderedDict(
-        [('entry-01/Delayline_events', nx_entry_name + '/instrument/detector_1/raw_event_data'),
-         ('entry-01/Delayline_events/event_id', raw_event_path + 'event_id'),
+        [('entry-01/Delayline_events/event_id', raw_event_path + 'event_id'),
          ('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
          ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
          ]))
@@ -38,6 +38,9 @@ def __copy_existing_data():
     event_time_zero_ds = __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_time_zero',
                                                       raw_event_path + 'event_time_zero', shift_time)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
+
+    # Create link to event data in the NXentry
+    builder.get_root()['raw_event_data'] = builder.get_root()['instrument/detector_1/raw_event_data']
 
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
