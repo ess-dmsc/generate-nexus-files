@@ -101,14 +101,27 @@ def __add_choppers(builder):
 def __add_detector(builder):
     # Add description of V20's DENEX (delay line) detector
 
+    def n_is_not_at_end_of_row(n):
+        return (n+1) % 150 is not 0
+
     pixels_per_axis = 150  # 65535 (requires int64)
-    detector_ids = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int32), (pixels_per_axis, pixels_per_axis))
-    single_axis_offsets = (0.002 * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - 0.15
-    x_pixel_offsets, y_pixel_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)
-    offsets = np.reshape(np.arange(0, pixels_per_axis ** 2, 1, np.int64), (pixels_per_axis, pixels_per_axis))
-    detector_group = builder.add_detector('DENEX delay line detector', 1, detector_ids,
-                                          {'x_pixel_offset': x_pixel_offsets, 'y_pixel_offset': y_pixel_offsets},
-                                          x_pixel_size=0.002, y_pixel_size=0.002)
+    pixel_size = 0.002
+    half_detector_width = 0.15
+    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width
+    x_offsets, y_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)  # np.zeros_like(single_axis_offsets, dtype=np.float)
+    x_offsets = x_offsets.flatten()
+    y_offsets = y_offsets.flatten()
+    vertices = np.stack((x_offsets, y_offsets, np.zeros_like(x_offsets, dtype=np.float)), axis=1)
+    faces = []
+    for n in range(0, (150**2)-1-pixels_per_axis):
+        if n_is_not_at_end_of_row(n):
+            faces.append([4, n, n+1, n+pixels_per_axis+1, n+pixels_per_axis])
+    faces = np.array(faces)
+    detector_faces = np.vstack((np.arange(0, 22499), np.arange(0, 22499)))
+
+    detector_group = builder.add_nx_group(builder.get_root()['instrument'], 'detector_1', 'NXdetector')
+    builder.add_dataset(detector_group, 'name', 'DENEX delay line detector')
+    builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
     detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
     location_dataset = builder.add_transformation(detector_transformations,
@@ -213,7 +226,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_3.nxs'
+    output_filename = 'V20_example_4.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -268,6 +281,3 @@ if __name__ == '__main__':
         # the "source" is placed at the position of the first chopper
 
     __create_file_writer_command(output_filename)
-
-    with DetectorPlotter(output_filename, nx_entry_name) as plotter:
-        plotter.plot_pixel_positions()
