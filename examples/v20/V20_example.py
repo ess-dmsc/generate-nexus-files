@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from nexusutils.nexusbuilder import NexusBuilder
-from nexusutils.detectorplotter import DetectorPlotter
 import h5py
 import numpy as np
 import nexusformat.nexus as nexus
@@ -102,20 +101,21 @@ def __add_detector(builder):
     # Add description of V20's DENEX (delay line) detector
 
     def n_is_not_at_end_of_row(n):
-        return (n+1) % 150 is not 0
+        return (n + 1) % 150 is not 0
 
     pixels_per_axis = 150  # 65535 (requires int64)
     pixel_size = 0.002
     half_detector_width = 0.15
     single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width
-    x_offsets, y_offsets = np.meshgrid(single_axis_offsets, single_axis_offsets)  # np.zeros_like(single_axis_offsets, dtype=np.float)
+    x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
+                                       single_axis_offsets)  # np.zeros_like(single_axis_offsets, dtype=np.float)
     x_offsets = x_offsets.flatten()
     y_offsets = y_offsets.flatten()
     vertices = np.stack((x_offsets, y_offsets, np.zeros_like(x_offsets, dtype=np.float)), axis=1)
     faces = []
-    for n in range(0, (150**2)-1-pixels_per_axis):
+    for n in range(0, (150 ** 2) - 1 - pixels_per_axis):
         if n_is_not_at_end_of_row(n):
-            faces.append([4, n, n+1, n+pixels_per_axis+1, n+pixels_per_axis])
+            faces.append([4, n, n + 1, n + pixels_per_axis + 1, n + pixels_per_axis])
     faces = np.array(faces)
     detector_faces = np.vstack((np.arange(0, 22499), np.arange(0, 22499)))
 
@@ -198,9 +198,13 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, 'V20_logs', pv,
                           '/entry/instrument/temperature_controller/' + log_name, 'f142')
 
+    event_data_link = {'name': 'raw_event_data',
+                       'target': '/entry/instrument/detector_1/raw_event_data'}
+    links = {'/entry/raw_event_data': event_data_link}
+
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
-    tree = converter.convert(nexus_file, streams)
+    tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree, 'V20_example_output.nxs', broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_example.json')
@@ -226,7 +230,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_4.nxs'
+    output_filename = 'V20_example_5.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
