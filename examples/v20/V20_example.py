@@ -123,10 +123,11 @@ def __add_detector(builder):
     builder.add_dataset(detector_group, 'name', 'DENEX delay line detector')
     builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
-    detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-    location_dataset = builder.add_transformation(detector_transformations,
+    #detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
+    location_dataset = builder.add_transformation(detector_group,
                                                   'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
+    builder.add_dataset(detector_group, 'local_name', 'DENEX delay line detector')
 
     builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
     builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
@@ -230,7 +231,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_5.nxs'
+    output_filename = 'V20_example_6.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
