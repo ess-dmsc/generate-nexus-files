@@ -106,10 +106,13 @@ def __add_detector(builder):
     pixels_per_axis = 150  # 65535 (requires int64)
     pixel_size = 0.002
     half_detector_width = 0.15
-    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width
+    half_pixel_width = 0.002 / 2.0
+    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width + half_pixel_width
     detector_group = builder.add_nx_group(builder.get_root()['instrument'], 'detector_1', 'NXdetector')
-    builder.add_dataset(detector_group, 'x_pixel_offset', single_axis_offsets, {'units': 'm'})
-    builder.add_dataset(detector_group, 'y_pixel_offset', single_axis_offsets, {'units': 'm'})
+    x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
+                                       single_axis_offsets)
+    builder.add_dataset(detector_group, 'x_pixel_offset', x_offsets, {'units': 'm'})
+    builder.add_dataset(detector_group, 'y_pixel_offset', y_offsets, {'units': 'm'})
 
     builder.add_dataset(detector_group, 'local_name', 'DENEX delay line detector')
 
@@ -235,7 +238,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_6.nxs'
+    output_filename = 'V20_example_8.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
