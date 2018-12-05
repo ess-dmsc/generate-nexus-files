@@ -107,29 +107,31 @@ def __add_detector(builder):
     pixel_size = 0.002
     half_detector_width = 0.15
     single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width
-    x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
-                                       single_axis_offsets)  # np.zeros_like(single_axis_offsets, dtype=np.float)
     detector_group = builder.add_nx_group(builder.get_root()['instrument'], 'detector_1', 'NXdetector')
-    builder.add_dataset(detector_group, 'x_pixel_offset', x_offsets, {'units': 'm'})
-    builder.add_dataset(detector_group, 'y_pixel_offset', y_offsets, {'units': 'm'})
-    x_offsets = x_offsets.flatten()
-    y_offsets = y_offsets.flatten()
-    vertices = np.stack((x_offsets, y_offsets, np.zeros_like(x_offsets, dtype=np.float)), axis=1)
-    faces = []
-    for n in range(0, (150 ** 2) - 1 - pixels_per_axis):
-        if n_is_not_at_end_of_row(n):
-            faces.append([4, n, n + 1, n + pixels_per_axis + 1, n + pixels_per_axis])
-    faces = np.array(faces)
-    detector_faces = np.vstack((np.arange(0, 22499), np.arange(0, 22499)))
-    builder.add_dataset(detector_group, 'name', 'DENEX delay line detector')
+    builder.add_dataset(detector_group, 'x_pixel_offset', single_axis_offsets, {'units': 'm'})
+    builder.add_dataset(detector_group, 'y_pixel_offset', single_axis_offsets, {'units': 'm'})
 
-    builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
+    builder.add_dataset(detector_group, 'local_name', 'DENEX delay line detector')
+
+    pixel_shape = builder.add_nx_group(detector_group, 'pixel_shape', 'NXoff_geometry')
+    pixel_verts = np.array([[-0.001, -0.001, 0.0], [0.001, -0.001, 0.0], [0.001, 0.001, 0.0], [-0.001, 0.001, 0.0]],
+                           dtype=np.float32)
+    pixel_winding_order = np.array([4, 0, 1, 2, 3], dtype=np.int32)
+    pixel_faces = np.array([0], dtype=np.int32)
+    builder.add_dataset(pixel_shape, 'faces', pixel_faces)
+    builder.add_dataset(pixel_shape, 'vertices', pixel_verts, {'units': 'm'})
+    builder.add_dataset(pixel_shape, 'winding_order', pixel_winding_order)
+
+    pixel_ids = np.arange(0, 22500, 1, dtype=int)
+    pixel_ids = np.reshape(pixel_ids, (150, 150))
+    builder.add_dataset(detector_group, 'detector_number', pixel_ids)
+
+    # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
-    #detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
+    # detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
     location_dataset = builder.add_transformation(detector_group,
                                                   'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
-    builder.add_dataset(detector_group, 'local_name', 'DENEX delay line detector')
 
     builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
     builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
