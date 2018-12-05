@@ -171,9 +171,11 @@ def __add_monitors(builder):
     monitor_group_1 = builder.add_nx_group(instrument_group, 'monitor_1', 'NXmonitor')
     builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
+    builder.add_dataset(monitor_group_1, 'detector_id', 22500)
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
     builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
+    builder.add_dataset(monitor_group_2, 'detector_id', 22501)
 
 
 def __create_file_writer_command(filepath):
@@ -238,7 +240,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_8.nxs'
+    output_filename = 'V20_example_9.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
