@@ -119,7 +119,7 @@ def __add_detector(builder):
     pixel_shape = builder.add_nx_group(detector_group, 'pixel_shape', 'NXoff_geometry')
     pixel_verts = np.array([[-0.001, -0.001, 0.0], [0.001, -0.001, 0.0], [0.001, 0.001, 0.0], [-0.001, 0.001, 0.0]],
                            dtype=np.float32)
-    pixel_winding_order = np.array([4, 0, 1, 2, 3], dtype=np.int32)
+    pixel_winding_order = np.array([0, 1, 2, 3], dtype=np.int32)
     pixel_faces = np.array([0], dtype=np.int32)
     builder.add_dataset(pixel_shape, 'faces', pixel_faces)
     builder.add_dataset(pixel_shape, 'vertices', pixel_verts, {'units': 'm'})
