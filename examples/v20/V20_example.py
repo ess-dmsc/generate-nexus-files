@@ -24,8 +24,7 @@ def __copy_existing_data():
     raw_event_path = nx_entry_name + '/instrument/detector_1/raw_event_data/'
     builder.add_nx_group(builder.get_root()['instrument/detector_1'], 'raw_event_data', 'NXevent_data')
     builder.copy_items(OrderedDict(
-        [('entry-01/Delayline_events/event_id', raw_event_path + 'event_id'),
-         ('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
+        [('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
          ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
          ]))
 
@@ -37,6 +36,16 @@ def __copy_existing_data():
     event_time_zero_ds = __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_time_zero',
                                                       raw_event_path + 'event_time_zero', shift_time)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
+    event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
+
+    def downscale_detector_resolution(ids):
+        original_res = (2 ** 16) ** 2
+        target_res = 150 ** 2
+        scale_factor = target_res / original_res
+        return (ids * scale_factor).astype(np.uint32)
+
+    __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
+                                 raw_event_path + 'event_id', downscale_detector_resolution)
 
     # Create link to event data in the NXentry
     builder.get_root()['raw_event_data'] = builder.get_root()['instrument/detector_1/raw_event_data']
@@ -100,14 +109,12 @@ def __add_choppers(builder):
 def __add_detector(builder):
     # Add description of V20's DENEX (delay line) detector
 
-    def n_is_not_at_end_of_row(n):
-        return (n + 1) % 150 is not 0
-
     pixels_per_axis = 150  # 65535 (requires int64)
     pixel_size = 0.002
     half_detector_width = 0.15
     half_pixel_width = 0.002 / 2.0
-    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1, dtype=np.float)) - half_detector_width + half_pixel_width
+    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
+                                                  dtype=np.float)) - half_detector_width + half_pixel_width
     detector_group = builder.add_nx_group(builder.get_root()['instrument'], 'detector_1', 'NXdetector')
     x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
                                        single_axis_offsets)
