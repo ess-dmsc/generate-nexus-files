@@ -54,9 +54,6 @@ def __copy_existing_data():
     __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
                                  raw_event_path + 'event_id', downscale_detector_resolution)
 
-    # Create link to event data in the NXentry
-    builder.get_root()['raw_event_data'] = builder.get_root()['instrument/detector_1/raw_event_data']
-
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
     split_destination = destination_group.split('/')
@@ -78,13 +75,11 @@ def __add_chopper(builder, name, speed=None):
     if speed is not None:
         builder.add_dataset(chopper_group, 'rotation_speed', speed, {'units': 'Hz'})
     unix_log = builder.add_nx_group(chopper_group, 'top_dead_centre_unix', 'NXlog')
-    epics_log = builder.add_nx_group(chopper_group, 'top_dead_centre_epics', 'NXlog')
-    unixstring_log = builder.add_nx_group(chopper_group, 'top_dead_centre_unixstring', 'NXlog')
-    return unix_log, epics_log, unixstring_log
+    return unix_log
 
 
 def __add_choppers(builder):
-    unix_log, epics_log, unixstring_log = __add_chopper(builder, 'chopper_1', 14.0)
+    unix_log = __add_chopper(builder, 'chopper_1', 14.0)
     __add_chopper(builder, 'chopper_2')
     __add_chopper(builder, 'chopper_3')
     __add_chopper(builder, 'chopper_4')
@@ -99,18 +94,9 @@ def __add_choppers(builder):
         return timestamps - first_timestamp + new_start_time
 
     with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
-        __copy_and_transform_dataset(chopper_file, 'entry-01/ca_epics_double/time', epics_log.name + '/time',
-                                     shift_time)
-        builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_epics_double/value'], epics_log.name + '/value')
-        epics_log['time'].attrs.create('units', 'ns', dtype='|S2')
         __copy_and_transform_dataset(chopper_file, 'entry-01/ca_unix_double/time', unix_log.name + '/time', shift_time)
         builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_unix_double/value'], unix_log.name + '/value')
         unix_log['time'].attrs.create('units', 'ns', dtype='|S2')
-        __copy_and_transform_dataset(chopper_file, 'entry-01/ca_unix_string/time', unixstring_log.name + '/time',
-                                     shift_time)
-        builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_unix_string/value'],
-                                            unixstring_log.name + '/value')
-        unixstring_log['time'].attrs.create('units', 'ns', dtype='|S2')
 
 
 def __add_detector(builder):
