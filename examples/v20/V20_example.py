@@ -6,11 +6,16 @@ import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 
 
-def __copy_and_transform_dataset(source_file, source_path, target_path, transformation):
+def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
     source_data = source_file[source_path][...]
-    transformed_data = transformation(source_data)
+    if transformation is not None:
+        transformed_data = transformation(source_data)
+    else:
+        transformed_data = source_data
+    if dtype is None:
+        dtype = transformed_data.dtype
     target_dataset = builder.target_file.create_dataset(target_path, transformed_data.shape,
-                                                        dtype=transformed_data.dtype,
+                                                        dtype=dtype,
                                                         compression=builder.compress_type,
                                                         compression_opts=builder.compress_opts)
     target_dataset[...] = transformed_data
@@ -24,9 +29,11 @@ def __copy_existing_data():
     raw_event_path = nx_entry_name + '/instrument/detector_1/raw_event_data/'
     builder.add_nx_group(builder.get_root()['instrument/detector_1'], 'raw_event_data', 'NXevent_data')
     builder.copy_items(OrderedDict(
-        [('entry-01/Delayline_events/event_index', raw_event_path + 'event_index'),
-         ('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
+        [('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
          ]))
+
+    __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_index',
+                                 raw_event_path + 'event_index', dtype=np.uint64)
 
     def shift_time(timestamps):
         first_timestamp = 59120017391465
@@ -203,12 +210,9 @@ def __create_file_writer_command(filepath):
     __add_data_stream(streams, 'V20_waveforms', 'monitor_2_wf',
                       '/entry/instrument/monitor_2/waveform_data', 'senv')
     for chopper_number in range(1, 9):
-        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix',
+        suffix = '_A' if chopper_number in [1, 2, 6, 7] else '_J'  # labels if Airbus or Julich chopper
+        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142')
-        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Epics',
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_epics', 'f142')
-        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + ':TDC_Unix_stringin',
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unixstring', 'f142')
 
     for pv in lakeshore_pvs:
         log_name = pv.split(':')[-1]
@@ -218,14 +222,15 @@ def __create_file_writer_command(filepath):
     event_data_link = {'name': 'raw_event_data',
                        'target': '/entry/instrument/detector_1/raw_event_data'}
     links = {'/entry/raw_event_data': event_data_link}
+    links = {}  # TODO temp remove link, bug in FW (DM-1212)
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree, 'V20_example_output.nxs', broker='192.168.1.80:9092')
-    object_to_json_file(write_command, 'V20_example.json')
-    object_to_json_file(stop_command, 'stop_V20_example.json')
+    object_to_json_file(write_command, 'V20_file_write_start.json')
+    object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
 
 def __add_data_stream(streams, topic, source, path, module):
@@ -247,7 +252,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_9.nxs'
+    output_filename = 'V20_example_10.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
