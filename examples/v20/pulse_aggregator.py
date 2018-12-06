@@ -31,7 +31,7 @@ raw_event_path = '/entry/instrument/detector_1/raw_event_data'
 # Path of the TDC timestamp dataset (ns from unix epoch)
 chopper_tdc_path = '/entry/instrument/chopper_1/top_dead_centre_unix/time'
 
-filename = 'V20_raw_data.nxs'
+filename = 'V20_raw_data1.nxs'
 
 with h5py.File(filename, 'r+') as raw_file:
     # Create output event group
@@ -53,3 +53,23 @@ with h5py.File(filename, 'r+') as raw_file:
                                                           compression_opts=1)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
     event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
+
+    event_time_zero_input = raw_file[raw_event_path + '/event_time_zero'][...]
+    event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
+    event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
+    event_index = 0
+    for i, t in enumerate(tdc_times[:-1]):
+        while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
+            # append event to pulse i
+            event_index += 1
+            event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
+        event_index_output[i + 1] = event_index
+
+    event_index_ds = output_data_group.create_dataset('event_index', data=event_index_output,
+                                                      compression='gzip',
+                                                      compression_opts=1)
+
+    event_offset_ds = output_data_group.create_dataset('event_time_offset', data=event_offset_output,
+                                                       compression='gzip',
+                                                       compression_opts=1)
+    event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
