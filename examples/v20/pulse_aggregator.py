@@ -3,9 +3,9 @@ import numpy as np
 
 
 def position_to_index(pos, count):
-    uint_max = 2**16-1
+    uint_max = 2 ** 16 - 1
     # What if count (Nx or Ny) does not divide uint_max?
-    return np.floor_divide(pos, (uint_max//count))
+    return np.floor_divide(pos, (uint_max // count))
 
 
 def convert_id(event_id, id_offset=0):
@@ -34,10 +34,22 @@ chopper_tdc_path = '/entry/instrument/chopper_1/top_dead_centre_unix/time'
 filename = 'V20_raw_data.nxs'
 
 with h5py.File(filename, 'r+') as raw_file:
+    # Create output event group
+    output_data_group = raw_file['/entry'].create_group('event_data')
+    output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
+
     # Shift the TDC times
     tdc_times = raw_file[chopper_tdc_path][...]
     tdc_times += tdc_pulse_time_difference_ns
 
     event_ids = raw_file[raw_event_path + '/event_id'][...]
     event_ids = convert_id(event_ids)
-    print('here')
+    event_id_ds = output_data_group.create_dataset('event_id', data=event_ids,
+                                                   compression='gzip',
+                                                   compression_opts=1)
+
+    event_time_zero_ds = output_data_group.create_dataset('event_time_zero', data=tdc_times,
+                                                          compression='gzip',
+                                                          compression_opts=1)
+    event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
+    event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
