@@ -61,8 +61,12 @@ with h5py.File(filename, 'r+') as raw_file:
     for i, t in enumerate(tdc_times[:-1]):
         while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
             # append event to pulse i
+            if event_time_zero_input[event_index] > tdc_times[i]:
+                event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
+            else:
+                event_offset_output[event_index] = 0
+                print('-ve offset')
             event_index += 1
-            event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
         event_index_output[i + 1] = event_index
 
     event_index_ds = output_data_group.create_dataset('event_index', data=event_index_output,
