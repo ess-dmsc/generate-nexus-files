@@ -210,6 +210,7 @@ def __create_file_writer_command(filepath):
     #event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
     #links = {'/entry/raw_event_data': event_data_link}
+    links = {}
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
