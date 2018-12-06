@@ -215,7 +215,7 @@ def __create_file_writer_command(filepath):
     nexus_file = nexus.nxload(filepath)
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
-    write_command, stop_command = create_writer_commands(tree, 'V20_example_output.nxs', broker='192.168.1.80:9092')
+    write_command, stop_command = create_writer_commands(tree, 'V20_raw_data.nxs', broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
