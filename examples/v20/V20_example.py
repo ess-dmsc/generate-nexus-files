@@ -139,6 +139,8 @@ def __add_detector(builder):
     builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
     builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
 
+    #builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
+
 
 def __add_users(builder):
     user_names = ['Tobias Richter', 'Jonas Nilsson', 'Nicklas Holmberg', 'Irina Stefanescu', 'Gregor Nowak',
@@ -205,10 +207,9 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, 'V20_logs', pv,
                           '/entry/instrument/temperature_controller/' + log_name, 'f142')
 
-    event_data_link = {'name': 'raw_event_data',
-                       'target': '/entry/instrument/detector_1/raw_event_data'}
-    links = {'/entry/raw_event_data': event_data_link}
-    links = {}  # TODO temp remove link, bug in FW (DM-1212)
+    #event_data_link = {'name': 'raw_event_data',
+    #                   'target': '/entry/instrument/detector_1/raw_event_data'}
+    #links = {'/entry/raw_event_data': event_data_link}
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
@@ -223,8 +224,7 @@ def __add_data_stream(streams, topic, source, path, module):
     options = {
         'topic': topic,
         'source': source,
-        'module': module,
-        'nexus_path': path
+        'writer_module': module
     }
     streams[path] = options
 
