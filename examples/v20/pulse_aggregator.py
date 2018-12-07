@@ -90,8 +90,8 @@ if __name__ == '__main__':
                 if event_time_zero_input[event_index] > tdc_times[i]:
                     event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
                 else:
-                    event_offset_output[event_index] = 0
-                    print('-ve offset')
+                    raise Exception('Found event outside of chopper timestamp range, '
+                                    'something went wrong when truncating the datasets')
                 event_index += 1
             event_index_output[i + 1] = event_index
 
