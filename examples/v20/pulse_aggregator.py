@@ -1,5 +1,20 @@
 import h5py
 import numpy as np
+import argparse
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
+parser.add_argument("-o", "--output-filename", type=str, help='Output filename.')
+parser.add_argument("-t", "--tdc-pulse-time-difference", type=int,
+                    help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
+                    default=0)
+parser.add_argument("-e", "--raw-event-path", type=str,
+                    help='Path to the raw event NXevent_data group in the file',
+                    default='/entry/instrument/detector_1/raw_event_data')
+parser.add_argument("-c", "--chopper-tdc-path", type=str,
+                    help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
+                    default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
+args = parser.parse_args()
 
 
 def position_to_index(pos, count):
@@ -51,32 +66,19 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
 
 
 if __name__ == '__main__':
-    # Account for difference between TDC timestamps and the actual pulse T0
-    # due to angular separation of the TDC position and the window on the chopper disk
-    # In integer nanoseconds
-    tdc_pulse_time_difference_ns = 0
-
-    # Path of the NXevent_data group containing events which are not aggregated by pulse (event_time_offset is zeros)
-    raw_event_path = '/entry/instrument/detector_1/raw_event_data'
-
-    # Path of the TDC timestamp dataset (ns from unix epoch)
-    chopper_tdc_path = '/entry/instrument/chopper_1/top_dead_centre_unix/time'
-
-    filename = 'V20_raw_data2.nxs'
-
-    with h5py.File(filename, 'r+') as raw_file:
+    with h5py.File(args.input_filename, 'r+') as raw_file:
         # Create output event group
         output_data_group = raw_file['/entry'].create_group('event_data')
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
         # Shift the TDC times
-        tdc_times = raw_file[chopper_tdc_path][...]
-        tdc_times += tdc_pulse_time_difference_ns
+        tdc_times = raw_file[args.chopper_tdc_path][...]
+        tdc_times += args.tdc_pulse_time_difference
 
-        event_ids = raw_file[raw_event_path + '/event_id'][...]
+        event_ids = raw_file[args.raw_event_path + '/event_id'][...]
         event_ids = convert_id(event_ids)
 
-        event_time_zero_input = raw_file[raw_event_path + '/event_time_zero'][...]
+        event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
 
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
