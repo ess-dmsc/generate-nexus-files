@@ -1,6 +1,7 @@
 import h5py
 import numpy as np
 import argparse
+from shutil import copyfile
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
@@ -66,7 +67,8 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
 
 
 if __name__ == '__main__':
-    with h5py.File(args.input_filename, 'r+') as raw_file:
+    copyfile(args.input_filename, args.output_filename)
+    with h5py.File(args.output_filename, 'r+') as raw_file:
         # Create output event group
         output_data_group = raw_file['/entry'].create_group('event_data')
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
