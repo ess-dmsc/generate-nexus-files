@@ -46,10 +46,11 @@ def __copy_existing_data():
     event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
 
     def downscale_detector_resolution(ids):
-        original_res = (2 ** 16) ** 2
-        target_res = 150 ** 2
-        scale_factor = target_res / original_res
-        return (ids * scale_factor).astype(np.uint32)
+        return ids
+        # original_res = (2 ** 16) ** 2
+        # target_res = 150 ** 2
+        # scale_factor = target_res / original_res
+        # return (ids * scale_factor).astype(np.uint32)
 
     __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
                                  raw_event_path + 'event_id', downscale_detector_resolution)
@@ -139,7 +140,7 @@ def __add_detector(builder):
     builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
     builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
 
-    #builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
+    # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
 def __add_users(builder):
@@ -182,7 +183,7 @@ def __add_monitors(builder):
 
 def __create_file_writer_command(filepath):
     streams = {}
-    __add_data_stream(streams, 'V20_rawEvents', 'delay_line_detector',
+    __add_data_stream(streams, 'V20_rawEvents', 'denex',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
     __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector_wf',  # different source name due to DM-1129 (JIRA)
                       '/entry/instrument/detector_1/waveform_data_1', 'senv')
@@ -200,20 +201,22 @@ def __create_file_writer_command(filepath):
     for chopper_number in range(1, 9):
         suffix = '_A' if chopper_number in [1, 2, 6, 7] else '_J'  # labels if Airbus or Julich chopper
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142')
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
+                          'uint64')
 
     for pv in lakeshore_pvs:
         log_name = pv.split(':')[-1]
         __add_data_stream(streams, 'V20_logs', pv,
                           '/entry/instrument/temperature_controller/' + log_name, 'f142')
 
-    #event_data_link = {'name': 'raw_event_data',
+    # event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
-    #links = {'/entry/raw_event_data': event_data_link}
+    # links = {'/entry/raw_event_data': event_data_link}
     links = {}
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
+    # streams = {}  # TODO temp
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree, 'V20_raw_data.nxs', broker='192.168.1.80:9092')
@@ -221,12 +224,14 @@ def __create_file_writer_command(filepath):
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
 
-def __add_data_stream(streams, topic, source, path, module):
+def __add_data_stream(streams, topic, source, path, module, type=None):
     options = {
         'topic': topic,
         'source': source,
         'writer_module': module
     }
+    if type is not None:
+        options['type'] = type
     streams[path] = options
 
 
