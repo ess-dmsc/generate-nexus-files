@@ -38,8 +38,16 @@ def write_event_data(output_data_group, event_ids, event_index_output, event_off
     event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
-def truncate_to_common_time_range(tdc_times, event_ids, event_time_zero_input):
-    pass
+def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
+    # Chopper timestamps are our pulse timestamps, we can only aggregate events per pulse
+    # for time periods in which we actually have chopper timestamps
+    # truncate any other events
+    start = np.searchsorted(event_times, chopper_times[0], 'left')
+    end = np.searchsorted(event_times, chopper_times[-1], 'right')
+    event_id = event_id[start:end]
+    event_times = event_times[start:end]
+
+    return chopper_times, event_id, event_times
 
 
 if __name__ == '__main__':
@@ -54,7 +62,7 @@ if __name__ == '__main__':
     # Path of the TDC timestamp dataset (ns from unix epoch)
     chopper_tdc_path = '/entry/instrument/chopper_1/top_dead_centre_unix/time'
 
-    filename = 'V20_raw_data1.nxs'
+    filename = 'V20_raw_data2.nxs'
 
     with h5py.File(filename, 'r+') as raw_file:
         # Create output event group
@@ -70,7 +78,8 @@ if __name__ == '__main__':
 
         event_time_zero_input = raw_file[raw_event_path + '/event_time_zero'][...]
 
-        truncate_to_common_time_range()
+        tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
+                                                                                     event_time_zero_input)
 
         event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
