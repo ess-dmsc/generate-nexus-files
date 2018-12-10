@@ -183,21 +183,25 @@ def __add_monitors(builder):
 
 def __create_file_writer_command(filepath):
     streams = {}
-    __add_data_stream(streams, 'V20_rawEvents', 'denex',
+    # DENEX detector
+    __add_data_stream(streams, 'denex', 'delay_line_detector',
                       '/entry/instrument/detector_1/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector_wf',  # different source name due to DM-1129 (JIRA)
-                      '/entry/instrument/detector_1/waveform_data_1', 'senv')
-    __add_data_stream(streams, 'V20_waveforms', 'delay_line_detector_wf',
-                      '/entry/instrument/detector_1/waveform_data_2', 'senv')
 
-    __add_data_stream(streams, 'V20_rawEvents', 'monitor_1',
-                      '/entry/instrument/monitor_1/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'monitor_1_wf',
-                      '/entry/instrument/monitor_1/waveform_data', 'senv')
-    __add_data_stream(streams, 'V20_rawEvents', 'monitor_2',
-                      '/entry/instrument/monitor_2/raw_event_data', 'ev42')
-    __add_data_stream(streams, 'V20_waveforms', 'monitor_2_wf',
-                      '/entry/instrument/monitor_2/waveform_data', 'senv')
+    for channel_number in range(4):
+        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number) +
+                          '_waveform',  # different source name due to DM-1a129 (JIRA)
+                          '/entry/instrument/detector_1/waveform_data_' + str(channel_number), 'senv')
+        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number),
+                          '/entry/instrument/detector_1/pulse_events_' + str(channel_number), 'ev42')
+
+    # Monitors
+    for channel_number in range(1, 3):
+        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
+                          '_waveform',  # different source name due to DM-1a129 (JIRA)
+                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data_' + str(channel_number), 'senv')
+        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
+                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events_' + str(channel_number), 'ev42')
+
     for chopper_number in range(1, 9):
         suffix = '_A' if chopper_number in [1, 2, 6, 7] else '_J'  # labels if Airbus or Julich chopper
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
