@@ -198,9 +198,11 @@ def __create_file_writer_command(filepath):
     for channel_number in range(1, 3):
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
                           '_waveform',  # different source name due to DM-1a129 (JIRA)
-                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data_' + str(channel_number), 'senv')
+                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data_' + str(channel_number),
+                          'senv')
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
-                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events_' + str(channel_number), 'ev42')
+                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events_' + str(channel_number),
+                          'ev42')
 
     for chopper_number in range(1, 9):
         suffix = '_A' if chopper_number in [1, 2, 6, 7] else '_J'  # labels if Airbus or Julich chopper
@@ -268,28 +270,6 @@ if __name__ == '__main__':
 
         # Copy event data into detector
         __copy_existing_data()
-
-        lakeshore_group = __add_sample_env_device('temperature_controller', 'Lakeshore Huginn',
-                                                  'Lakeshore Huginn temperature controller')
-        lakeshore_pvs = [
-            'Huginn:SUBCRYO_READYTOMEAS',
-            'Huginn:SUBCRYO_SETP',
-            'Huginn:SUBCRYO_SETP_S',
-            'Huginn_LS:INNAME0',
-            'Huginn_LS:INNAME1',
-            'Huginn_LS:INNAME2',
-            'Huginn_LS:INNAME3',
-            'Huginn_LS:KRDG0',
-            'Huginn_LS:KRDG1',
-            'Huginn_LS:KRDG2',
-            'Huginn_LS:KRDG3',
-            'Huginn:MAINCRYO_SETP',
-            'Huginn:SUBCRYO_ONOFF',
-            'Huginn:SUBCRYO_SETP_MAX'
-        ]
-        for pv in lakeshore_pvs:
-            log_name = pv.split(':')[-1]
-            builder.add_nx_group('/entry/instrument/temperature_controller/', log_name, 'NXlog')
 
         # TODO Add guides, shutters, any other known components
         #   Add more details on the sample
