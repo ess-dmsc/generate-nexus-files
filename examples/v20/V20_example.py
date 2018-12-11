@@ -137,8 +137,9 @@ def __add_detector(builder):
                                                   'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
-    builder.add_nx_group(detector_group, 'waveform_data_1', 'NXlog')
-    builder.add_nx_group(detector_group, 'waveform_data_2', 'NXlog')
+    for channel_number in range(4):
+        builder.add_nx_group(detector_group, 'waveform_data_'+str(channel_number), 'NXlog')
+        builder.add_nx_group(detector_group, 'pulse_events_' + str(channel_number), 'NXlog')
 
     # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
@@ -174,10 +175,12 @@ def __add_monitors(builder):
     monitor_group_1 = builder.add_nx_group(instrument_group, 'monitor_1', 'NXmonitor')
     builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
+    builder.add_nx_group(monitor_group_1, 'pulse_events', 'NXlog')
     builder.add_dataset(monitor_group_1, 'detector_id', 22500)
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
     builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
+    builder.add_nx_group(monitor_group_2, 'pulse_events', 'NXlog')
     builder.add_dataset(monitor_group_2, 'detector_id', 22501)
 
 
@@ -198,10 +201,10 @@ def __create_file_writer_command(filepath):
     for channel_number in range(1, 3):
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
                           '_waveform',  # different source name due to DM-1a129 (JIRA)
-                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data_' + str(channel_number),
+                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data',
                           'senv')
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
-                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events_' + str(channel_number),
+                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events',
                           'ev42')
 
     for chopper_number in range(1, 9):
@@ -209,11 +212,6 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
                           'uint64')
-
-    for pv in lakeshore_pvs:
-        log_name = pv.split(':')[-1]
-        __add_data_stream(streams, 'V20_logs', pv,
-                          '/entry/instrument/temperature_controller/' + log_name, 'f142')
 
     # event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
@@ -225,7 +223,9 @@ def __create_file_writer_command(filepath):
     # streams = {}  # TODO temp
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
-    write_command, stop_command = create_writer_commands(tree, 'V20_raw_data.nxs', broker='192.168.1.80:9092')
+    write_command, stop_command = create_writer_commands(tree,
+                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-10_1805.nxs',
+                                                         broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
@@ -281,5 +281,7 @@ if __name__ == '__main__':
 
         # Since we will use timestamps from the first (furthest from detector) chopper as the pulse timestamps,
         # the "source" is placed at the position of the first chopper
+
+        # kafkacat -b 192.168.1.80 -t V20_writerCommand -X message.max.bytes=20000000 V20_file_write_stop.json -P
 
     __create_file_writer_command(output_filename)
