@@ -6,6 +6,10 @@ import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 
 
+airbus_choppers = [1, 2, 6, 7]
+julich_choppers = [3, 4, 5, 8]
+
+
 def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
     source_data = source_file[source_path][...]
     if transformation is not None:
@@ -71,23 +75,23 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
          (source_group + '/value', destination_group + '/value')]))
 
 
-def __add_chopper(builder, name, speed=None):
-    chopper_group = builder.add_nx_group(instrument_group, name, 'NXdisk_chopper')
-    if speed is not None:
-        builder.add_dataset(chopper_group, 'rotation_speed', speed, {'units': 'Hz'})
+def __add_chopper(builder, number):
+    chopper_group = builder.add_nx_group(instrument_group, 'chopper_' + str(number), 'NXdisk_chopper')
+    if number not in airbus_choppers:
+        builder.add_dataset(chopper_group, 'speed', [0])
+        builder.add_dataset(chopper_group, 'speed_setpoint', [0])
+        builder.add_dataset(chopper_group, 'phase', [0])
+        builder.add_dataset(chopper_group, 'phase_setpoint', [0])
+        builder.add_dataset(chopper_group, 'factor', [0])
+
     unix_log = builder.add_nx_group(chopper_group, 'top_dead_centre_unix', 'NXlog')
     return unix_log
 
 
 def __add_choppers(builder):
-    unix_log = __add_chopper(builder, 'chopper_1', 14.0)
-    __add_chopper(builder, 'chopper_2')
-    __add_chopper(builder, 'chopper_3')
-    __add_chopper(builder, 'chopper_4')
-    __add_chopper(builder, 'chopper_5')
-    __add_chopper(builder, 'chopper_6')
-    __add_chopper(builder, 'chopper_7')
-    __add_chopper(builder, 'chopper_8')
+    unix_log = __add_chopper(builder, 1)
+    for chopper_number in range(1, 9):
+        __add_chopper(builder, chopper_number)
 
     def shift_time(timestamps):
         first_timestamp = 1542008231816585559
@@ -209,10 +213,27 @@ def __create_file_writer_command(filepath):
                           'ev42')
 
     for chopper_number in range(1, 9):
-        suffix = '_A' if chopper_number in [1, 2, 6, 7] else '_J'  # labels if Airbus or Julich chopper
+        suffix = '_A' if chopper_number in airbus_choppers else '_J'  # labels if Airbus or Julich chopper
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
                           'uint64')
+        if chopper_number in julich_choppers:
+            julich_chopper_number = julich_choppers.index(chopper_number) + 1
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0'+str(julich_chopper_number)+':Speed',
+                              '/entry/instrument/chopper_' + str(chopper_number) + '/speed', 'f142',
+                              'double')
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Speed-SP',
+                              '/entry/instrument/chopper_' + str(chopper_number) + '/speed_setpoint', 'f142',
+                              'double')
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Phase',
+                              '/entry/instrument/chopper_' + str(chopper_number) + '/phase', 'f142',
+                              'double')
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Phase-SP',
+                              '/entry/instrument/chopper_' + str(chopper_number) + '/phase_setpoint', 'f142',
+                              'double')
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Factor',
+                              '/entry/instrument/chopper_' + str(chopper_number) + '/factor', 'f142',
+                              'int64')
 
     # Timing system
     __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch0_waveform',
