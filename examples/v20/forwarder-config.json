@@ -1,0 +1,207 @@
+{
+    "streams": [
+        {
+            "channel": "chopper_1_A:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sourceChopper" }
+        },
+        {
+            "channel": "chopper_1_A:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_1_A:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_2_A:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_2_A:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_2_A:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_3_J:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_3_J:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_3_J:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_4_J:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_4_J:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_4_J:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_5_J:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_5_J:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_5_J:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_6_A:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_6_A:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_6_A:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_7_A:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_7_A:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_7_A:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "chopper_8_J:TDC_Unix",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_8_J:TDC_Epics",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "chopper_8_J:TDC_Unix_stringin",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+ 
+        {
+            "channel": "Huginn:SUBCRYO_READYTOMEAS",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn:SUBCRYO_SETP",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn:SUBCRYO_SETP_S",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "Huginn_LS:INNAME0",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:INNAME1",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:INNAME2",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:INNAME3",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:KRDG0",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:KRDG1",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:KRDG2",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn_LS:KRDG3",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn:MAINCRYO_SETP",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn:SUBCRYO_ONOFF",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "Huginn:SUBCRYO_SETP_MAX",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltH-xn",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltH-xp",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltH-Center",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltH-Gap",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltV-xn",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltV-xp",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltV-Center",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-SLT-01:SltV-Gap",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+
+        {
+            "channel": "HZB-V20:MC-MCU-01:m12",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        },
+        {
+            "channel": "HZB-V20:MC-MCU-01:m9",
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+        }
+    ]
+}
