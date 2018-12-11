@@ -140,6 +140,7 @@ def __add_detector(builder):
     for channel_number in range(4):
         builder.add_nx_group(detector_group, 'waveform_data_'+str(channel_number), 'NXlog')
         builder.add_nx_group(detector_group, 'pulse_events_' + str(channel_number), 'NXlog')
+    builder.add_nx_group(builder.get_root(), 'timing_system_waveform_data', 'NXlog')
 
     # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
@@ -213,6 +214,10 @@ def __create_file_writer_command(filepath):
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
                           'uint64')
 
+    # Timing system
+    __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch0_waveform',
+                      '/entry/timing_system_waveform_data', 'senv')
+
     # event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
     # links = {'/entry/raw_event_data': event_data_link}
@@ -224,7 +229,7 @@ def __create_file_writer_command(filepath):
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-10_1805.nxs',
+                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-11_0952.nxs',
                                                          broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')

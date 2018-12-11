@@ -1,107 +1,47 @@
 {
     "streams": [
         {
-            "channel": "chopper_1_A:TDC_Unix",
+            "channel": "chopper_1_A",
             "converter": { "schema": "f142", "topic": "V20_sourceChopper" }
         },
         {
-            "channel": "chopper_1_A:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_1_A:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_1_A",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_2_A:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_2_A:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_2_A:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_2_A",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_3_J:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_3_J:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_3_J:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_3_J",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_4_J:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_4_J:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_4_J:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_4_J",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_5_J:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_5_J:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_5_J:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_5_J",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_6_A:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_6_A:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_6_A:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_6_A",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_7_A:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_7_A:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_7_A:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_7_A",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
-            "channel": "chopper_8_J:TDC_Unix",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_8_J:TDC_Epics",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "chopper_8_J:TDC_Unix_stringin",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "channel": "chopper_8_J",
+            "converter": { "schema": "f142", "topic": "V20_choppers" }
         },
 
         {
