@@ -2,88 +2,88 @@
     "streams": [
         {
             "channel": "chopper_1_A",
-            "converter": { "schema": "f142", "topic": "V20_sourceChopper" }
+            "converter": { "schema": "f142", "topic": "V20_sourceChopper", "type": "double"}
         },
         {
             "channel": "chopper_1_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_2_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_3_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_4_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_5_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_6_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_7_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "chopper_8_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" }
+            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
         },
 
         {
             "channel": "HZB-V20:MC-SLT-01:SltH-xn",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltH-xp",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltH-Center",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltH-Gap",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltV-xn",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltV-xp",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltV-Center",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-SLT-01:SltV-Gap",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
 
         {
             "channel": "HZB-V20:MC-MCU-01:m12",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         },
         {
             "channel": "HZB-V20:MC-MCU-01:m9",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
+            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
         }
     ]
 }

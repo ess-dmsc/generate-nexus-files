@@ -14,7 +14,7 @@ parser.add_argument("-e", "--raw-event-path", type=str,
                     default='/entry/instrument/detector_1/raw_event_data')
 parser.add_argument("-c", "--chopper-tdc-path", type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_1_A/top_dead_centre_unix/time')
+                    default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
 args = parser.parse_args()
 
 
