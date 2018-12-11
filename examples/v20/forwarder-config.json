@@ -84,6 +84,86 @@
         {
             "channel": "HZB-V20:MC-MCU-01:m9",
             "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
+        },
+        {
+            "channel": "V20:C01:Speed",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C01:Speed-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C01:Phase",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C01:Phase-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C01:Factor",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
+        },
+        {
+            "channel": "V20:C02:Speed",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C02:Speed-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C02:Phase",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C02:Phase-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C02:Factor",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
+        },
+        {
+            "channel": "V20:C03:Speed",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C03:Speed-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C03:Phase",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C03:Phase-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C03:Factor",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
+        },
+        {
+            "channel": "V20:C04:Speed",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C04:Speed-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C04:Phase",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C04:Phase-SP",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
+        },
+        {
+            "channel": "V20:C04:Factor",
+            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
         }
     ]
 }
