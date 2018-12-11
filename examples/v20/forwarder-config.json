@@ -103,64 +103,6 @@
             "channel": "chopper_8_J:TDC_Unix_stringin",
             "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
         },
- 
-        {
-            "channel": "Huginn:SUBCRYO_READYTOMEAS",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn:SUBCRYO_SETP",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn:SUBCRYO_SETP_S",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-
-        {
-            "channel": "Huginn_LS:INNAME0",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:INNAME1",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:INNAME2",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:INNAME3",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:KRDG0",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:KRDG1",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:KRDG2",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn_LS:KRDG3",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn:MAINCRYO_SETP",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn:SUBCRYO_ONOFF",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
-        {
-            "channel": "Huginn:SUBCRYO_SETP_MAX",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" }
-        },
 
         {
             "channel": "HZB-V20:MC-SLT-01:SltH-xn",
