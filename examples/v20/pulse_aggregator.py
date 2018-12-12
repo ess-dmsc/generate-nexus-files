@@ -45,7 +45,7 @@ def write_event_data(output_data_group, event_ids, event_index_output, event_off
                                                           compression_opts=1)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
     event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
-    event_index_ds = output_data_group.create_dataset('event_index', data=event_index_output.astype(np.uint32),
+    event_index_ds = output_data_group.create_dataset('event_index', data=event_index_output.astype(np.uint64),
                                                       compression='gzip',
                                                       compression_opts=1)
     event_offset_ds = output_data_group.create_dataset('event_time_offset', data=event_offset_output,
