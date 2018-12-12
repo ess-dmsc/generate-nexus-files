@@ -77,7 +77,7 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
 
 def __add_chopper(builder, number):
     chopper_group = builder.add_nx_group(instrument_group, 'chopper_' + str(number), 'NXdisk_chopper')
-    if number not in airbus_choppers:
+    if number in julich_choppers:
         builder.add_dataset(chopper_group, 'speed', [0])
         builder.add_dataset(chopper_group, 'speed_setpoint', [0])
         builder.add_dataset(chopper_group, 'phase', [0])
@@ -90,7 +90,7 @@ def __add_chopper(builder, number):
 
 def __add_choppers(builder):
     unix_log = __add_chopper(builder, 1)
-    for chopper_number in range(1, 9):
+    for chopper_number in range(2, 9):
         __add_chopper(builder, chopper_number)
 
     def shift_time(timestamps):
@@ -107,9 +107,9 @@ def __add_choppers(builder):
 def __add_detector(builder):
     # Add description of V20's DENEX (delay line) detector
 
-    pixels_per_axis = 150  # 65535 (requires int64)
+    pixels_per_axis = 300  # 65535 (requires int64)
     pixel_size = 0.002
-    half_detector_width = 0.15
+    half_detector_width = 0.3
     half_pixel_width = 0.002 / 2.0
     single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
                                                   dtype=np.float)) - half_detector_width + half_pixel_width
@@ -130,8 +130,8 @@ def __add_detector(builder):
     builder.add_dataset(pixel_shape, 'vertices', pixel_verts, {'units': 'm'})
     builder.add_dataset(pixel_shape, 'winding_order', pixel_winding_order)
 
-    pixel_ids = np.arange(0, 22500, 1, dtype=int)
-    pixel_ids = np.reshape(pixel_ids, (150, 150))
+    pixel_ids = np.arange(0, pixels_per_axis**2, 1, dtype=int)
+    pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
     builder.add_dataset(detector_group, 'detector_number', pixel_ids)
 
     # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
@@ -181,12 +181,12 @@ def __add_monitors(builder):
     builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
     builder.add_nx_group(monitor_group_1, 'pulse_events', 'NXlog')
-    builder.add_dataset(monitor_group_1, 'detector_id', 22500)
+    builder.add_dataset(monitor_group_1, 'detector_id', 90000)
     monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
     builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
     builder.add_nx_group(monitor_group_2, 'pulse_events', 'NXlog')
-    builder.add_dataset(monitor_group_2, 'detector_id', 22501)
+    builder.add_dataset(monitor_group_2, 'detector_id', 90001)
 
 
 def __create_file_writer_command(filepath):
@@ -216,7 +216,7 @@ def __create_file_writer_command(filepath):
         suffix = '_A' if chopper_number in airbus_choppers else '_J'  # labels if Airbus or Julich chopper
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
                           '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
-                          'uint64')
+                          'double')
         if chopper_number in julich_choppers:
             julich_chopper_number = julich_choppers.index(chopper_number) + 1
             __add_data_stream(streams, 'V20_choppers', 'V20:C0'+str(julich_chopper_number)+':Speed',
@@ -250,7 +250,7 @@ def __create_file_writer_command(filepath):
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-11_1018.nxs',
+                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-11_1923.nxs',
                                                          broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
