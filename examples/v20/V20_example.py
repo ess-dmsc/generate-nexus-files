@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
+from datetime import datetime
 
 
 airbus_choppers = [1, 2, 6, 7]
@@ -138,7 +139,7 @@ def __add_detector(builder):
     # Add detector position
     # detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
     location_dataset = builder.add_transformation(detector_group,
-                                                  'translation', [5.0], 'm', [0.0, 0.0, 1.0], name='location')
+                                                  'translation', [0.5], 'm', [1.0, 0.0, 0.0], name='location')
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
     for channel_number in range(4):
@@ -250,7 +251,7 @@ def __create_file_writer_command(filepath):
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-11_1923.nxs',
+                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-13_1434.nxs',
                                                          broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
@@ -292,7 +293,10 @@ if __name__ == '__main__':
                             'We\'re not sure what it is, but it glows with a mysterious green light...')
 
         # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -24.5])
+        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.0])
+
+        # Add start_time dataset (required by Mantid)
+        builder.add_dataset(builder.get_root(), 'start_time', datetime.now().isoformat())
 
         # Copy event data into detector
         __copy_existing_data()
