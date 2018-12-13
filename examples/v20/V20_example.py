@@ -6,7 +6,6 @@ import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 from datetime import datetime
 
-
 airbus_choppers = [1, 2, 6, 7]
 julich_choppers = [3, 4, 5, 8]
 
@@ -131,7 +130,7 @@ def __add_detector(builder):
     builder.add_dataset(pixel_shape, 'vertices', pixel_verts, {'units': 'm'})
     builder.add_dataset(pixel_shape, 'winding_order', pixel_winding_order)
 
-    pixel_ids = np.arange(0, pixels_per_axis**2, 1, dtype=int)
+    pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
     pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
     builder.add_dataset(detector_group, 'detector_number', pixel_ids)
 
@@ -143,7 +142,7 @@ def __add_detector(builder):
     builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
 
     for channel_number in range(4):
-        builder.add_nx_group(detector_group, 'waveform_data_'+str(channel_number), 'NXlog')
+        builder.add_nx_group(detector_group, 'waveform_data_' + str(channel_number), 'NXlog')
         builder.add_nx_group(detector_group, 'pulse_events_' + str(channel_number), 'NXlog')
     builder.add_nx_group(builder.get_root(), 'timing_system_waveform_data', 'NXlog')
 
@@ -220,7 +219,7 @@ def __create_file_writer_command(filepath):
                           'double')
         if chopper_number in julich_choppers:
             julich_chopper_number = julich_choppers.index(chopper_number) + 1
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0'+str(julich_chopper_number)+':Speed',
+            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Speed',
                               '/entry/instrument/chopper_' + str(chopper_number) + '/speed', 'f142',
                               'double')
             __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Speed-SP',
@@ -250,8 +249,9 @@ def __create_file_writer_command(filepath):
     # streams = {}  # TODO temp
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
+    iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_ESSIntegration_2018-12-13_1434.nxs',
+                                                         '/data/kafka-to-nexus/V20_ESSIntegration_' + iso8601_str_seconds + '.nxs',
                                                          broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
@@ -296,7 +296,8 @@ if __name__ == '__main__':
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.0])
 
         # Add start_time dataset (required by Mantid)
-        builder.add_dataset(builder.get_root(), 'start_time', datetime.now().isoformat())
+        iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
+        builder.add_dataset(builder.get_root(), 'start_time', iso8601_str_seconds)
 
         # Copy event data into detector
         __copy_existing_data()
