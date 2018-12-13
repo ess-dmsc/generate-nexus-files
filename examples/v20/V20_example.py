@@ -136,10 +136,14 @@ def __add_detector(builder):
 
     # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
-    # detector_transformations = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-    location_dataset = builder.add_transformation(detector_group,
-                                                  'translation', [0.5], 'm', [1.0, 0.0, 0.0], name='location')
-    builder.add_dataset(detector_group, 'depends_on', location_dataset.name)
+    transforms = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
+    orientation = builder.add_transformation(transforms, 'rotation', [90], 'deg', [0.0, 1.0, 0.0], name='orientation',
+                                             depends_on='.')
+    z_offset = builder.add_transformation(transforms, 'translation', [0.049], 'm', [0.0, 0.0, -1.0],
+                                          name='beam_direction_offset', depends_on=orientation.name)
+    x_offset = builder.add_transformation(transforms, 'translation', [0.971], 'm', [1.0, 0.0, 0.0], name='location',
+                                          depends_on=z_offset.name)
+    builder.add_dataset(detector_group, 'depends_on', x_offset.name)
 
     for channel_number in range(4):
         builder.add_nx_group(detector_group, 'waveform_data_' + str(channel_number), 'NXlog')
@@ -290,10 +294,10 @@ if __name__ == '__main__':
         __add_monitors(builder)
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description',
-                            'We\'re not sure what it is, but it glows with a mysterious green light...')
+                            'Silicon in can')
 
         # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.0])
+        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
