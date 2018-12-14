@@ -181,7 +181,7 @@ def __add_user_group(builder, user_names, roles, institution):
 
 
 def __add_monitors(builder):
-    monitor_group_1 = builder.add_nx_group(instrument_group, 'monitor_1', 'NXmonitor')
+    monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
     builder.add_nx_group(monitor_group_1, 'pulse_events', 'NXlog')
@@ -189,7 +189,7 @@ def __add_monitors(builder):
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
     monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [-3.298], 'm', [0.0, 0.0, 1.0])
     builder.add_dataset(monitor_group_1, 'depends_on', monitor_1_z_offset.name)
-    monitor_group_2 = builder.add_nx_group(instrument_group, 'monitor_2', 'NXmonitor')
+    monitor_group_2 = builder.add_nx_group(builder.get_root(), 'monitor_2', 'NXmonitor')
     builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
     builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
     builder.add_nx_group(monitor_group_2, 'pulse_events', 'NXlog')
@@ -213,10 +213,10 @@ def __create_file_writer_command(filepath):
     for channel_number in range(1, 3):
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
                           '_waveform',  # different source name due to DM-1a129 (JIRA)
-                          '/entry/instrument/monitor_' + str(channel_number) + '/waveform_data',
+                          '/entry/monitor_' + str(channel_number) + '/waveform_data',
                           'senv')
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
-                          '/entry/instrument/monitor_' + str(channel_number) + '/pulse_events',
+                          '/entry/monitor_' + str(channel_number) + '/pulse_events',
                           'ev42')
 
     for chopper_number in range(1, 9):
