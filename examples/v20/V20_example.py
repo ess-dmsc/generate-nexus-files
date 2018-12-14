@@ -137,7 +137,7 @@ def __add_detector(builder):
     # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
     transforms = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-    orientation = builder.add_transformation(transforms, 'rotation', [90], 'deg', [0.0, 1.0, 0.0], name='orientation',
+    orientation = builder.add_transformation(transforms, 'rotation', [90.0], 'deg', [0.0, 1.0, 0.0], name='orientation',
                                              depends_on='.')
     z_offset = builder.add_transformation(transforms, 'translation', [0.049], 'm', [0.0, 0.0, -1.0],
                                           name='beam_direction_offset', depends_on=orientation.name)
