@@ -10,5 +10,7 @@ if __name__ == '__main__':
         # A few more details to flesh out the example
         builder.add_user('LOKI Team', 'ESS')
 
+        builder.add_fake_event_data(10, 10)
+
     with DetectorPlotter(output_filename) as plotter:
         plotter.plot_pixel_positions()
