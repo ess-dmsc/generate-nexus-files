@@ -22,5 +22,7 @@ if __name__ == '__main__':
             for det_id, spec_number in zip(det_ids, spectrum_numbers):
                 map_file.write("{}    {}\n".format(det_id, spec_number))
 
+        builder.add_dataset(builder.root, 'name', 'LOKI', {'short_name': 'LOKI'})
+
     with DetectorPlotter(output_filename) as plotter:
         plotter.plot_pixel_positions()
