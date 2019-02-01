@@ -2,6 +2,7 @@ import h5py
 import numpy as np
 import argparse
 from shutil import copyfile
+from matplotlib import pyplot as pl
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
@@ -70,22 +71,21 @@ def _wfm_psc_1():
     """
     Definition V20 for wfm pulse shaping chopper 1 (closest to source)
     :return: Returns the sorted angles of all edges in degrees. First entry is start angle of the first cut-out
-    second entry is end angle of first cut-out. Cut-outs are in order from the top-dead-centre (TDC) position. The first
-    window after the TDC is actually the third window in order of size (smallest to largest).
+    second entry is end angle of first cut-out. Cut-outs are in order from the position that the top-dead-centre (TDC)
+    timestamp is recorded. The values in the array are from the closing edge of the largest window, TDC position is 15
+    degrees after this.
     """
-    return [193.26 - 165., 212.56 - 165., 242.32 - 165., 265.33 - 165., 287.91 - 165., 314.37 - 165., 330.3 - 165.,
-            360.0 - 165., 83.71 + 195., 94.7 + 195., 140.49 + 195., 155.79 + 195.]
+    return np.array([83.71, 94.7, 140.49, 155.79, 193.26, 212.56, 242.32, 265.33, 287.91, 314.37, 330.3, 360.0]) + 15.0
 
 
 def _wfm_psc_2():
     """
     Definition V20 for wfm pulse shaping chopper 2 (closest to sample)
     :return: Returns the sorted angles of all edges in degrees. First entry is start angle of the first cut-out
-    second entry is end angle of first cut-out. Cut-outs are in order from the top-dead-centre position. The first
-    window after the TDC is actually the third window in order of size (smallest to largest).
+    second entry is end angle of first cut-out. Cut-outs are in order from the position that the top-dead-centre (TDC)
+    timestamp is recorded.
     """
-    return [182.88 - 165., 202.18 - 165., 235.67 - 165., 254.97 - 165., 284.73 - 165., 307.74 - 165., 330.0 - 165.,
-            360.0 - 165., 65.04 + 195., 76.03 + 195., 126.1 + 195., 141.4 + 195.]
+    return np.array([65.04, 76.03, 126.1, 141.4, 182.88, 202.18, 235.67, 254.97, 284.73, 307.74, 330.00, 360.0]) + 15.0
 
 
 def _tof_shifts(pscdata, psc_frequency=0.):
@@ -105,7 +105,7 @@ def something():
     frequ2 = 70.0  # Hz
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=frequ1) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=frequ2)) * \
-                      5.0e+05  # factor of 0.5 * 1.0e6 (taking mean and converting to microseconds)
+                      5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
 
 
 if __name__ == '__main__':
@@ -130,15 +130,15 @@ if __name__ == '__main__':
         event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
-        for i, t in enumerate(tdc_times[:-1]):
-            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
-                # append event to pulse i
-                if event_time_zero_input[event_index] > tdc_times[i]:
-                    event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
-                else:
-                    raise Exception('Found event outside of chopper timestamp range, '
-                                    'something went wrong when truncating the datasets')
+        for pulse_number, _ in enumerate(tdc_times[:-1]):
+            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1]:
+                # append event to pulse pulse_number
+                event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 event_index += 1
-            event_index_output[i + 1] = event_index
+            event_index_output[pulse_number + 1] = event_index
+
+        # histo_tof, bins = np.histogram(event_offset_output, bins=72, range=(0, 72000000))
+        pl.hist(event_offset_output, bins=2*288, range=(0, 72000000))
+        pl.show()
 
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
