@@ -95,8 +95,7 @@ def _tof_shifts(pscdata, psc_frequency=0.):
     This is the time shift from the WFM chopper top-dead-centre timestamp to the t0 of each sub-pulse
     """
     cut_out_centre = np.reshape(pscdata, (len(pscdata) // 2, 2)).mean(1)
-    cut_out_diffs = np.ediff1d(cut_out_centre)
-    tof_shifts = cut_out_diffs / (360.0 * psc_frequency)
+    tof_shifts = cut_out_centre / (360.0 * psc_frequency)
     # TODO What about the 17.1 degree phase shift from the chopper signal,
     #  which Peter mentioned, do we need to apply that here?
     return tof_shifts
@@ -110,6 +109,7 @@ if __name__ == '__main__':
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
                       5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
+    relative_shifts = relative_shifts.astype(np.uint64)
 
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as raw_file:
@@ -131,19 +131,23 @@ if __name__ == '__main__':
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
 
-        event_index_output = np.zeros_like(wfm_tdc_times, dtype=np.uint64)
+        # There are 6 subpulses for each wfm tdc
+        event_index_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
         for pulse_number, _ in enumerate(tdc_times[:-1]):
             subpulse = 0
             # while event time is in the current pulse
-            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and subpulse<6:
+            while event_index < len(event_time_zero_input) and \
+                    event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and \
+                    subpulse < 6:
                 # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
-                subpulse_number = (pulse_number * 5) + subpulse
+                wfm_tdc_number = (pulse_number * 5)
+                subpulse_number = (pulse_number * 6) + subpulse
                 time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 # while event time is in the current subpulse
                 while time_after_pulse_tdc < threshold[subpulse]:
-                    t0 = wfm_tdc_times[subpulse_number] + relative_shifts[subpulse]
+                    t0 = wfm_tdc_times[wfm_tdc_number] + relative_shifts[subpulse]
                     event_offset_output[event_index] = event_time_zero_input[event_index] - t0
                     event_index += 1
                     time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
