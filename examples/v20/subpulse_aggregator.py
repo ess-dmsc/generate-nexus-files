@@ -162,7 +162,7 @@ if __name__ == '__main__':
         wfm_tdc_index = 0
         wfm_2_tdc_index = 0  # for the second WFM chopper
         event_offset_output = np.zeros_like(event_time_zero_input)
-        event_index_output = np.array([0], dtype=np.uint64)
+        event_index_output = np.array([], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
         subpulse_uuid = (0, 0)
         for event_index, event_wallclock_time in enumerate(tqdm(event_time_zero_input)):
@@ -191,7 +191,7 @@ if __name__ == '__main__':
             else:
                 # Append a new subpulse
                 event_index_output = np.concatenate((event_index_output, [event_index]))
-                event_time_zero_output = np.concatenate((event_time_zero_output, [t0]))
+                event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
 
             subpulse_uuid = next_subpulse_uuid
 
