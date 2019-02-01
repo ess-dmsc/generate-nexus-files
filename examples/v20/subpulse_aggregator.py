@@ -58,16 +58,24 @@ def write_event_data(output_data_group, event_ids, event_index_output, event_off
     event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
-def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
+def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_chopper_times):
     # Chopper timestamps are our pulse timestamps, we can only aggregate events per pulse
     # for time periods in which we actually have chopper timestamps
     # truncate any other events
     start = np.searchsorted(event_times, chopper_times[0], 'left')
-    end = np.searchsorted(event_times, chopper_times[-1], 'right')
+    end = np.searchsorted(event_times, chopper_times[-2], 'right')
     event_id = event_id[start:end]
     event_times = event_times[start:end]
 
-    return chopper_times, event_id, event_times
+    # We need wfm chopper times up to the following chopper_time
+    wfm_chopper_times = wfm_chopper_times[
+                        np.searchsorted(wfm_chopper_times, chopper_times[0], 'left'):np.searchsorted(wfm_chopper_times,
+                                                                                                     chopper_times[-1],
+                                                                                                     'right')]
+
+    chopper_times = chopper_times[:-2]
+
+    return chopper_times, event_id, event_times, wfm_chopper_times
 
 
 def _wfm_psc_1():
@@ -129,32 +137,42 @@ if __name__ == '__main__':
 
         event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
 
-        tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
-                                                                                     event_time_zero_input)
+        tdc_times, event_ids, event_time_zero_input, wfm_tdc_times = truncate_to_chopper_time_range(tdc_times,
+                                                                                                    event_ids,
+                                                                                                    event_time_zero_input,
+                                                                                                    wfm_tdc_times)
 
         # There are 6 subpulses for each wfm tdc
         event_index_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
         event_time_zero_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
+        missed_events = 0
+        wfm_tdc_index = 0
         for pulse_number in tqdm(range(len(tdc_times) - 1)):
-            wfm_tdc_number = (pulse_number * 5)
             for subpulse in range(6):
                 # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
                 subpulse_number = (pulse_number * 6) + subpulse
                 time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
-                t0 = wfm_tdc_times[wfm_tdc_number] + relative_shifts[subpulse]
+                # Using pulse_number *5 was not robust, seek to next wfm_tdc after current tdc_time instead
+                # Start seeking from the previous wfm_tdc_index, slicing numpy array uses a view, so this is faster
+                wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], tdc_times[pulse_number], 'right')
+                t0 = wfm_tdc_times[wfm_tdc_index] + relative_shifts[subpulse]
                 event_time_zero_output[subpulse_number] = t0
                 # while event time is in the current subpulse
                 while event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and \
                         time_after_pulse_tdc < threshold[subpulse]:
+                    if t0 > event_time_zero_input[event_index]:
+                        missed_events += 1
                     event_offset_output[event_index] = event_time_zero_input[event_index] - t0
                     event_index += 1
                     time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 event_index_output[subpulse_number + 1] = event_index
 
+        print(missed_events)
+
         fig, (ax) = pl.subplots(1, 1)
-        ax.hist(event_offset_output, bins=4*288, range=(0, 72000000))
+        ax.hist(event_offset_output, bins=4 * 288, range=(0, 72000000))
         for value in threshold:
             ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
         pl.show()
