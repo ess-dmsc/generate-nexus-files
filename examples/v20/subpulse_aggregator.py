@@ -16,6 +16,9 @@ parser.add_argument("-e", "--raw-event-path", type=str,
 parser.add_argument("-c", "--chopper-tdc-path", type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
+parser.add_argument("-w", "--wfm-chopper-tdc-path", type=str,
+                    help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
+                    default='/entry/instrument/chopper_3/top_dead_centre_unix/time')
 args = parser.parse_args()
 
 
@@ -99,18 +102,14 @@ def _tof_shifts(pscdata, psc_frequency=0.):
     return tof_shifts
 
 
-def something():
-    frequ1 = 70.0  # Hz
-    frequ2 = 70.0  # Hz
-    relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=frequ1) +
-                       _tof_shifts(_wfm_psc_2(), psc_frequency=frequ2)) * \
-                      5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
-
-
 if __name__ == '__main__':
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
     threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+
+    relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
+                       _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
+                      5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
 
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as raw_file:
@@ -122,6 +121,8 @@ if __name__ == '__main__':
         tdc_times = raw_file[args.chopper_tdc_path][...]
         tdc_times += args.tdc_pulse_time_difference
 
+        wfm_tdc_times = raw_file[args.wfm_chopper_tdc_path][...]
+
         event_ids = raw_file[args.raw_event_path + '/event_id'][...]
         event_ids = convert_id(event_ids)
 
@@ -130,30 +131,29 @@ if __name__ == '__main__':
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
 
-        event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
+        event_index_output = np.zeros_like(wfm_tdc_times, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
         for pulse_number, _ in enumerate(tdc_times[:-1]):
             while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1]:
                 time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 if time_after_pulse_tdc < threshold[0]:
-                    # Event is in subpulse 1
-                    pass
+                    subpulse = 0
+                    # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
+                    subpulse_number = (pulse_number * 5) + subpulse
+                    t0 = wfm_tdc_times[subpulse_number] + relative_shifts[subpulse]
+                    event_offset_output[event_index] = event_time_zero_input[event_index] - t0
+                    event_index += 1
                 elif time_after_pulse_tdc < threshold[1]:
-                    # Event is in subpulse 2
-                    pass
+                    subpulse = 1
                 elif time_after_pulse_tdc < threshold[2]:
-                    # Event is in subpulse 3
-                    pass
+                    subpulse = 2
                 elif time_after_pulse_tdc < threshold[3]:
-                    # Event is in subpulse 4
-                    pass
+                    subpulse = 3
                 elif time_after_pulse_tdc < threshold[4]:
-                    # Event is in subpulse 5
-                    pass
+                    subpulse = 4
                 else:
-                    # Event is in subpulse 6
-                    pass
+                    subpulse = 5
                 # append event to pulse pulse_number
                 event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 event_index += 1
