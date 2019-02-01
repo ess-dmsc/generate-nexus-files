@@ -113,7 +113,11 @@ def _tof_shifts(pscdata, psc_frequency=0.):
 if __name__ == '__main__':
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
-    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000, 70000000], dtype=int)
+    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+
+    def which_subpulse(time_after_source_tdc):
+        subpulse_index = np.searchsorted(threshold, time_after_source_tdc, 'left')
+        return subpulse_index
 
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
@@ -142,35 +146,38 @@ if __name__ == '__main__':
                                                                                                     event_time_zero_input,
                                                                                                     wfm_tdc_times)
 
-        # There are 6 subpulses for each wfm tdc
-        event_index_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
-        event_time_zero_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
-        event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
-        event_index = 0
-        missed_events = 0
+        source_tdc_index = 0
         wfm_tdc_index = 0
-        time_after_pulse_tdc = event_time_zero_input[0] - tdc_times[0]
-        for pulse_number in tqdm(range(len(tdc_times) - 1)):
-            for subpulse in range(6):
-                # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
-                subpulse_number = (pulse_number * 6) + subpulse
-                # Using pulse_number *5 was not robust, seek to next wfm_tdc after current tdc_time instead
-                # Start seeking from the previous wfm_tdc_index, slicing numpy array uses a view, so this is faster
-                wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], tdc_times[pulse_number], 'right')
-                t0 = wfm_tdc_times[wfm_tdc_index] + relative_shifts[subpulse]
-                event_time_zero_output[subpulse_number] = t0
-                # while event time is in the current subpulse
-                while event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and \
-                        time_after_pulse_tdc < threshold[subpulse]:
-                    if t0 > event_time_zero_input[event_index]:
-                        missed_events += 1
-                    event_offset_output[event_index] = event_time_zero_input[event_index] - t0
-                    event_index += 1
-                    time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
-                event_index_output[subpulse_number + 1] = event_index
+        event_offset_output = np.zeros_like(event_time_zero_input)
+        event_index_output = np.array([0], dtype=np.uint64)
+        event_time_zero_output = np.array([], dtype=np.uint64)
+        subpulse_uuid = (0, 0)
+        for event_index, event_wallclock_time in enumerate(tqdm(event_time_zero_input)):
+            # Find relevant source chopper timestamp
+            tdc_index = np.searchsorted(tdc_times[source_tdc_index:], event_wallclock_time, 'right') - 1 + source_tdc_index
+            source_tdc = tdc_times[tdc_index]
 
-        print("Reached event index: " + str(event_index))
-        print("Missed events: " + str(missed_events))
+            # Find relevant WFM chopper timestamp
+            wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], source_tdc, 'right') + wfm_tdc_index
+            wfm_tdc = wfm_tdc_times[wfm_tdc_index]
+
+            # Determine which subpulse I'm in
+            subpulse_index = which_subpulse(event_wallclock_time - source_tdc)
+            t0 = wfm_tdc + relative_shifts[subpulse_index]
+
+            next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
+
+            event_offset_output[event_index] = event_wallclock_time - t0
+
+            if next_subpulse_uuid == subpulse_uuid:
+                # This event is from the same subpulse as the previous one
+                event_index_output[-1] = event_index
+            else:
+                # Append a new subpulse
+                event_index_output = np.concatenate((event_index_output, [event_index]))
+                event_time_zero_output = np.concatenate((event_time_zero_output, [t0]))
+
+            subpulse_uuid = next_subpulse_uuid
 
         fig, (ax) = pl.subplots(1, 1)
         ax.hist(event_offset_output, bins=4 * 288, range=(0, 72000000))
