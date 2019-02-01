@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 from shutil import copyfile
 from matplotlib import pyplot as pl
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
@@ -39,11 +40,11 @@ def convert_id(event_id, id_offset=0):
     return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
 
 
-def write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times):
+def write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output):
     event_id_ds = output_data_group.create_dataset('event_id', data=event_ids,
                                                    compression='gzip',
                                                    compression_opts=1)
-    event_time_zero_ds = output_data_group.create_dataset('event_time_zero', data=tdc_times,
+    event_time_zero_ds = output_data_group.create_dataset('event_time_zero', data=event_time_zero_output,
                                                           compression='gzip',
                                                           compression_opts=1)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
@@ -131,31 +132,26 @@ if __name__ == '__main__':
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
 
-        missed_events = 0
         # There are 6 subpulses for each wfm tdc
         event_index_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
+        event_time_zero_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
-        for pulse_number, _ in enumerate(tdc_times[:-1]):
-            subpulse = 0
-            # while event time is in the current pulse
-            while event_index < len(event_time_zero_input) and \
-                    event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and \
-                    subpulse < 6:
+        for pulse_number in tqdm(range(len(tdc_times) - 1)):
+            wfm_tdc_number = (pulse_number * 5)
+            for subpulse in range(6):
                 # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
-                wfm_tdc_number = (pulse_number * 5)
                 subpulse_number = (pulse_number * 6) + subpulse
                 time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
+                t0 = wfm_tdc_times[wfm_tdc_number] + relative_shifts[subpulse]
+                event_time_zero_output[subpulse_number] = t0
                 # while event time is in the current subpulse
-                while time_after_pulse_tdc < threshold[subpulse]:
-                    t0 = wfm_tdc_times[wfm_tdc_number] + relative_shifts[subpulse]
+                while event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and \
+                        time_after_pulse_tdc < threshold[subpulse]:
                     event_offset_output[event_index] = event_time_zero_input[event_index] - t0
                     event_index += 1
                     time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
-                subpulse += 1
                 event_index_output[subpulse_number + 1] = event_index
-
-        print(missed_events)
 
         fig, (ax) = pl.subplots(1, 1)
         ax.hist(event_offset_output, bins=4*288, range=(0, 72000000))
@@ -163,4 +159,4 @@ if __name__ == '__main__':
             ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
         pl.show()
 
-        write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
+        write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output)
