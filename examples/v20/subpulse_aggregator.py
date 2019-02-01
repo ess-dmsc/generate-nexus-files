@@ -149,11 +149,11 @@ if __name__ == '__main__':
         event_index = 0
         missed_events = 0
         wfm_tdc_index = 0
+        time_after_pulse_tdc = event_time_zero_input[0] - tdc_times[0]
         for pulse_number in tqdm(range(len(tdc_times) - 1)):
             for subpulse in range(6):
                 # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
                 subpulse_number = (pulse_number * 6) + subpulse
-                time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 # Using pulse_number *5 was not robust, seek to next wfm_tdc after current tdc_time instead
                 # Start seeking from the previous wfm_tdc_index, slicing numpy array uses a view, so this is faster
                 wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], tdc_times[pulse_number], 'right')
@@ -169,7 +169,8 @@ if __name__ == '__main__':
                     time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 event_index_output[subpulse_number + 1] = event_index
 
-        print(missed_events)
+        print("Reached event index: " + str(event_index))
+        print("Missed events: " + str(missed_events))
 
         fig, (ax) = pl.subplots(1, 1)
         ax.hist(event_offset_output, bins=4 * 288, range=(0, 72000000))
