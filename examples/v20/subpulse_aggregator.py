@@ -2,7 +2,6 @@ import h5py
 import numpy as np
 import argparse
 from shutil import copyfile
-from matplotlib import pyplot as pl
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -179,7 +178,7 @@ if __name__ == '__main__':
             wfm_2_tdc = wfm_2_tdc_times[wfm_2_tdc_index]
             wfm_tdc_mean = (wfm_tdc + wfm_2_tdc) / 2.
 
-            # Determine which subpulse I'm in
+            # Determine which subpulse the event is in
             subpulse_index = which_subpulse(event_wallclock_time - source_tdc)
             t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
 
@@ -197,10 +196,11 @@ if __name__ == '__main__':
 
             subpulse_uuid = next_subpulse_uuid
 
-        fig, (ax) = pl.subplots(1, 1)
-        ax.hist(event_offset_output, bins=4 * 288, range=(0, 72000000))
-        for value in threshold:
-            ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
-        pl.show()
+        #from matplotlib import pyplot as pl
+        #fig, (ax) = pl.subplots(1, 1)
+        #ax.hist(event_offset_output, bins=1 * 288, range=(0, 72000000))
+        #for value in threshold:
+        #    ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
+        #pl.show()
 
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output)
