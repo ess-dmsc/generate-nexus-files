@@ -182,10 +182,9 @@ if __name__ == '__main__':
             subpulse_index = which_subpulse(event_wallclock_time - source_tdc)
             t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
 
-            next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
-
             event_offset_output[event_index] = event_wallclock_time - t0
 
+            next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
             if next_subpulse_uuid == subpulse_uuid:
                 # This event is from the same subpulse as the previous one
                 event_index_output[-1] = event_index
@@ -196,11 +195,11 @@ if __name__ == '__main__':
 
             subpulse_uuid = next_subpulse_uuid
 
-        #from matplotlib import pyplot as pl
-        #fig, (ax) = pl.subplots(1, 1)
-        #ax.hist(event_offset_output, bins=1 * 288, range=(0, 72000000))
-        #for value in threshold:
-        #    ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
-        #pl.show()
+        # from matplotlib import pyplot as pl
+        # fig, (ax) = pl.subplots(1, 1)
+        # ax.hist(event_offset_output, bins=1 * 288, range=(0, 72000000))
+        # for value in threshold:
+        #     ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
+        # pl.show()
 
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output)
