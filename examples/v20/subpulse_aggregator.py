@@ -20,6 +20,9 @@ parser.add_argument("-c", "--chopper-tdc-path", type=str,
 parser.add_argument("-w", "--wfm-chopper-tdc-path", type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_3/top_dead_centre_unix/time')
+parser.add_argument("-v", "--wfm-2-chopper-tdc-path", type=str,
+                    help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
+                    default='/entry/instrument/chopper_4/top_dead_centre_unix/time')
 args = parser.parse_args()
 
 
@@ -58,7 +61,7 @@ def write_event_data(output_data_group, event_ids, event_index_output, event_off
     event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
-def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_chopper_times):
+def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_chopper_times, wfm_2_chopper_times):
     # Chopper timestamps are our pulse timestamps, we can only aggregate events per pulse
     # for time periods in which we actually have chopper timestamps
     # truncate any other events
@@ -72,10 +75,15 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_cho
                         np.searchsorted(wfm_chopper_times, chopper_times[0], 'left'):np.searchsorted(wfm_chopper_times,
                                                                                                      chopper_times[-1],
                                                                                                      'right')]
+    wfm_2_chopper_times = wfm_2_chopper_times[
+                          np.searchsorted(wfm_2_chopper_times, chopper_times[0], 'left'):np.searchsorted(
+                              wfm_2_chopper_times,
+                              chopper_times[-1],
+                              'right')]
 
     chopper_times = chopper_times[:-2]
 
-    return chopper_times, event_id, event_times, wfm_chopper_times
+    return chopper_times, event_id, event_times, wfm_chopper_times, wfm_2_chopper_times
 
 
 def _wfm_psc_1():
@@ -115,9 +123,11 @@ if __name__ == '__main__':
     # TODO calculate these from beamline geometry
     threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
 
+
     def which_subpulse(time_after_source_tdc):
         subpulse_index = np.searchsorted(threshold, time_after_source_tdc, 'left')
         return subpulse_index
+
 
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
@@ -135,35 +145,43 @@ if __name__ == '__main__':
         tdc_times += args.tdc_pulse_time_difference
 
         wfm_tdc_times = raw_file[args.wfm_chopper_tdc_path][...]
+        wfm_2_tdc_times = raw_file[args.wfm_2_chopper_tdc_path][...]
 
         event_ids = raw_file[args.raw_event_path + '/event_id'][...]
         event_ids = convert_id(event_ids)
 
         event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
 
-        tdc_times, event_ids, event_time_zero_input, wfm_tdc_times = truncate_to_chopper_time_range(tdc_times,
-                                                                                                    event_ids,
-                                                                                                    event_time_zero_input,
-                                                                                                    wfm_tdc_times)
+        tdc_times, event_ids, event_time_zero_input, wfm_tdc_times, wfm_2_tdc_times = \
+            truncate_to_chopper_time_range(tdc_times,
+                                           event_ids,
+                                           event_time_zero_input,
+                                           wfm_tdc_times,
+                                           wfm_2_tdc_times)
 
         source_tdc_index = 0
         wfm_tdc_index = 0
+        wfm_2_tdc_index = 0  # for the second WFM chopper
         event_offset_output = np.zeros_like(event_time_zero_input)
         event_index_output = np.array([0], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
         subpulse_uuid = (0, 0)
         for event_index, event_wallclock_time in enumerate(tqdm(event_time_zero_input)):
             # Find relevant source chopper timestamp
-            tdc_index = np.searchsorted(tdc_times[source_tdc_index:], event_wallclock_time, 'right') - 1 + source_tdc_index
+            tdc_index = np.searchsorted(tdc_times[source_tdc_index:], event_wallclock_time,
+                                        'right') - 1 + source_tdc_index
             source_tdc = tdc_times[tdc_index]
 
-            # Find relevant WFM chopper timestamp
+            # Find relevant WFM chopper timestamps
             wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], source_tdc, 'right') + wfm_tdc_index
             wfm_tdc = wfm_tdc_times[wfm_tdc_index]
+            wfm_2_tdc_index = np.searchsorted(wfm_2_tdc_times[wfm_2_tdc_index:], source_tdc, 'right') + wfm_2_tdc_index
+            wfm_2_tdc = wfm_2_tdc_times[wfm_2_tdc_index]
+            wfm_tdc_mean = (wfm_tdc + wfm_2_tdc) / 2.
 
             # Determine which subpulse I'm in
             subpulse_index = which_subpulse(event_wallclock_time - source_tdc)
-            t0 = wfm_tdc + relative_shifts[subpulse_index]
+            t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
 
             next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
 

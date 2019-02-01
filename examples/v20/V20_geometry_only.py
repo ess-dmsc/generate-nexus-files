@@ -104,8 +104,9 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'description',
                             'The sample')
 
-        # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598 + 21.7])
+        # builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598 + 21.7])
+        # Add a source at the position of the WFM choppers
+        builder.add_source('V20_wfm_chopper_source', 'source', [0.0, 0.0, -50.598 + 28.55])
 
         # TODO Add shutters?
 
