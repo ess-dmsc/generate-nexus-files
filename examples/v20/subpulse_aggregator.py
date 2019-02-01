@@ -105,7 +105,7 @@ def _tof_shifts(pscdata, psc_frequency=0.):
 if __name__ == '__main__':
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
-    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000, 70000000], dtype=int)
 
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
@@ -135,29 +135,20 @@ if __name__ == '__main__':
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
         event_index = 0
         for pulse_number, _ in enumerate(tdc_times[:-1]):
-            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1]:
+            subpulse = 0
+            # while event time is in the current pulse
+            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1] and subpulse<6:
+                # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
+                subpulse_number = (pulse_number * 5) + subpulse
                 time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
-                if time_after_pulse_tdc < threshold[0]:
-                    subpulse = 0
-                    # pulse_number * 5 as there are 5 rotations of wfm choppers for every 1 of the source chopper
-                    subpulse_number = (pulse_number * 5) + subpulse
+                # while event time is in the current subpulse
+                while time_after_pulse_tdc < threshold[subpulse]:
                     t0 = wfm_tdc_times[subpulse_number] + relative_shifts[subpulse]
                     event_offset_output[event_index] = event_time_zero_input[event_index] - t0
                     event_index += 1
-                elif time_after_pulse_tdc < threshold[1]:
-                    subpulse = 1
-                elif time_after_pulse_tdc < threshold[2]:
-                    subpulse = 2
-                elif time_after_pulse_tdc < threshold[3]:
-                    subpulse = 3
-                elif time_after_pulse_tdc < threshold[4]:
-                    subpulse = 4
-                else:
-                    subpulse = 5
-                # append event to pulse pulse_number
-                event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[pulse_number]
-                event_index += 1
-            event_index_output[pulse_number + 1] = event_index
+                    time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
+                subpulse += 1
+                event_index_output[subpulse_number + 1] = event_index
 
         fig, (ax) = pl.subplots(1, 1)
         ax.hist(event_offset_output, bins=4*288, range=(0, 72000000))
