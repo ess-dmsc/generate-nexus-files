@@ -26,7 +26,6 @@ def position_to_index(pos, count):
 
 
 def convert_id(event_id, id_offset=0):
-    # TODO Is the order correct? Is x in the high bits or the low bits?
     x = (event_id[:] >> 16) & 0xffff
     y = event_id[:] & 0xffff
     Nx = 300
@@ -109,6 +108,10 @@ def something():
 
 
 if __name__ == '__main__':
+    # Nasty hardcoded thresholds for subpulses
+    # TODO calculate these from beamline geometry
+    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as raw_file:
         # Create output event group
@@ -132,13 +135,34 @@ if __name__ == '__main__':
         event_index = 0
         for pulse_number, _ in enumerate(tdc_times[:-1]):
             while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[pulse_number + 1]:
+                time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
+                if time_after_pulse_tdc < threshold[0]:
+                    # Event is in subpulse 1
+                    pass
+                elif time_after_pulse_tdc < threshold[1]:
+                    # Event is in subpulse 2
+                    pass
+                elif time_after_pulse_tdc < threshold[2]:
+                    # Event is in subpulse 3
+                    pass
+                elif time_after_pulse_tdc < threshold[3]:
+                    # Event is in subpulse 4
+                    pass
+                elif time_after_pulse_tdc < threshold[4]:
+                    # Event is in subpulse 5
+                    pass
+                else:
+                    # Event is in subpulse 6
+                    pass
                 # append event to pulse pulse_number
                 event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 event_index += 1
             event_index_output[pulse_number + 1] = event_index
 
-        # histo_tof, bins = np.histogram(event_offset_output, bins=72, range=(0, 72000000))
-        pl.hist(event_offset_output, bins=2*288, range=(0, 72000000))
+        fig, (ax) = pl.subplots(1, 1)
+        ax.hist(event_offset_output, bins=4*288, range=(0, 72000000))
+        for value in threshold:
+            ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
         pl.show()
 
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
