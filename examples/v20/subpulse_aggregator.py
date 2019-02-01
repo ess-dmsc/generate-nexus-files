@@ -131,6 +131,7 @@ if __name__ == '__main__':
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
 
+        missed_events = 0
         # There are 6 subpulses for each wfm tdc
         event_index_output = np.zeros(len(tdc_times) * 6, dtype=np.uint64)
         event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
@@ -153,6 +154,8 @@ if __name__ == '__main__':
                     time_after_pulse_tdc = event_time_zero_input[event_index] - tdc_times[pulse_number]
                 subpulse += 1
                 event_index_output[subpulse_number + 1] = event_index
+
+        print(missed_events)
 
         fig, (ax) = pl.subplots(1, 1)
         ax.hist(event_offset_output, bins=4*288, range=(0, 72000000))
