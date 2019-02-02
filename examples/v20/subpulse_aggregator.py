@@ -3,23 +3,28 @@ import numpy as np
 import argparse
 from shutil import copyfile
 from tqdm import tqdm
+from matplotlib import pyplot as pl
+
+# Uncomment for nicer styling on plots
+# import seaborn as sns
+# sns.set()
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
-parser.add_argument("-o", "--output-filename", type=str, help='Output filename.')
-parser.add_argument("-t", "--tdc-pulse-time-difference", type=int,
+parser.add_argument('-i', '--input-filename', type=str, help='Input file to convert.')
+parser.add_argument('-o', '--output-filename', type=str, help='Output filename.')
+parser.add_argument('-t', '--tdc-pulse-time-difference', type=int,
                     help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
                     default=0)
-parser.add_argument("-e", "--raw-event-path", type=str,
+parser.add_argument('-e', '--raw-event-path', type=str,
                     help='Path to the raw event NXevent_data group in the file',
                     default='/entry/instrument/detector_1/raw_event_data')
-parser.add_argument("-c", "--chopper-tdc-path", type=str,
+parser.add_argument('-c', '--chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
-parser.add_argument("-w", "--wfm-chopper-tdc-path", type=str,
+parser.add_argument('-w', '--wfm-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_3/top_dead_centre_unix/time')
-parser.add_argument("-v", "--wfm-2-chopper-tdc-path", type=str,
+parser.add_argument('-v', '--wfm-2-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_4/top_dead_centre_unix/time')
 args = parser.parse_args()
@@ -31,9 +36,9 @@ def position_to_index(pos, count):
     return np.floor_divide(pos, (uint_max // count))
 
 
-def convert_id(event_id, id_offset=0):
-    x = (event_id[:] >> 16) & 0xffff
-    y = event_id[:] & 0xffff
+def convert_id(id, id_offset=0):
+    x = (id[:] >> 16) & 0xffff
+    y = id[:] & 0xffff
     Nx = 300
     Ny = 300
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
@@ -86,7 +91,7 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_cho
 
 
 def _wfm_psc_1():
-    """
+    """"
     Definition V20 for wfm pulse shaping chopper 1 (closest to source)
     :return: Returns the sorted angles of all edges in degrees. First entry is start angle of the first cut-out
     second entry is end angle of first cut-out. Cut-outs are in order from the position that the top-dead-centre (TDC)
@@ -133,7 +138,9 @@ if __name__ == '__main__':
                       5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
     relative_shifts = relative_shifts.astype(np.uint64)
 
+    print('Copying input file contents to output file...')
     copyfile(args.input_filename, args.output_filename)
+    print('...done copying.')
     with h5py.File(args.output_filename, 'r+') as raw_file:
         # Create output event group
         output_data_group = raw_file['/entry'].create_group('event_data')
@@ -161,11 +168,16 @@ if __name__ == '__main__':
         source_tdc_index = 0
         wfm_tdc_index = 0
         wfm_2_tdc_index = 0  # for the second WFM chopper
+        event_index = 0
         event_offset_output = np.zeros_like(event_time_zero_input)
+        event_id_output = np.zeros_like(event_time_zero_input)
+        offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
         event_index_output = np.array([], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
         subpulse_uuid = (0, 0)
-        for event_index, event_wallclock_time in enumerate(tqdm(event_time_zero_input)):
+        print('Aggregating events by subpulse...')
+        for event_input_number, (event_wallclock_time, event_id) in enumerate(
+                tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
             # Find relevant source chopper timestamp
             tdc_index = np.searchsorted(tdc_times[source_tdc_index:], event_wallclock_time,
                                         'right') - 1 + source_tdc_index
@@ -176,13 +188,19 @@ if __name__ == '__main__':
             wfm_tdc = wfm_tdc_times[wfm_tdc_index]
             wfm_2_tdc_index = np.searchsorted(wfm_2_tdc_times[wfm_2_tdc_index:], source_tdc, 'right') + wfm_2_tdc_index
             wfm_2_tdc = wfm_2_tdc_times[wfm_2_tdc_index]
-            wfm_tdc_mean = (wfm_tdc + wfm_2_tdc) / 2.
+            wfm_tdc_mean = np.uint64((wfm_tdc + wfm_2_tdc) // 2)
 
             # Determine which subpulse the event is in
-            subpulse_index = which_subpulse(event_wallclock_time - source_tdc)
+            offset_from_source_chopper_tdc[event_input_number] = event_wallclock_time - source_tdc
+            subpulse_index = which_subpulse(offset_from_source_chopper_tdc[event_input_number])
             t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
 
+            if t0 > event_wallclock_time:
+                # Throw this event away
+                continue
+
             event_offset_output[event_index] = event_wallclock_time - t0
+            event_id_output[event_index] = event_id
 
             next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
             if next_subpulse_uuid == subpulse_uuid:
@@ -194,12 +212,28 @@ if __name__ == '__main__':
                 event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
 
             subpulse_uuid = next_subpulse_uuid
+            event_index += 1
 
-        # from matplotlib import pyplot as pl
-        # fig, (ax) = pl.subplots(1, 1)
-        # ax.hist(event_offset_output, bins=1 * 288, range=(0, 72000000))
-        # for value in threshold:
-        #     ax.axvline(x=value, color='r', linestyle='dashed', linewidth=2)
-        # pl.show()
+        # Truncate space from arrays which wasn't needed due to bad events
+        event_offset_output = event_offset_output[:event_index + 1]
+        event_id_output = event_id_output[:event_index + 1]
 
-        write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output)
+        fig, (ax1, ax2) = pl.subplots(2, 1)
+        ax1.hist(offset_from_source_chopper_tdc, bins=144, range=(0, 72000000))
+        for value in threshold:
+            ax1.axvline(x=value, color='r', linestyle='dashed', linewidth=1)
+        ax1.set_title(
+            'Time offset from source chopper TDC timestamp, vertical lines indicate thresholds for subpulses')
+        ax1.set_xlabel('Time (nanoseconds)')
+        ax1.set_ylabel('Counts')
+        ax2.hist(event_offset_output, bins=144, range=(0, 72000000))
+        ax2.set_title('Time offset from WFM chopper TDC timestamp, adjusted for the window timing for each subpulse')
+        ax2.set_xlabel('Time (nanoseconds)')
+        ax2.set_ylabel('Counts')
+        # Leave a little more whitespace between the plots, so that the labels don't collide
+        pl.subplots_adjust(hspace=0.3)
+
+        write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
+                         event_time_zero_output)
+
+        pl.show()
