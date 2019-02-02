@@ -38,42 +38,42 @@ def position_to_index(pos, count):
     return np.floor_divide(pos, (uint_max // count))
 
 
-def convert_id(id, id_offset=0):
-    x = (id[:] >> 16) & 0xffff
-    y = id[:] & 0xffff
-    Nx = 300
-    Ny = 300
+def convert_id(detector_id, id_offset=0):
+    x = (detector_id[:] >> 16) & 0xffff
+    y = detector_id[:] & 0xffff
+    nx = 300
+    ny = 300
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
     # will simply discard events that do not correspond to IDF).
-    return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
+    return id_offset + position_to_index(x, nx) + nx * position_to_index(y, ny)
 
 
 def write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output):
-    event_id_ds = output_data_group.create_dataset('event_id', data=event_ids,
-                                                   compression='gzip',
-                                                   compression_opts=1)
+    output_data_group.create_dataset('event_id', data=event_ids,
+                                     compression='gzip',
+                                     compression_opts=1)
     event_time_zero_ds = output_data_group.create_dataset('event_time_zero', data=event_time_zero_output,
                                                           compression='gzip',
                                                           compression_opts=1)
     event_time_zero_ds.attrs.create('units', np.array('ns').astype('|S2'))
     event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
-    event_index_ds = output_data_group.create_dataset('event_index', data=event_index_output.astype(np.uint64),
-                                                      compression='gzip',
-                                                      compression_opts=1)
+    output_data_group.create_dataset('event_index', data=event_index_output.astype(np.uint64),
+                                     compression='gzip',
+                                     compression_opts=1)
     event_offset_ds = output_data_group.create_dataset('event_time_offset', data=event_offset_output,
                                                        compression='gzip',
                                                        compression_opts=1)
     event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
-def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_chopper_times, wfm_2_chopper_times):
+def truncate_to_chopper_time_range(chopper_times, event_id_array, event_times, wfm_chopper_times, wfm_2_chopper_times):
     # Chopper timestamps are our pulse timestamps, we can only aggregate events per pulse
     # for time periods in which we actually have chopper timestamps
     # truncate any other events
     start = np.searchsorted(event_times, chopper_times[0], 'left')
     end = np.searchsorted(event_times, chopper_times[-2], 'right')
-    event_id = event_id[start:end]
+    event_id_array = event_id_array[start:end]
     event_times = event_times[start:end]
 
     # We need wfm chopper times up to the following chopper_time
@@ -89,7 +89,7 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times, wfm_cho
 
     chopper_times = chopper_times[:-2]
 
-    return chopper_times, event_id, event_times, wfm_chopper_times, wfm_2_chopper_times
+    return chopper_times, event_id_array, event_times, wfm_chopper_times, wfm_2_chopper_times
 
 
 def _wfm_psc_1():
@@ -124,16 +124,31 @@ def _tof_shifts(pscdata, psc_frequency=0.):
     return tof_shifts
 
 
+def _which_subpulse(time_after_source_tdc):
+    return np.searchsorted(threshold, time_after_source_tdc, 'left')
+
+
+def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows):
+    fig, (ax1, ax2) = pl.subplots(2, 1)
+    ax1.hist(offset_from_source_chopper, bins=144, range=(0, 72000000))
+    for value in threshold:
+        ax1.axvline(x=value, color='r', linestyle='dashed', linewidth=1)
+    ax1.set_title(
+        'Time offset from source chopper TDC timestamp, vertical lines indicate thresholds for subpulses')
+    ax1.set_xlabel('Time (nanoseconds)')
+    ax1.set_ylabel('Counts')
+    ax2.hist(offset_from_wfm_windows, bins=144, range=(0, 72000000))
+    ax2.set_title('Time offset from WFM chopper TDC timestamp, adjusted for the window timing for each subpulse')
+    ax2.set_xlabel('Time (nanoseconds)')
+    ax2.set_ylabel('Counts')
+    # Leave a little more whitespace between the plots, so that the labels don't collide
+    pl.subplots_adjust(hspace=0.3)
+
+
 if __name__ == '__main__':
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
     threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
-
-
-    def which_subpulse(time_after_source_tdc):
-        subpulse_index = np.searchsorted(threshold, time_after_source_tdc, 'left')
-        return subpulse_index
-
 
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
@@ -199,7 +214,7 @@ if __name__ == '__main__':
 
             # Determine which subpulse the event is in
             offset_from_source_chopper_tdc[event_input_number] = event_wallclock_time - source_tdc
-            subpulse_index = which_subpulse(offset_from_source_chopper_tdc[event_input_number])
+            subpulse_index = _which_subpulse(offset_from_source_chopper_tdc[event_input_number])
             t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
 
             if t0 > event_wallclock_time:
@@ -229,20 +244,7 @@ if __name__ == '__main__':
         # Truncate last value as indicate start of a subpulse for which there were no events
         event_index_output = event_index_output[:-1]
 
-        fig, (ax1, ax2) = pl.subplots(2, 1)
-        ax1.hist(offset_from_source_chopper_tdc, bins=144, range=(0, 72000000))
-        for value in threshold:
-            ax1.axvline(x=value, color='r', linestyle='dashed', linewidth=1)
-        ax1.set_title(
-            'Time offset from source chopper TDC timestamp, vertical lines indicate thresholds for subpulses')
-        ax1.set_xlabel('Time (nanoseconds)')
-        ax1.set_ylabel('Counts')
-        ax2.hist(event_offset_output, bins=144, range=(0, 72000000))
-        ax2.set_title('Time offset from WFM chopper TDC timestamp, adjusted for the window timing for each subpulse')
-        ax2.set_xlabel('Time (nanoseconds)')
-        ax2.set_ylabel('Counts')
-        # Leave a little more whitespace between the plots, so that the labels don't collide
-        pl.subplots_adjust(hspace=0.3)
+        plot_histograms(offset_from_source_chopper_tdc, event_offset_output)
 
         write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
                          event_time_zero_output)
