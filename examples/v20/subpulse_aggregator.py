@@ -14,19 +14,19 @@ parser.add_argument('-i', '--input-filename', type=str, help='Input file to conv
 parser.add_argument('-o', '--output-filename', type=str, help='Output filename.')
 parser.add_argument('--in-place', action='store_true',
                     help='Writes output data into the input file instead of creating a new output file')
-parser.add_argument('-t', '--tdc-pulse-time-difference', type=int,
+parser.add_argument('--tdc-pulse-time-difference', type=int,
                     help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
                     default=0)
-parser.add_argument('-e', '--raw-event-path', type=str,
+parser.add_argument('--raw-event-path', type=str,
                     help='Path to the raw event NXevent_data group in the file',
                     default='/entry/instrument/detector_1/raw_event_data')
-parser.add_argument('-c', '--chopper-tdc-path', type=str,
+parser.add_argument('--chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
-parser.add_argument('-w', '--wfm-chopper-tdc-path', type=str,
+parser.add_argument('--wfm-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_3/top_dead_centre_unix/time')
-parser.add_argument('-v', '--wfm-2-chopper-tdc-path', type=str,
+parser.add_argument('--wfm-2-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_4/top_dead_centre_unix/time')
 args = parser.parse_args()
