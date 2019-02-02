@@ -172,7 +172,7 @@ if __name__ == '__main__':
         event_offset_output = np.zeros_like(event_time_zero_input)
         event_id_output = np.zeros_like(event_time_zero_input)
         offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
-        event_index_output = np.array([], dtype=np.uint64)
+        event_index_output = np.array([0], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
         subpulse_uuid = (0, 0)
         print('Aggregating events by subpulse...')
@@ -208,7 +208,8 @@ if __name__ == '__main__':
                 event_index_output[-1] = event_index
             else:
                 # Append a new subpulse
-                event_index_output = np.concatenate((event_index_output, [event_index]))
+                # + 1 to event_index as it indicates the start of the next pulse, not end of current one
+                event_index_output = np.concatenate((event_index_output, [event_index + 1]))
                 event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
 
             subpulse_uuid = next_subpulse_uuid
@@ -217,6 +218,9 @@ if __name__ == '__main__':
         # Truncate space from arrays which wasn't needed due to bad events
         event_offset_output = event_offset_output[:event_index + 1]
         event_id_output = event_id_output[:event_index + 1]
+
+        # Truncate last value as indicate start of a subpulse for which there were no events
+        event_index_output = event_index_output[:-1]
 
         fig, (ax1, ax2) = pl.subplots(2, 1)
         ax1.hist(offset_from_source_chopper_tdc, bins=144, range=(0, 72000000))
