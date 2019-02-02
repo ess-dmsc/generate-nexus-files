@@ -10,8 +10,10 @@ from matplotlib import pyplot as pl
 # sns.set()
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-i', '--input-filename', type=str, help='Input file to convert.')
+parser.add_argument('-i', '--input-filename', type=str, help='Input file to convert.', required=True)
 parser.add_argument('-o', '--output-filename', type=str, help='Output filename.')
+parser.add_argument('--in-place', action='store_true',
+                    help='Writes output data into the input file instead of creating a new output file')
 parser.add_argument('-t', '--tdc-pulse-time-difference', type=int,
                     help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
                     default=0)
@@ -138,10 +140,15 @@ if __name__ == '__main__':
                       5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
     relative_shifts = relative_shifts.astype(np.uint64)
 
-    print('Copying input file contents to output file...')
-    copyfile(args.input_filename, args.output_filename)
-    print('...done copying.')
-    with h5py.File(args.output_filename, 'r+') as raw_file:
+    if not args.in_place:
+        print('Copying input file contents to output file...')
+        copyfile(args.input_filename, args.output_filename)
+        print('...done copying.')
+        output_file = args.output_filename
+    else:
+        output_file = args.input_filename
+
+    with h5py.File(output_file, 'r+') as raw_file:
         # Create output event group
         output_data_group = raw_file['/entry'].create_group('event_data')
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
