@@ -238,8 +238,8 @@ if __name__ == '__main__':
             event_index += 1
 
         # Truncate space from arrays which wasn't needed due to bad events
-        event_offset_output = event_offset_output[:event_index + 1]
-        event_id_output = event_id_output[:event_index + 1]
+        event_offset_output = event_offset_output[:event_index]
+        event_id_output = event_id_output[:event_index]
 
         # Truncate last value as indicate start of a subpulse for which there were no events
         event_index_output = event_index_output[:-1]
