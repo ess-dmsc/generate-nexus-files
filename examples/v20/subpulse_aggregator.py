@@ -63,7 +63,7 @@ def write_event_data(output_data_group, event_ids, event_index_output, event_off
                                      compression_opts=1)
     event_offset_ds = output_data_group.create_dataset('event_time_offset', data=event_offset_output,
                                                        compression='gzip',
-                                                       compression_opts=1)
+                                                       compression_opts=1, dtype=np.uint32)
     event_offset_ds.attrs.create('units', np.array('ns').astype('|S2'))
 
 
@@ -169,8 +169,8 @@ if __name__ == '__main__':
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
         # Shift the TDC times
-        tdc_times = raw_file[args.chopper_tdc_path][...]
-        tdc_times += args.tdc_pulse_time_difference
+        source_tdc_times = raw_file[args.chopper_tdc_path][...]
+        source_tdc_times += args.tdc_pulse_time_difference
 
         wfm_tdc_times = raw_file[args.wfm_chopper_tdc_path][...]
         wfm_2_tdc_times = raw_file[args.wfm_2_chopper_tdc_path][...]
@@ -180,8 +180,8 @@ if __name__ == '__main__':
 
         event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
 
-        tdc_times, event_ids, event_time_zero_input, wfm_tdc_times, wfm_2_tdc_times = \
-            truncate_to_chopper_time_range(tdc_times,
+        source_tdc_times, event_ids, event_time_zero_input, wfm_tdc_times, wfm_2_tdc_times = \
+            truncate_to_chopper_time_range(source_tdc_times,
                                            event_ids,
                                            event_time_zero_input,
                                            wfm_tdc_times,
@@ -191,8 +191,8 @@ if __name__ == '__main__':
         wfm_tdc_index = 0
         wfm_2_tdc_index = 0  # for the second WFM chopper
         event_index = 0
-        event_offset_output = np.zeros_like(event_time_zero_input)
-        event_id_output = np.zeros_like(event_time_zero_input)
+        event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
+        event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
         offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
         event_index_output = np.array([0], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
@@ -201,9 +201,9 @@ if __name__ == '__main__':
         for event_input_number, (event_wallclock_time, event_id) in enumerate(
                 tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
             # Find relevant source chopper timestamp
-            tdc_index = np.searchsorted(tdc_times[source_tdc_index:], event_wallclock_time,
+            tdc_index = np.searchsorted(source_tdc_times[source_tdc_index:], event_wallclock_time,
                                         'right') - 1 + source_tdc_index
-            source_tdc = tdc_times[tdc_index]
+            source_tdc = source_tdc_times[tdc_index]
 
             # Find relevant WFM chopper timestamps
             wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], source_tdc, 'right') + wfm_tdc_index
