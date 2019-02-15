@@ -251,9 +251,6 @@ if __name__ == '__main__':
 
             subpulse_uuid = next_subpulse_uuid
             event_index += 1
-            # TODO temp, break now
-            if event_index == 200000:
-                break
 
         # Truncate space from arrays which wasn't needed due to bad events
         event_offset_output = event_offset_output[:event_index]
