@@ -20,6 +20,9 @@ parser.add_argument('--tdc-pulse-time-difference', type=int,
 parser.add_argument('--raw-event-path', type=str,
                     help='Path to the raw event NXevent_data group in the file',
                     default='/entry/instrument/detector_1/raw_event_data')
+parser.add_argument('--output-event-path', type=str,
+                    help='Path to the group where the output should be written',
+                    default='/entry/event_data')
 parser.add_argument('--chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
@@ -130,14 +133,14 @@ def _which_subpulse(time_after_source_tdc):
 
 def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows):
     fig, (ax1, ax2) = pl.subplots(2, 1)
-    ax1.hist(offset_from_source_chopper, bins=144, range=(0, 72000000))
+    ax1.hist(offset_from_source_chopper, bins=2 * 144, range=(0, 72000000))
     for value in threshold:
         ax1.axvline(x=value, color='r', linestyle='dashed', linewidth=1)
     ax1.set_title(
         'Time offset from source chopper TDC timestamp, vertical lines indicate thresholds for subpulses')
     ax1.set_xlabel('Time (nanoseconds)')
     ax1.set_ylabel('Counts')
-    ax2.hist(offset_from_wfm_windows, bins=144, range=(0, 72000000))
+    ax2.hist(offset_from_wfm_windows, bins=2 * 144, range=(0, 72000000))
     ax2.set_title('Time offset from WFM chopper TDC timestamp, adjusted for the window timing for each subpulse')
     ax2.set_xlabel('Time (nanoseconds)')
     ax2.set_ylabel('Counts')
@@ -148,7 +151,14 @@ def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows):
 if __name__ == '__main__':
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
-    threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+    component_name = args.raw_event_path.split('/')[-2]
+    if component_name == "monitor_1":
+        threshold = np.array([21300000, 31400000, 40500000, 48600000, 56600000], dtype=int)
+    elif component_name == "monitor_2":
+        threshold = np.array([20600000, 30600000, 39400000, 47600000, 55600000], dtype=int)
+    else:
+        threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+    low_cutoff = 10000000
 
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
@@ -165,7 +175,8 @@ if __name__ == '__main__':
 
     with h5py.File(output_file, 'r+') as raw_file:
         # Create output event group
-        output_data_group = raw_file['/entry'].create_group('event_data')
+        # output_data_group = raw_file['/entry'].create_group('event_data')
+        output_data_group = raw_file.create_group(args.output_event_path)
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
         # Shift the TDC times
@@ -197,9 +208,13 @@ if __name__ == '__main__':
         event_index_output = np.array([0], dtype=np.uint64)
         event_time_zero_output = np.array([], dtype=np.uint64)
         subpulse_uuid = (0, 0)
+        zero_time_events = 0
         print('Aggregating events by subpulse...')
         for event_input_number, (event_wallclock_time, event_id) in enumerate(
                 tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
+            if event_wallclock_time == 0:
+                zero_time_events += 1
+                continue
             # Find relevant source chopper timestamp
             tdc_index = np.searchsorted(source_tdc_times[source_tdc_index:], event_wallclock_time,
                                         'right') - 1 + source_tdc_index
@@ -236,10 +251,14 @@ if __name__ == '__main__':
 
             subpulse_uuid = next_subpulse_uuid
             event_index += 1
+            # TODO temp, break now
+            if event_index == 200000:
+                break
 
         # Truncate space from arrays which wasn't needed due to bad events
         event_offset_output = event_offset_output[:event_index]
         event_id_output = event_id_output[:event_index]
+        offset_from_source_chopper_tdc = offset_from_source_chopper_tdc[:event_index]
 
         # Truncate last value as indicate start of a subpulse for which there were no events
         event_index_output = event_index_output[:-1]
@@ -248,5 +267,9 @@ if __name__ == '__main__':
 
         write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
                          event_time_zero_output)
+
+        print(
+            'WARNING, encountered {} event_time_zero entries with a value of 0, these were omitted from the output'.format(
+                zero_time_events))
 
         pl.show()
