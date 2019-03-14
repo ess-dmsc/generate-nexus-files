@@ -227,10 +227,12 @@ def __create_file_writer_command(filepath):
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
     tree = converter.convert(nexus_file, streams, links)
-    # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
+    # The Kafka broker at V20 is v20-udder1, but due to the network setup at V20 we have to use the IP: 192.168.1.80
     iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
+    timestamp = iso8601_str_seconds.replace(':', '_')
+    timestamp = timestamp.replace('-', '_')
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_ESSIntegration_' + iso8601_str_seconds + '.nxs',
+                                                         '/data/kafka-to-nexus/V20_' + timestamp + '.nxs',
                                                          broker='192.168.1.80:9092')
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
