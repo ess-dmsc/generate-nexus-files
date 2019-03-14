@@ -153,33 +153,6 @@ def __add_detector(builder):
     # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
-def __add_users(builder):
-    user_names = ['Tobias Richter', 'Jonas Nilsson', 'Nicklas Holmberg', 'Irina Stefanescu', 'Gregor Nowak',
-                  'Neil Vaytet', 'Torben Nielsen', 'Andrew Jackson', 'Vendula Maulerova']
-    roles = ['Project Owner', 'Detector and Monitor DAQ', 'Timing system', 'DG contact', 'BEER detector team',
-             'Mantid Reduction, WFM treatment', 'Mantid/McStas', 'Observer', 'Monitor tests']
-    __add_user_group(builder, user_names, roles, 'ESS')
-
-    user_names = ['Peter Kadletz', 'Robin Woracek']
-    roles = ['Beamline Responsible', 'Beamline Responsible']
-    __add_user_group(builder, user_names, roles, 'HZB')
-
-    user_names = ['Michael Hart', 'Matthew Jones', 'Owen Arnold', 'Will Smith']
-    roles = ['V20 NICOS', 'Streaming', 'Mantid', 'Set-up of timing system']
-    __add_user_group(builder, user_names, roles, 'STFC')
-
-
-def __add_user_group(builder, user_names, roles, institution):
-    users = builder.add_nx_group(builder.get_root(), institution + '_users', 'NXuser')
-    user_names_ascii = [n.encode('ascii', 'ignore') for n in user_names]
-    roles_ascii = [n.encode('ascii', 'ignore') for n in roles]
-    users.create_dataset('name', (len(user_names_ascii),), '|S' + str(len(max(user_names_ascii, key=len))),
-                         user_names_ascii)
-    users.create_dataset('role', (len(roles_ascii),), '|S' + str(len(max(roles_ascii, key=len))),
-                         roles_ascii)
-    builder.add_dataset(users, 'affiliation', institution)
-
-
 def __add_monitors(builder):
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
@@ -253,7 +226,6 @@ def __create_file_writer_command(filepath):
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
-    # streams = {}  # TODO temp
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but probably need to use the IP: 192.168.1.80
     iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
@@ -291,7 +263,7 @@ if __name__ == '__main__':
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
-        __add_users(builder)
+        builder.add_user('Many people', 'ESS, HZB, STFC', number=1)
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
