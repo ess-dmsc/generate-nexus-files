@@ -26,7 +26,7 @@ def __copy_and_transform_dataset(source_file, source_path, target_path, transfor
     return target_dataset
 
 
-def __copy_existing_data():
+def __copy_existing_data(downscale_detecter=False):
     """
     Copy data from the existing NeXus file
     """
@@ -50,14 +50,17 @@ def __copy_existing_data():
     event_time_zero_ds.attrs.create('offset', np.array('1970-01-01T00:00:00').astype('|S19'))
 
     def downscale_detector_resolution(ids):
-        return ids
-        # original_res = (2 ** 16) ** 2
-        # target_res = 150 ** 2
-        # scale_factor = target_res / original_res
-        # return (ids * scale_factor).astype(np.uint32)
+        original_res = (2 ** 16) ** 2
+        target_res = 150 ** 2
+        scale_factor = target_res / original_res
+        return (ids * scale_factor).astype(np.uint32)
 
-    __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
-                                 raw_event_path + 'event_id', downscale_detector_resolution)
+    if downscale_detecter:
+        __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
+                                     raw_event_path + 'event_id', downscale_detector_resolution)
+    else:
+        __copy_and_transform_dataset(builder.source_file, 'entry-01/Delayline_events/event_id',
+                                     raw_event_path + 'event_id')
 
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
@@ -177,7 +180,7 @@ def __create_file_writer_command(filepath):
 
     for channel_number in range(4):
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number) +
-                          '_waveform',  # different source name due to DM-1a129 (JIRA)
+                          '_waveform',  # different source name due to DM-1129 (JIRA)
                           '/entry/instrument/detector_1/waveform_data_' + str(channel_number), 'senv')
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number),
                           '/entry/instrument/detector_1/pulse_events_' + str(channel_number), 'ev42')
@@ -185,7 +188,7 @@ def __create_file_writer_command(filepath):
     # Monitors
     for channel_number in range(1, 3):
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
-                          '_waveform',  # different source name due to DM-1a129 (JIRA)
+                          '_waveform',  # different source name due to DM-1129 (JIRA)
                           '/entry/monitor_' + str(channel_number) + '/waveform_data',
                           'senv')
         __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
@@ -195,7 +198,7 @@ def __create_file_writer_command(filepath):
     for chopper_number in range(1, 9):
         suffix = '_A' if chopper_number in airbus_choppers else '_J'  # labels if Airbus or Julich chopper
         __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',
+                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',  # TODO use senv module
                           'double')
         if chopper_number in julich_choppers:
             julich_chopper_number = julich_choppers.index(chopper_number) + 1
@@ -228,6 +231,7 @@ def __create_file_writer_command(filepath):
     nexus_file = nexus.nxload(filepath)
     tree = converter.convert(nexus_file, streams, links)
     # The Kafka broker at V20 is v20-udder1, but due to the network setup at V20 we have to use the IP: 192.168.1.80
+    # Use a timestamp in the output filename, but avoid characters "-" and ":"
     iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
     timestamp = iso8601_str_seconds.replace(':', '_')
     timestamp = timestamp.replace('-', '_')
@@ -271,7 +275,9 @@ if __name__ == '__main__':
         __add_monitors(builder)
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description',
-                            'Silicon in can')
+                            'hBN target with 1.0 mm diameter hole')
+        #builder.add_dataset(sample_group, 'description',
+        #                    'hBN target with 0.2 mm diameter hole')
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
