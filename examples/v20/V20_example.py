@@ -80,35 +80,27 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
 
 def __add_chopper(builder, number):
     chopper_group = builder.add_nx_group(instrument_group, 'chopper_' + str(number), 'NXdisk_chopper')
-    if number in julich_choppers:
-        builder.add_dataset(chopper_group, 'speed', [0])
-        builder.add_dataset(chopper_group, 'speed_setpoint', [0])
-        builder.add_dataset(chopper_group, 'phase', [0])
-        builder.add_dataset(chopper_group, 'phase_setpoint', [0])
-        builder.add_dataset(chopper_group, 'factor', [0])
 
-    unix_log = builder.add_nx_group(chopper_group, 'top_dead_centre_unix', 'NXlog')
-    return unix_log
+    builder.add_dataset(chopper_group, 'speed', [0])
+    builder.add_dataset(chopper_group, 'speed_setpoint', [0])
+    builder.add_dataset(chopper_group, 'phase', [0])
+    builder.add_dataset(chopper_group, 'phase_setpoint', [0])
+    builder.add_dataset(chopper_group, 'factor', [0])
+
+    tdc_log = builder.add_nx_group(chopper_group, 'top_dead_center', 'NXlog')
 
 
 def __add_choppers(builder):
-    unix_log = __add_chopper(builder, 1)
-    for chopper_number in range(2, 9):
+    for chopper_number in range(1, 9):
         __add_chopper(builder, chopper_number)
-
-    def shift_time(timestamps):
-        first_timestamp = 1542008231816585559
-        new_start_time = 1543584772000000000
-        return timestamps - first_timestamp + new_start_time
-
-    with h5py.File('chopper_tdc_file.hdf', 'r') as chopper_file:
-        __copy_and_transform_dataset(chopper_file, 'entry-01/ca_unix_double/time', unix_log.name + '/time', shift_time)
-        builder._NexusBuilder__copy_dataset(chopper_file['entry-01/ca_unix_double/value'], unix_log.name + '/value')
-        unix_log['time'].attrs.create('units', 'ns', dtype='|S2')
 
 
 def __add_detector(builder):
-    # Add description of V20's DENEX (delay line) detector
+    """
+    Description of V20's DENEX (delay line) detector
+    :param builder:
+    :return:
+    """
 
     pixels_per_axis = 300  # 65535 (requires int64)
     pixel_size = 0.002
@@ -148,79 +140,96 @@ def __add_detector(builder):
                                           depends_on=z_offset.name)
     builder.add_dataset(detector_group, 'depends_on', x_offset.name)
 
+    # Placeholders for streamed data
     for channel_number in range(4):
-        builder.add_nx_group(detector_group, 'waveform_data_' + str(channel_number), 'NXlog')
-        builder.add_nx_group(detector_group, 'pulse_events_' + str(channel_number), 'NXlog')
-    builder.add_nx_group(builder.get_root(), 'timing_system_waveform_data', 'NXlog')
-
-    # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
+        builder.add_nx_group(detector_group, f'waveforms_channel_{channel_number}', 'NXlog')
+        builder.add_nx_group(detector_group, f'pulses_channel_{channel_number}', 'NXlog')
+    builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
 def __add_monitors(builder):
+    """
+    Helium-3 monitor
+    :param builder:
+    :return:
+    """
+    distance_from_sample = -3.298
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
-    builder.add_nx_group(monitor_group_1, 'raw_event_data', 'NXevent_data')
-    builder.add_nx_group(monitor_group_1, 'waveform_data', 'NXlog')
-    builder.add_nx_group(monitor_group_1, 'pulse_events', 'NXlog')
+    builder.add_nx_group(monitor_group_1, 'events', 'NXevent_data')
+    builder.add_nx_group(monitor_group_1, 'waveforms', 'NXlog')
     builder.add_dataset(monitor_group_1, 'detector_id', 90000)
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
-    monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [-3.298], 'm', [0.0, 0.0, 1.0])
+    monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
+                                                    [0.0, 0.0, 1.0])
     builder.add_dataset(monitor_group_1, 'depends_on', monitor_1_z_offset.name)
-    monitor_group_2 = builder.add_nx_group(builder.get_root(), 'monitor_2', 'NXmonitor')
-    builder.add_nx_group(monitor_group_2, 'raw_event_data', 'NXevent_data')
-    builder.add_nx_group(monitor_group_2, 'waveform_data', 'NXlog')
-    builder.add_nx_group(monitor_group_2, 'pulse_events', 'NXlog')
-    builder.add_dataset(monitor_group_2, 'detector_id', 90001)
+    builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
+
+
+def __add_readout_system(builder):
+    for readout_system_number in ('1', '2'):
+        group_name = f'readout_system_{readout_system_number}'
+        readout_group = builder.get_root().create_group(group_name)
+        builder.add_nx_group(readout_group, 's_diff', 'NXlog')
+        builder.add_nx_group(readout_group, 'n_diff', 'NXlog')
+        builder.add_nx_group(readout_group, 'status', 'NXlog')
 
 
 def __create_file_writer_command(filepath):
     streams = {}
-    # DENEX detector
-    __add_data_stream(streams, 'denex', 'delay_line_detector',
-                      '/entry/instrument/detector_1/raw_event_data', 'ev42')
 
-    for channel_number in range(4):
-        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number) +
-                          '_waveform',  # different source name due to DM-1129 (JIRA)
-                          '/entry/instrument/detector_1/waveform_data_' + str(channel_number), 'senv')
-        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc0_Ch' + str(channel_number),
-                          '/entry/instrument/detector_1/pulse_events_' + str(channel_number), 'ev42')
+    # DENEX detector
+    detector_topic = 'denex_detector'
+    __add_data_stream(streams, detector_topic, 'delay_line_detector',
+                      '/entry/instrument/detector_1/raw_event_data', 'ev42')
+    detector_debug_topic = 'denex_debug'
+    for detector_channel in range(4):
+        __add_data_stream(streams, detector_debug_topic, f'Denex_Adc0_Ch{detector_channel}',
+                          f'/entry/instrument/detector_1/pulses_channel_{detector_channel}', 'ev42')
+        __add_data_stream(streams, detector_debug_topic, f'Denex_Adc0_Ch{detector_channel}_waveform',
+                          f'/entry/instrument/detector_1/waveforms_channel_{detector_channel}', 'senv')
+
+    # TODO Detector HV supply
 
     # Monitors
-    for channel_number in range(1, 3):
-        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number) +
-                          '_waveform',  # different source name due to DM-1129 (JIRA)
-                          '/entry/monitor_' + str(channel_number) + '/waveform_data',
-                          'senv')
-        __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch' + str(channel_number),
-                          '/entry/monitor_' + str(channel_number) + '/pulse_events',
-                          'ev42')
+    monitor_topic = 'monitor'
+    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
+                      '/entry/monitor_1/events', 'ev42')
+    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
+                      '/entry/monitor_1/waveforms', 'senv')
 
-    for chopper_number in range(1, 9):
-        suffix = '_A' if chopper_number in airbus_choppers else '_J'  # labels if Airbus or Julich chopper
-        __add_data_stream(streams, 'V20_choppers', 'chopper_' + str(chopper_number) + suffix,
-                          '/entry/instrument/chopper_' + str(chopper_number) + '/top_dead_centre_unix', 'f142',  # TODO use senv module
-                          'double')
-        if chopper_number in julich_choppers:
-            julich_chopper_number = julich_choppers.index(chopper_number) + 1
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Speed',
-                              '/entry/instrument/chopper_' + str(chopper_number) + '/speed', 'f142',
-                              'double')
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Speed-SP',
-                              '/entry/instrument/chopper_' + str(chopper_number) + '/speed_setpoint', 'f142',
-                              'double')
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Phase',
-                              '/entry/instrument/chopper_' + str(chopper_number) + '/phase', 'f142',
-                              'double')
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Phase-SP',
-                              '/entry/instrument/chopper_' + str(chopper_number) + '/phase_setpoint', 'f142',
-                              'double')
-            __add_data_stream(streams, 'V20_choppers', 'V20:C0' + str(julich_chopper_number) + ':Factor',
-                              '/entry/instrument/chopper_' + str(chopper_number) + '/factor', 'f142',
-                              'int64')
+    # Choppers
+    chopper_topic = 'V20_choppers'
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0401:TDC_array',
+                      '/entry/instrument/chopper_1/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0402:TDC_array',
+                      '/entry/instrument/chopper_2/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0101:TDC_array',
+                      '/entry/instrument/chopper_3/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0102:TDC_array',
+                      '/entry/instrument/chopper_4/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0301:TDC_array',
+                      '/entry/instrument/chopper_5/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0501:TDC_array',
+                      '/entry/instrument/chopper_6/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0502:TDC_array',
+                      '/entry/instrument/chopper_7/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0302:TDC_array',
+                      '/entry/instrument/chopper_8/top_dead_center', 'senv')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0101:Ref_Unix_asub.VALF',
+                      '/entry/instrument/chopper_3/ntp_to_mrf_comparison', 'f142', 'int32')
 
-    # Timing system
-    __add_data_stream(streams, 'V20_rawEvents', 'denex_Adc1_Ch0_waveform',
-                      '/entry/timing_system_waveform_data', 'senv')
+    # Readout system timing status
+    timing_status_topic = 'V20_timingStatus'
+    for readout_system_number in ('1', '2'):
+        group_name = f'readout_system_{readout_system_number}'
+        __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:TS-SDiff-RBV',
+                          f'/entry/{group_name}/s_diff', 'f142', 'double')
+        __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:TS-NDiff-RBV',
+                          f'/entry/{group_name}/n_diff', 'f142', 'double')
+        __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:STATUS2-RBV',
+                          f'/entry/{group_name}/status', 'f142', 'int32')
+
+    # TODO Linear stages
 
     # event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
@@ -262,7 +271,7 @@ def __add_sample_env_device(group_name, name, description=None):
 
 
 if __name__ == '__main__':
-    output_filename = 'V20_example_10.nxs'
+    output_filename = 'V20_example_11.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
