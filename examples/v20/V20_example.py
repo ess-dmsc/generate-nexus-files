@@ -188,7 +188,18 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, detector_debug_topic, f'Denex_Adc0_Ch{detector_channel}_waveform',
                           f'/entry/instrument/detector_1/waveforms_channel_{detector_channel}', 'senv')
 
-    # TODO Detector HV supply
+    # Detector HV supply
+    hv_supply_topic = 'V20_detectorPower'
+    for hv_power_supply_channel in range(4):
+        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:VMon',
+                          f'/entry/instrument/detector_1/hv_supply_voltage_channel_{hv_power_supply_channel + 1}',
+                          'f142')
+        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:IMon',
+                          f'/entry/instrument/detector_1/hv_supply_current_channel_{hv_power_supply_channel + 1}',
+                          'f142')
+        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:Pw',
+                          f'/entry/instrument/detector_1/hv_supply_status_channel_{hv_power_supply_channel + 1}',
+                          'f142')
 
     # Monitors
     monitor_topic = 'monitor'
@@ -229,7 +240,16 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:STATUS2-RBV',
                           f'/entry/{group_name}/status', 'f142', 'int32')
 
-    # TODO Linear stages
+    # Linear stages
+    linear_motion_topic = 'V20_linearStages'
+    for axis in ('1', '2'):
+        group_name = f'linear_axis_{axis}'
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.VAL',
+                          f'/entry/{group_name}/set_value', 'f142', 'double')
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.RBV',
+                          f'/entry/{group_name}/position', 'f142', 'double')
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.STAT',
+                          f'/entry/{group_name}/status', 'f142', 'int32')
 
     # event_data_link = {'name': 'raw_event_data',
     #                   'target': '/entry/instrument/detector_1/raw_event_data'}
