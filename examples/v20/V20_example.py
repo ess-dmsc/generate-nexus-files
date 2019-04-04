@@ -187,7 +187,7 @@ def __add_linear_stage(buidler):
         builder.add_nx_group(group, 'target_value', 'NXlog')
         builder.add_nx_group(group, 'value', 'NXlog')
         builder.add_nx_group(group, 'status', 'NXlog')
-        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m1{axis}.VAL')
+        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{axis}.VAL')
         builder.add_dataset(group, 'name', f'Linear Axis {axis}')
 
 
@@ -261,11 +261,11 @@ def __create_file_writer_command(filepath):
     linear_motion_topic = 'V20_linearStages'
     for axis in ('1', '2'):
         group_name = f'linear_axis_{axis}'
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.VAL',
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.VAL',
                           f'/entry/{group_name}/target_value', 'f142', 'double')
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.RBV',
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.RBV',
                           f'/entry/{group_name}/value', 'f142', 'double')
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.STAT',
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.STAT',
                           f'/entry/{group_name}/status', 'f142', 'int32')
 
     # event_data_link = {'name': 'raw_event_data',
