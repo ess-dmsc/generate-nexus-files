@@ -150,6 +150,8 @@ def __add_detector(builder):
         builder.add_nx_group(detector_group, f'hv_supply_current_channel_{hv_power_supply_channel + 1}', 'NXlog')
         builder.add_nx_group(detector_group, f'hv_supply_status_channel_{hv_power_supply_channel + 1}', 'NXlog')
 
+    __add_readout_system(builder, detector_group)
+
     builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
@@ -171,21 +173,22 @@ def __add_monitors(builder):
     builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
 
 
-def __add_readout_system(builder):
+def __add_readout_system(builder, parent_group):
     for readout_system_number in ('1', '2'):
         group_name = f'readout_system_{readout_system_number}'
-        readout_group = builder.get_root().create_group(group_name)
+        readout_group = parent_group.create_group(group_name)
         builder.add_nx_group(readout_group, 's_diff', 'NXlog')
         builder.add_nx_group(readout_group, 'n_diff', 'NXlog')
         builder.add_nx_group(readout_group, 'status', 'NXlog')
 
 
-def __add_linear_stage(buidler):
+def __add_linear_stage(builder):
     for axis in ('1', '2'):
         group_name = f'linear_axis_{axis}'
         group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
         builder.add_nx_group(group, 'target_value', 'NXlog')
-        builder.add_nx_group(group, 'value', 'NXlog')
+        value = builder.add_nx_group(group, 'value', 'NXlog')
+        value.attrs.create('units', np.array('mm').astype('|S2'))
         builder.add_nx_group(group, 'status', 'NXlog')
         builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{axis}.VAL')
         builder.add_dataset(group, 'name', f'Linear Axis {axis}')
@@ -321,14 +324,13 @@ if __name__ == '__main__':
         __add_choppers(builder)
         __add_monitors(builder)
         __add_linear_stage(builder)
-        __add_readout_system(builder)
 
         # Sample
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description',
                             'hBN target with 1.0 mm diameter hole')
-        #builder.add_dataset(sample_group, 'description',
-        #                    'hBN target with 0.2 mm diameter hole')
+        # builder.add_dataset(sample_group, 'description',
+        #                     'hBN target with 0.2 mm diameter hole')
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
@@ -341,7 +343,6 @@ if __name__ == '__main__':
         __copy_existing_data()
 
         # TODO Add guides, shutters, any other known components
-        #   Add more details on the sample
 
         # Notes on geometry:
 
