@@ -180,6 +180,17 @@ def __add_readout_system(builder):
         builder.add_nx_group(readout_group, 'status', 'NXlog')
 
 
+def __add_linear_stage(buidler):
+    for axis in ('1', '2'):
+        group_name = f'linear_axis_{axis}'
+        group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
+        builder.add_nx_group(group, 'target_value', 'NXlog')
+        builder.add_nx_group(group, 'value', 'NXlog')
+        builder.add_nx_group(group, 'status', 'NXlog')
+        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m1{axis}.VAL')
+        builder.add_dataset(group, 'name', f'Linear Axis {axis}')
+
+
 def __create_file_writer_command(filepath):
     streams = {}
 
@@ -320,7 +331,7 @@ if __name__ == '__main__':
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
-        builder.add_dataset(builder.get_root(), 'start_time', iso8601_str_seconds)
+        builder.add_dataset(builder.get_root(), 'start_time', '8601TIME')  # NICOS will replace 8601TIME
 
         # Copy event data into detector
         __copy_existing_data()
