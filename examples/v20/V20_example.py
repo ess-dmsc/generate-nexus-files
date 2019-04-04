@@ -144,6 +144,12 @@ def __add_detector(builder):
     for channel_number in range(4):
         builder.add_nx_group(detector_group, f'waveforms_channel_{channel_number}', 'NXlog')
         builder.add_nx_group(detector_group, f'pulses_channel_{channel_number}', 'NXlog')
+
+    for hv_power_supply_channel in range(4):
+        builder.add_nx_group(detector_group, f'hv_supply_voltage_channel_{hv_power_supply_channel + 1}', 'NXlog')
+        builder.add_nx_group(detector_group, f'hv_supply_current_channel_{hv_power_supply_channel + 1}', 'NXlog')
+        builder.add_nx_group(detector_group, f'hv_supply_status_channel_{hv_power_supply_channel + 1}', 'NXlog')
+
     builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
@@ -193,13 +199,13 @@ def __create_file_writer_command(filepath):
     for hv_power_supply_channel in range(4):
         __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:VMon',
                           f'/entry/instrument/detector_1/hv_supply_voltage_channel_{hv_power_supply_channel + 1}',
-                          'f142')
+                          'f142', 'double')
         __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:IMon',
                           f'/entry/instrument/detector_1/hv_supply_current_channel_{hv_power_supply_channel + 1}',
-                          'f142')
+                          'f142', 'double')
         __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:Pw',
                           f'/entry/instrument/detector_1/hv_supply_status_channel_{hv_power_supply_channel + 1}',
-                          'f142')
+                          'f142', 'int32')
 
     # Monitors
     monitor_topic = 'monitor'
@@ -245,9 +251,9 @@ def __create_file_writer_command(filepath):
     for axis in ('1', '2'):
         group_name = f'linear_axis_{axis}'
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.VAL',
-                          f'/entry/{group_name}/set_value', 'f142', 'double')
+                          f'/entry/{group_name}/target_value', 'f142', 'double')
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.RBV',
-                          f'/entry/{group_name}/position', 'f142', 'double')
+                          f'/entry/{group_name}/value', 'f142', 'double')
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1{axis}.STAT',
                           f'/entry/{group_name}/status', 'f142', 'int32')
 
@@ -265,8 +271,9 @@ def __create_file_writer_command(filepath):
     timestamp = iso8601_str_seconds.replace(':', '_')
     timestamp = timestamp.replace('-', '_')
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/V20_' + timestamp + '.nxs',
-                                                         broker='192.168.1.80:9092')
+                                                         '/data/kafka-to-nexus/FILENAME',  # NICOS replaces FILENAME
+                                                         broker='192.168.1.80:9092',
+                                                         start_time='STARTTIME')  # NICOS replaces STARTTIME
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
