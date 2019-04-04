@@ -320,6 +320,10 @@ if __name__ == '__main__':
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
+        __add_linear_stage(builder)
+        __add_readout_system(builder)
+
+        # Sample
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description',
                             'hBN target with 1.0 mm diameter hole')
