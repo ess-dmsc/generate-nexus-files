@@ -348,28 +348,28 @@ if __name__ == '__main__':
         # builder.add_dataset(sample_group, 'description',
         #                     'hBN target with 0.2 mm diameter hole')
         transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
-        # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
-        builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
-                                   name='offset_stage_2_to_sample', depends_on='')
-        # Link to stage 2 value NXlog - can't get links to work so using a seconds stream for now
-        linear_2 = transforms.create_group('linear_stage_2_position')  # placeholder, will be replaced by stream
-        __add_attributes(linear_2, {'depends_on': '',
-                                    'vector': [1., 0., 0.],
-                                    'transformation_type': 'translation',
-                                    'units': 'mm'})
-        # Offset of origin of stage 2 from origin of stage 1
-        builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
-                                   name='offset_stage_2_to_stage_1', depends_on='')
+
+        # Offset of origin of stage 1 from "default" sample position
+        trans_1 = builder.add_transformation(transforms, 'translation', 0.07, 'm', [0.0, 0.0, -1.0],
+                                             name='offset_stage_1_to_default_sample')
         # Link to stage 1 value NXlog - can't get links to work so using a seconds stream for now
         linear_1 = transforms.create_group('linear_stage_1_position')  # placeholder, will be replaced by stream
-        __add_attributes(linear_1, {'depends_on': '',
+        __add_attributes(linear_1, {'depends_on': trans_1.name,
                                     'vector': [0., 1., 0.],
                                     'transformation_type': 'translation',
                                     'units': 'mm'})
-        # Offset of origin of stage 1 from "default" sample position
-        builder.add_transformation(transforms, 'translation', 0.07, 'm', [0.0, 0.0, -1.0],
-                                   name='offset_stage_1_to_default_sample')
-
+        # Offset of origin of stage 2 from origin of stage 1
+        trans_2 = builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
+                                             name='offset_stage_2_to_stage_1', depends_on=linear_1.name)
+        # Link to stage 2 value NXlog - can't get links to work so using a seconds stream for now
+        linear_2 = transforms.create_group('linear_stage_2_position')  # placeholder, will be replaced by stream
+        __add_attributes(linear_2, {'depends_on': trans_2.name,
+                                    'vector': [1., 0., 0.],
+                                    'transformation_type': 'translation',
+                                    'units': 'mm'})
+        # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
+        builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
+                                   name='offset_stage_2_to_sample', depends_on=linear_2)
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
