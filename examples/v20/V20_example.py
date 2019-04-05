@@ -31,7 +31,7 @@ def __copy_existing_data(downscale_detecter=False):
     Copy data from the existing NeXus file
     """
     raw_event_path = nx_entry_name + '/instrument/detector_1/raw_event_data/'
-    builder.add_nx_group(builder.get_root()['instrument/detector_1'], 'raw_event_data', 'NXevent_data')
+    builder.get_root()['instrument/detector_1'].create_group('raw_event_data')
     builder.copy_items(OrderedDict(
         [('entry-01/Delayline_events/event_time_offset', raw_event_path + 'event_time_offset')
          ]))
@@ -87,7 +87,7 @@ def __add_chopper(builder, number):
     builder.add_dataset(chopper_group, 'phase_setpoint', [0])
     builder.add_dataset(chopper_group, 'factor', [0])
 
-    tdc_log = builder.add_nx_group(chopper_group, 'top_dead_center', 'NXlog')
+    chopper_group.create_group('top_dead_center')
 
 
 def __add_choppers(builder):
@@ -142,13 +142,13 @@ def __add_detector(builder):
 
     # Placeholders for streamed data
     for channel_number in range(4):
-        builder.add_nx_group(detector_group, f'waveforms_channel_{channel_number}', 'NXlog')
-        builder.add_nx_group(detector_group, f'pulses_channel_{channel_number}', 'NXlog')
+        detector_group.create_group(f'waveforms_channel_{channel_number}')
+        detector_group.create_group(f'pulses_channel_{channel_number}')
 
     for hv_power_supply_channel in range(4):
-        builder.add_nx_group(detector_group, f'hv_supply_voltage_channel_{hv_power_supply_channel + 1}', 'NXlog')
-        builder.add_nx_group(detector_group, f'hv_supply_current_channel_{hv_power_supply_channel + 1}', 'NXlog')
-        builder.add_nx_group(detector_group, f'hv_supply_status_channel_{hv_power_supply_channel + 1}', 'NXlog')
+        detector_group.create_group(f'hv_supply_voltage_channel_{hv_power_supply_channel + 1}')
+        detector_group.create_group(f'hv_supply_current_channel_{hv_power_supply_channel + 1}')
+        detector_group.create_group(f'hv_supply_status_channel_{hv_power_supply_channel + 1}')
 
     __add_readout_system(builder, detector_group)
 
@@ -163,9 +163,8 @@ def __add_monitors(builder):
     """
     distance_from_sample = -3.298
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
-    builder.add_nx_group(monitor_group_1, 'events', 'NXevent_data')
-    builder.add_nx_group(monitor_group_1, 'waveforms', 'NXlog')
     monitor_group_1.create_group('waveforms')
+    monitor_group_1.create_group('events')
     builder.add_dataset(monitor_group_1, 'detector_id', 90000)
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
     monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
@@ -178,19 +177,19 @@ def __add_readout_system(builder, parent_group):
     for readout_system_number in ('1', '2'):
         group_name = f'readout_system_{readout_system_number}'
         readout_group = parent_group.create_group(group_name)
-        builder.add_nx_group(readout_group, 's_diff', 'NXlog')
-        builder.add_nx_group(readout_group, 'n_diff', 'NXlog')
-        builder.add_nx_group(readout_group, 'status', 'NXlog')
+        readout_group.create_group('s_diff')
+        readout_group.create_group('n_diff')
+        readout_group.create_group('status')
 
 
 def __add_linear_stage(builder):
     for axis in ('1', '2'):
         group_name = f'linear_axis_{axis}'
         group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
-        builder.add_nx_group(group, 'target_value', 'NXlog')
-        value = builder.add_nx_group(group, 'value', 'NXlog')
+        group.create_group('target_value')
+        value = group.create_group('value')
         value.attrs.create('units', np.array('mm').astype('|S2'))
-        builder.add_nx_group(group, 'status', 'NXlog')
+        group.create_group('status')
         builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{axis}.VAL')
         builder.add_dataset(group, 'name', f'Linear Axis {axis}')
 
@@ -273,13 +272,17 @@ def __create_file_writer_command(filepath):
                           f'/entry/{group_name}/status', 'f142', 'int32')
 
     # TODO linear motion values
-    linear_stage_2_link = {'name': 'linear_stage_2_position',
-                           'target': '/entry/instrument/linear_axis_2/value'}
-    linear_stage_1_link = {'name': 'linear_stage_1_position',
-                           'target': '/entry/instrument/linear_axis_1/value'}
-    links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
-             '/entry/sample/transformations/linear_stage_1_position': linear_stage_1_link}
-    # links = {}
+    __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m2.RBV',
+                      '/entry/sample/transformations/linear_stage_2_position', 'f142', 'double')
+    __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1.RBV',
+                      '/entry/sample/transformations/linear_stage_1_position', 'f142', 'double')
+    #linear_stage_2_link = {'name': 'linear_stage_2_position',
+    #                       'target': '/entry/instrument/linear_axis_2/value'}
+    #linear_stage_1_link = {'name': 'linear_stage_1_position',
+    #                       'target': '/entry/instrument/linear_axis_1/value'}
+    #links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
+    #         '/entry/sample/transformations/linear_stage_1_position': linear_stage_1_link}
+    links = {}
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
@@ -316,6 +319,14 @@ def __add_sample_env_device(group_name, name, description=None):
     return env_group
 
 
+def __add_attributes(node, attributes):
+    for key in attributes:
+        if isinstance(attributes[key], str):
+            # Since python 3 we have to treat strings like this
+            node.attrs.create(key, np.array(attributes[key]).astype('|S' + str(len(attributes[key]))))
+        else:
+            node.attrs.create(key, np.array(attributes[key]))
+
 if __name__ == '__main__':
     output_filename = 'V20_example_11.nxs'
     input_filename = 'adc_test8_half_cover_w_waveforms.nxs'  # None
@@ -340,13 +351,21 @@ if __name__ == '__main__':
         # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
         builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
                                    name='offset_stage_2_to_sample', depends_on='')
-        # Link to stage 2 value NXlog TODO do attributes on links work?? (not even sure if possible, let alone implemented in FW)
-        builder.add_nx_group(transforms, 'linear_stage_2_position', 'TEMP')  # placeholder, will be replaced by link
+        # Link to stage 2 value NXlog - can't get links to work so using a seconds stream for now
+        linear_2 = transforms.create_group('linear_stage_2_position')  # placeholder, will be replaced by stream
+        __add_attributes(linear_2, {'depends_on': '',
+                                    'vector': [1., 0., 0.],
+                                    'transformation_type': 'translation',
+                                    'units': 'mm'})
         # Offset of origin of stage 2 from origin of stage 1
         builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
                                    name='offset_stage_2_to_stage_1', depends_on='')
-        # Link to stage 1 value NXlog
-        builder.add_nx_group(transforms, 'linear_stage_1_position', 'TEMP')  # placeholder, will be replaced by link
+        # Link to stage 1 value NXlog - can't get links to work so using a seconds stream for now
+        linear_1 = transforms.create_group('linear_stage_1_position')  # placeholder, will be replaced by stream
+        __add_attributes(linear_1, {'depends_on': '',
+                                    'vector': [0., 1., 0.],
+                                    'transformation_type': 'translation',
+                                    'units': 'mm'})
         # Offset of origin of stage 1 from "default" sample position
         builder.add_transformation(transforms, 'translation', 0.07, 'm', [0.0, 0.0, -1.0],
                                    name='offset_stage_1_to_default_sample')
