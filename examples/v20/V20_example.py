@@ -152,7 +152,7 @@ def __add_detector(builder):
 
     __add_readout_system(builder, detector_group)
 
-    builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
+    # builder.add_nx_group(builder.get_root(), 'raw_event_data', 'NXevent_data')
 
 
 def __add_monitors(builder):
@@ -165,6 +165,7 @@ def __add_monitors(builder):
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     builder.add_nx_group(monitor_group_1, 'events', 'NXevent_data')
     builder.add_nx_group(monitor_group_1, 'waveforms', 'NXlog')
+    monitor_group_1.create_group('waveforms')
     builder.add_dataset(monitor_group_1, 'detector_id', 90000)
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
     monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
@@ -211,13 +212,13 @@ def __create_file_writer_command(filepath):
     # Detector HV supply
     hv_supply_topic = 'V20_detectorPower'
     for hv_power_supply_channel in range(4):
-        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:VMon',
+        __add_data_stream(streams, hv_supply_topic, f'HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:VMon',
                           f'/entry/instrument/detector_1/hv_supply_voltage_channel_{hv_power_supply_channel + 1}',
                           'f142', 'double')
-        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:IMon',
+        __add_data_stream(streams, hv_supply_topic, f'HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:IMon',
                           f'/entry/instrument/detector_1/hv_supply_current_channel_{hv_power_supply_channel + 1}',
                           'f142', 'double')
-        __add_data_stream(streams, hv_supply_topic, f'	HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:Pw',
+        __add_data_stream(streams, hv_supply_topic, f'HZB-V20:Det-PwrC-01:02:00{hv_power_supply_channel}:Pw',
                           f'/entry/instrument/detector_1/hv_supply_status_channel_{hv_power_supply_channel + 1}',
                           'f142', 'int32')
 
@@ -271,10 +272,14 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.STAT',
                           f'/entry/{group_name}/status', 'f142', 'int32')
 
-    # event_data_link = {'name': 'raw_event_data',
-    #                   'target': '/entry/instrument/detector_1/raw_event_data'}
-    # links = {'/entry/raw_event_data': event_data_link}
-    links = {}
+    # TODO linear motion values
+    linear_stage_2_link = {'name': 'linear_stage_2_position',
+                           'target': '/entry/instrument/linear_axis_2/value'}
+    linear_stage_1_link = {'name': 'linear_stage_1_position',
+                           'target': '/entry/instrument/linear_axis_1/value'}
+    links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
+             '/entry/sample/transformations/linear_stage_1_position': linear_stage_1_link}
+    # links = {}
 
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(filepath)
@@ -331,6 +336,21 @@ if __name__ == '__main__':
                             'hBN target with 1.0 mm diameter hole')
         # builder.add_dataset(sample_group, 'description',
         #                     'hBN target with 0.2 mm diameter hole')
+        transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
+        # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
+        builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
+                                   name='offset_stage_2_to_sample', depends_on='')
+        # Link to stage 2 value NXlog TODO do attributes on links work?? (not even sure if possible, let alone implemented in FW)
+        builder.add_nx_group(transforms, 'linear_stage_2_position', 'TEMP')  # placeholder, will be replaced by link
+        # Offset of origin of stage 2 from origin of stage 1
+        builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
+                                   name='offset_stage_2_to_stage_1', depends_on='')
+        # Link to stage 1 value NXlog
+        builder.add_nx_group(transforms, 'linear_stage_1_position', 'TEMP')  # placeholder, will be replaced by link
+        # Offset of origin of stage 1 from "default" sample position
+        builder.add_transformation(transforms, 'translation', 0.07, 'm', [0.0, 0.0, -1.0],
+                                   name='offset_stage_1_to_default_sample')
+
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
@@ -341,8 +361,6 @@ if __name__ == '__main__':
 
         # Copy event data into detector
         __copy_existing_data()
-
-        # TODO Add guides, shutters, any other known components
 
         # Notes on geometry:
 
