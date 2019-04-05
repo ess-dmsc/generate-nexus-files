@@ -254,22 +254,22 @@ def __create_file_writer_command(filepath):
     for readout_system_number in ('1', '2'):
         group_name = f'readout_system_{readout_system_number}'
         __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:TS-SDiff-RBV',
-                          f'/entry/{group_name}/s_diff', 'f142', 'double')
+                          f'/entry/instrument/detector_1/{group_name}/s_diff', 'f142', 'double')
         __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:TS-NDiff-RBV',
-                          f'/entry/{group_name}/n_diff', 'f142', 'double')
+                          f'/entry/instrument/detector_1/{group_name}/n_diff', 'f142', 'double')
         __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:STATUS2-RBV',
-                          f'/entry/{group_name}/status', 'f142', 'int32')
+                          f'/entry/instrument/detector_1/{group_name}/status', 'f142', 'int32')
 
     # Linear stages
     linear_motion_topic = 'V20_linearStages'
     for axis in ('1', '2'):
         group_name = f'linear_axis_{axis}'
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.VAL',
-                          f'/entry/{group_name}/target_value', 'f142', 'double')
+                          f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.RBV',
-                          f'/entry/{group_name}/value', 'f142', 'double')
+                          f'/entry/instrument/{group_name}/value', 'f142', 'double')
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.STAT',
-                          f'/entry/{group_name}/status', 'f142', 'int32')
+                          f'/entry/instrument/{group_name}/status', 'f142', 'int32')
 
     # TODO linear motion values
     __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m2.RBV',
@@ -357,7 +357,8 @@ if __name__ == '__main__':
         __add_attributes(linear_1, {'depends_on': trans_1.name,
                                     'vector': [0., 1., 0.],
                                     'transformation_type': 'translation',
-                                    'units': 'mm'})
+                                    'units': 'mm',
+                                    'NX_class': 'NXlog'})
         # Offset of origin of stage 2 from origin of stage 1
         trans_2 = builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
                                              name='offset_stage_2_to_stage_1', depends_on=linear_1.name)
@@ -366,10 +367,11 @@ if __name__ == '__main__':
         __add_attributes(linear_2, {'depends_on': trans_2.name,
                                     'vector': [1., 0., 0.],
                                     'transformation_type': 'translation',
-                                    'units': 'mm'})
+                                    'units': 'mm',
+                                    'NX_class': 'NXlog'})
         # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
         builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
-                                   name='offset_stage_2_to_sample', depends_on=linear_2)
+                                   name='offset_stage_2_to_sample', depends_on=linear_2.name)
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
