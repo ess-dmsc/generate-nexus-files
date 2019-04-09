@@ -190,6 +190,8 @@ def __add_linear_stage(builder):
         value = group.create_group('value')
         value.attrs.create('units', np.array('mm').astype('|S2'))
         group.create_group('status')
+        speed = group.create_group('speed')
+        speed.attrs.create('units', np.array('mm/s').astype('|S2'))
         builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{axis}.VAL')
         builder.add_dataset(group, 'name', f'Linear Axis {axis}')
 
@@ -270,6 +272,8 @@ def __create_file_writer_command(filepath):
                           f'/entry/instrument/{group_name}/value', 'f142', 'double')
         __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.STAT',
                           f'/entry/instrument/{group_name}/status', 'f142', 'int32')
+        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.VELO',
+                          f'/entry/instrument/{group_name}/speed', 'f142', 'double')
 
     # TODO linear motion values
     __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m2.RBV',

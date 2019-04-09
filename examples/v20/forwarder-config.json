@@ -1,169 +1,179 @@
 {
-    "streams": [
-        {
-            "channel": "chopper_1_A",
-            "converter": { "schema": "f142", "topic": "V20_sourceChopper", "type": "double"}
-        },
-        {
-            "channel": "chopper_1_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_2_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_3_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_4_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_5_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_6_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_7_A",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "chopper_8_J",
-            "converter": { "schema": "f142", "topic": "V20_choppers" , "type": "double"}
-        },
-
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltH-xn",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltH-xp",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltH-Center",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltH-Gap",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltV-xn",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltV-xp",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltV-Center",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-SLT-01:SltV-Gap",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-
-        {
-            "channel": "HZB-V20:MC-MCU-01:m12",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "HZB-V20:MC-MCU-01:m9",
-            "converter": { "schema": "f142", "topic": "V20_sampleEnv" , "type": "double"}
-        },
-        {
-            "channel": "V20:C01:Speed",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C01:Speed-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C01:Phase",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C01:Phase-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C01:Factor",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
-        },
-        {
-            "channel": "V20:C02:Speed",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C02:Speed-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C02:Phase",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C02:Phase-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C02:Factor",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
-        },
-        {
-            "channel": "V20:C03:Speed",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C03:Speed-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C03:Phase",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C03:Phase-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C03:Factor",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
-        },
-        {
-            "channel": "V20:C04:Speed",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C04:Speed-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C04:Phase",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C04:Phase-SP",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "double"}
-        },
-        {
-            "channel": "V20:C04:Factor",
-            "converter": { "schema": "f142", "topic": "V20_choppers", "type": "long"}
-        }
-    ]
+  "streams": [
+    {
+      "channel": "HZB-V20:Chop-Drv-0101:Ref_Unix_asub.VALF",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0401:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0402:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0101:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0102:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0301:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0501:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0502:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0302:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.VAL",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.STAT",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.VELO",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.VAL",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.STAT",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.VELO",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:TS-SDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:TS-NDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:STATUS2-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:TS-SDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:TS-NDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:STATUS2-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    }
+  ]
 }
