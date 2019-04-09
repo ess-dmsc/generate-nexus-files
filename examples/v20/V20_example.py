@@ -276,11 +276,11 @@ def __create_file_writer_command(filepath):
                       '/entry/sample/transformations/linear_stage_2_position', 'f142', 'double')
     __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1.RBV',
                       '/entry/sample/transformations/linear_stage_1_position', 'f142', 'double')
-    #linear_stage_2_link = {'name': 'linear_stage_2_position',
+    # linear_stage_2_link = {'name': 'linear_stage_2_position',
     #                       'target': '/entry/instrument/linear_axis_2/value'}
-    #linear_stage_1_link = {'name': 'linear_stage_1_position',
+    # linear_stage_1_link = {'name': 'linear_stage_1_position',
     #                       'target': '/entry/instrument/linear_axis_1/value'}
-    #links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
+    # links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
     #         '/entry/sample/transformations/linear_stage_1_position': linear_stage_1_link}
     links = {}
 
@@ -326,6 +326,7 @@ def __add_attributes(node, attributes):
             node.attrs.create(key, np.array(attributes[key]).astype('|S' + str(len(attributes[key]))))
         else:
             node.attrs.create(key, np.array(attributes[key]))
+
 
 if __name__ == '__main__':
     output_filename = 'V20_example_11.nxs'
@@ -374,7 +375,7 @@ if __name__ == '__main__':
                                    name='offset_stage_2_to_sample', depends_on=linear_2.name)
 
         # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598+21.7])
+        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598 + 21.7])
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
