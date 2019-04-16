@@ -26,22 +26,21 @@ def position_to_index(pos, count):
 
 
 def convert_id(event_id, id_offset=0):
-    # TODO Is the order correct? Is x in the high bits or the low bits?
-    x = (event_id[:] >> 16) & 0xffff
-    y = event_id[:] & 0xffff
     Nx = 512
-    Ny = 512
 
-    #print(f'max: {np.max(x)}, min: {np.min(x)}')
-    #print(f'max: {np.max(y)}, min: {np.min(y)}')
+    y = np.bitwise_and(event_id[:], 0xffff)
+    x = np.right_shift(event_id[:], 16)
 
-    #pl.hist(y)
-    #pl.show()
+    # Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
+    # fig = pl.figure()
+    # ax = fig.add_subplot(111)
+    # ax.imshow(Hist)
+    # pl.show()
 
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
     # will simply discard events that do not correspond to IDF).
-    #return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
+    # return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
     return id_offset + x + (Nx * y)
 
 
@@ -120,10 +119,13 @@ if __name__ == '__main__':
             del output_file[group_name]
 
         groups_to_remove = []
+
+
         def remove_groups_without_nxclass(name, object):
             if isinstance(object, h5py.Group):
                 if 'NX_class' not in object.attrs.keys():
                     groups_to_remove.append(name)
+
 
         output_file.visititems(remove_groups_without_nxclass)
 
@@ -135,7 +137,8 @@ if __name__ == '__main__':
         pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
         pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
         del output_file['entry/instrument/detector_1/detector_number']
-        output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64, data=pixel_ids)
+        output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
+                                                                   data=pixel_ids)
 
         pixel_size = 300. * 0.002 / 512.
         half_detector_width = 0.3
@@ -147,9 +150,7 @@ if __name__ == '__main__':
 
         del output_file['entry/instrument/detector_1/x_pixel_offset']
         del output_file['entry/instrument/detector_1/y_pixel_offset']
-        xoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape, dtype=np.float64,
-                                                                   data=x_offsets)
-        yoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape, dtype=np.float64,
-                                                                   data=y_offsets)
-
-
+        xoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
+                                                                                     dtype=np.float64, data=x_offsets)
+        yoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
+                                                                                     dtype=np.float64, data=y_offsets)
