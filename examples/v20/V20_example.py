@@ -105,7 +105,7 @@ def __add_detector(builder):
     pixels_per_axis = 300  # 65535 (requires int64)
     pixel_size = 0.002
     half_detector_width = 0.3
-    half_pixel_width = 0.002 / 2.0
+    half_pixel_width = pixel_size / 2.0
     single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
                                                   dtype=np.float)) - half_detector_width + half_pixel_width
     detector_group = builder.add_nx_group(builder.get_root()['instrument'], 'detector_1', 'NXdetector')

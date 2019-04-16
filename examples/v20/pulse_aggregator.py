@@ -2,6 +2,7 @@ import h5py
 import numpy as np
 import argparse
 from shutil import copyfile
+import matplotlib.pylab as pl
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
@@ -14,7 +15,7 @@ parser.add_argument("-e", "--raw-event-path", type=str,
                     default='/entry/instrument/detector_1/raw_event_data')
 parser.add_argument("-c", "--chopper-tdc-path", type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
+                    default='/entry/instrument/chopper_1/top_dead_center/time')
 args = parser.parse_args()
 
 
@@ -28,12 +29,20 @@ def convert_id(event_id, id_offset=0):
     # TODO Is the order correct? Is x in the high bits or the low bits?
     x = (event_id[:] >> 16) & 0xffff
     y = event_id[:] & 0xffff
-    Nx = 300
-    Ny = 300
+    Nx = 512
+    Ny = 512
+
+    #print(f'max: {np.max(x)}, min: {np.min(x)}')
+    #print(f'max: {np.max(y)}, min: {np.min(y)}')
+
+    #pl.hist(y)
+    #pl.show()
+
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
     # will simply discard events that do not correspond to IDF).
-    return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
+    #return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
+    return id_offset + x + (Nx * y)
 
 
 def write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times):
@@ -68,19 +77,20 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
 
 if __name__ == '__main__':
     copyfile(args.input_filename, args.output_filename)
-    with h5py.File(args.output_filename, 'r+') as raw_file:
+    with h5py.File(args.output_filename, 'r+') as output_file:
         # Create output event group
-        output_data_group = raw_file['/entry'].create_group('event_data')
+        output_data_group = output_file['/entry'].create_group('event_data')
         output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
         # Shift the TDC times
-        tdc_times = raw_file[args.chopper_tdc_path][...]
+        tdc_times = output_file[args.chopper_tdc_path][...]
         tdc_times += args.tdc_pulse_time_difference
 
-        event_ids = raw_file[args.raw_event_path + '/event_id'][...]
+        event_ids = output_file[args.raw_event_path + '/event_id'][...]
         event_ids = convert_id(event_ids)
+        print(np.max(event_ids))
 
-        event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
+        event_time_zero_input = output_file[args.raw_event_path + '/event_time_zero'][...]
 
         tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                      event_time_zero_input)
@@ -100,3 +110,46 @@ if __name__ == '__main__':
             event_index_output[i + 1] = event_index
 
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
+
+        # Delete the raw event data group
+        del output_file[args.raw_event_path]
+
+        # Delete waveform groups (not read by Mantid)
+        for channel in range(3):
+            group_name = f'/entry/instrument/detector_1/waveforms_channel_{channel}'
+            del output_file[group_name]
+
+        groups_to_remove = []
+        def remove_groups_without_nxclass(name, object):
+            if isinstance(object, h5py.Group):
+                if 'NX_class' not in object.attrs.keys():
+                    groups_to_remove.append(name)
+
+        output_file.visititems(remove_groups_without_nxclass)
+
+        for group in reversed(groups_to_remove):
+            print(group)
+            del output_file[group]
+
+        pixels_per_axis = 512
+        pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
+        pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
+        del output_file['entry/instrument/detector_1/detector_number']
+        output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64, data=pixel_ids)
+
+        pixel_size = 300. * 0.002 / 512.
+        half_detector_width = 0.3
+        half_pixel_width = pixel_size / 2.0
+        single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
+                                                      dtype=np.float)) - half_detector_width + half_pixel_width
+        x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
+                                           single_axis_offsets)
+
+        del output_file['entry/instrument/detector_1/x_pixel_offset']
+        del output_file['entry/instrument/detector_1/y_pixel_offset']
+        xoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape, dtype=np.float64,
+                                                                   data=x_offsets)
+        yoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape, dtype=np.float64,
+                                                                   data=y_offsets)
+
+
