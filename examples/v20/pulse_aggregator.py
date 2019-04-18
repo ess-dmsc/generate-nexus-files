@@ -28,14 +28,14 @@ def position_to_index(pos, count):
 def convert_id(event_id, id_offset=0):
     Nx = 512
 
-    y = np.bitwise_and(event_id[:], 0xffff)
-    x = np.right_shift(event_id[:], 16)
+    x = np.bitwise_and(event_id[:], 0xffff)
+    y = np.right_shift(event_id[:], 16)
 
-    #Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
-    #fig = pl.figure()
-    #ax = fig.add_subplot(111)
-    #ax.imshow(Hist)
-    #pl.show()
+    # Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
+    # fig = pl.figure()
+    # ax = fig.add_subplot(111)
+    # ax.imshow(Hist)
+    # pl.show()
 
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         pixel_size = neutron_sensitive_width / pixels_per_axis
         single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
                                                       dtype=np.float)) - (neutron_sensitive_width / 2.) + (
-                                          pixel_size / 2.)
+                                      pixel_size / 2.)
         x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
                                            single_axis_offsets)
 
@@ -169,21 +169,25 @@ if __name__ == '__main__':
         # Correct the source position
         output_file['entry/instrument/source/transformations/location'][...] = 27.4
         # Correct detector_1 position and orientation
+        del output_file['entry/instrument/detector_1/depends_on']
+        depend_on_path = '/entry/instrument/detector_1/transformations/x_offset'
+        output_file['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
+            '|S' + str(len(depend_on_path))))
         del output_file['entry/instrument/detector_1/transformations/orientation']
         location_path = 'entry/instrument/detector_1/transformations/location'
         output_file[location_path][...] = 3.5
         output_file[location_path].attrs['vector'] = [0., 0., 1.]
         output_file[location_path].attrs['depends_on'] = '.'
         del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
-        y_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('y_offset', (1,),
+        x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
                                                                                                      dtype=np.float64,
-                                                                                                     data=0.02)
+                                                                                                     data=0.04)
 
-        y_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
+        x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
         translation_label = "translation"
-        y_offset_dataset.attrs.create('transformation_type',
+        x_offset_dataset.attrs.create('transformation_type',
                                       np.array(translation_label).astype('|S' + str(len(translation_label))))
-        y_offset_dataset.attrs.create('depends_on',
-                                      np.array(location_path).astype('|S' + str(len(location_path))))
-        y_offset_dataset.attrs.create('vector',
+        x_offset_dataset.attrs.create('depends_on',
+                                      np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
+        x_offset_dataset.attrs.create('vector',
                                       [1., 0., 0.])
