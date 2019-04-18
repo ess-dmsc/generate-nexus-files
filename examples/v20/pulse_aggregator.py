@@ -31,11 +31,11 @@ def convert_id(event_id, id_offset=0):
     y = np.bitwise_and(event_id[:], 0xffff)
     x = np.right_shift(event_id[:], 16)
 
-    # Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
-    # fig = pl.figure()
-    # ax = fig.add_subplot(111)
-    # ax.imshow(Hist)
-    # pl.show()
+    #Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
+    #fig = pl.figure()
+    #ax = fig.add_subplot(111)
+    #ax.imshow(Hist)
+    #pl.show()
 
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
@@ -140,11 +140,14 @@ if __name__ == '__main__':
         output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
                                                                    data=pixel_ids)
 
-        pixel_size = 300. * 0.002 / 512.
-        half_detector_width = 0.3
-        half_pixel_width = pixel_size / 2.0
+        neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
+        # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
+        # into 512 pixels and the actual active width we see of the detector
+        # I suspect the actually detector area we collect data from is smaller than 0.28x0.28
+        pixel_size = neutron_sensitive_width / pixels_per_axis
         single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
-                                                      dtype=np.float)) - half_detector_width + half_pixel_width
+                                                      dtype=np.float)) - (neutron_sensitive_width / 2.) + (
+                                          pixel_size / 2.)
         x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
                                            single_axis_offsets)
 
@@ -154,3 +157,33 @@ if __name__ == '__main__':
                                                                                      dtype=np.float64, data=x_offsets)
         yoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
                                                                                      dtype=np.float64, data=y_offsets)
+        del output_file['entry/monitor_1/waveforms']
+        del output_file['entry/instrument/detector_1/waveforms_channel_3']
+
+        # Patch the geometry ########################
+        del output_file['entry/instrument/linear_axis_1']
+        del output_file['entry/instrument/linear_axis_2']
+        del output_file['entry/sample/transformations/offset_stage_1_to_default_sample']
+        del output_file['entry/sample/transformations/offset_stage_2_to_sample']
+        del output_file['entry/sample/transformations/offset_stage_2_to_stage_1']
+        # Correct the source position
+        output_file['entry/instrument/source/transformations/location'][...] = 27.4
+        # Correct detector_1 position and orientation
+        del output_file['entry/instrument/detector_1/transformations/orientation']
+        location_path = 'entry/instrument/detector_1/transformations/location'
+        output_file[location_path][...] = 3.5
+        output_file[location_path].attrs['vector'] = [0., 0., 1.]
+        output_file[location_path].attrs['depends_on'] = '.'
+        del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
+        y_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('y_offset', (1,),
+                                                                                                     dtype=np.float64,
+                                                                                                     data=0.02)
+
+        y_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
+        translation_label = "translation"
+        y_offset_dataset.attrs.create('transformation_type',
+                                      np.array(translation_label).astype('|S' + str(len(translation_label))))
+        y_offset_dataset.attrs.create('depends_on',
+                                      np.array(location_path).astype('|S' + str(len(location_path))))
+        y_offset_dataset.attrs.create('vector',
+                                      [1., 0., 0.])
