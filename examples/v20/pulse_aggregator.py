@@ -108,6 +108,7 @@ if __name__ == '__main__':
                 event_index += 1
             event_index_output[i + 1] = event_index
 
+        event_ids[event_ids > 262143] = 262143
         write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
 
         # Delete the raw event data group
@@ -181,7 +182,7 @@ if __name__ == '__main__':
         del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
         x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
                                                                                                      dtype=np.float64,
-                                                                                                     data=0.04)
+                                                                                                     data=0.065)
 
         x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
         translation_label = "translation"
@@ -190,4 +191,4 @@ if __name__ == '__main__':
         x_offset_dataset.attrs.create('depends_on',
                                       np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
         x_offset_dataset.attrs.create('vector',
-                                      [1., 0., 0.])
+                                      [-1., 0., 0.])
