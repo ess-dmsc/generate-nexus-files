@@ -108,7 +108,7 @@ def aggregate_events_by_pulse(out_file, optargs, input_group_path, output_group_
         event_index_output[i + 1] = event_index
 
     if event_id_override is not None:
-        event_ids[event_ids] = event_id_override
+        event_ids = event_id_override * np.ones_like(event_ids)
     else:
         event_ids[event_ids > 262143] = 262143
     write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
