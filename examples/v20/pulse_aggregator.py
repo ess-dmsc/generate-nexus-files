@@ -74,45 +74,59 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
     return chopper_times, event_id, event_times
 
 
+def aggregate_events_by_pulse(out_file, optargs, input_group_path, output_group_name='event_data',
+                              event_id_override=None):
+    # Create output event group
+    output_data_group = out_file['/entry'].create_group(output_group_name)
+    output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
+
+    # Shift the TDC times
+    tdc_times = out_file[optargs.chopper_tdc_path][...]
+    tdc_times += optargs.tdc_pulse_time_difference
+
+    event_ids = out_file[input_group_path + '/event_id'][...]
+    event_ids = convert_id(event_ids)
+    print(np.max(event_ids))
+
+    event_time_zero_input = out_file[input_group_path + '/event_time_zero'][...]
+
+    tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
+                                                                                 event_time_zero_input)
+
+    event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
+    event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
+    event_index = 0
+    for i, t in enumerate(tdc_times[:-1]):
+        while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
+            # append event to pulse i
+            if event_time_zero_input[event_index] > tdc_times[i]:
+                event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
+            else:
+                raise Exception('Found event outside of chopper timestamp range, '
+                                'something went wrong when truncating the datasets')
+            event_index += 1
+        event_index_output[i + 1] = event_index
+
+    if event_id_override is not None:
+        event_ids[event_ids] = event_id_override
+    else:
+        event_ids[event_ids > 262143] = 262143
+    write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
+
+    # Delete the raw event data group
+    del output_file[input_group_path]
+
+
 if __name__ == '__main__':
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as output_file:
-        # Create output event group
-        output_data_group = output_file['/entry'].create_group('event_data')
-        output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
-        # Shift the TDC times
-        tdc_times = output_file[args.chopper_tdc_path][...]
-        tdc_times += args.tdc_pulse_time_difference
+        # DENEX detector
+        aggregate_events_by_pulse(output_file, args, args.raw_event_path)
 
-        event_ids = output_file[args.raw_event_path + '/event_id'][...]
-        event_ids = convert_id(event_ids)
-        print(np.max(event_ids))
-
-        event_time_zero_input = output_file[args.raw_event_path + '/event_time_zero'][...]
-
-        tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
-                                                                                     event_time_zero_input)
-
-        event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
-        event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
-        event_index = 0
-        for i, t in enumerate(tdc_times[:-1]):
-            while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
-                # append event to pulse i
-                if event_time_zero_input[event_index] > tdc_times[i]:
-                    event_offset_output[event_index] = event_time_zero_input[event_index] - tdc_times[i]
-                else:
-                    raise Exception('Found event outside of chopper timestamp range, '
-                                    'something went wrong when truncating the datasets')
-                event_index += 1
-            event_index_output[i + 1] = event_index
-
-        event_ids[event_ids > 262143] = 262143
-        write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
-
-        # Delete the raw event data group
-        del output_file[args.raw_event_path]
+        # Monitor
+        aggregate_events_by_pulse(output_file, args, '/entry/monitor_1/events', 'monitor_event_data',
+                                  event_id_override=262144)
 
         # Delete waveform groups (not read by Mantid)
         for channel in range(3):
@@ -192,3 +206,7 @@ if __name__ == '__main__':
                                       np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
         x_offset_dataset.attrs.create('vector',
                                       [-1., 0., 0.])
+
+        # Correct monitor position and id
+        output_file['entry/monitor_1/transformations/transformation'][...] = -1.8
+        output_file['entry/monitor_1/detector_id'][...] = 262144
