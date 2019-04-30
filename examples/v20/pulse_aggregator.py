@@ -213,3 +213,14 @@ if __name__ == '__main__':
 
         # Link monitor in the instrument group so that Mantid finds it
         output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
+
+        # Link monitor event datasets to monitor in instrument group (for Mantid)
+        output_file['/entry/instrument/monitor_1/event_id'] = output_file['/entry/monitor_event_data/event_id']
+        output_file['/entry/instrument/monitor_1/event_index'] = output_file['/entry/monitor_event_data/event_index']
+        output_file['/entry/instrument/monitor_1/event_time_offset'] = output_file[
+            '/entry/monitor_event_data/event_time_offset']
+        output_file['/entry/instrument/monitor_1/event_time_zero'] = output_file[
+            '/entry/monitor_event_data/event_time_zero']
+
+        output_file['/entry/instrument/monitor_1/monitor_number'] = output_file[
+            '/entry/instrument/monitor_1/detector_id']
