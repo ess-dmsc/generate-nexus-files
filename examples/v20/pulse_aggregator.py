@@ -208,5 +208,8 @@ if __name__ == '__main__':
                                       [-1., 0., 0.])
 
         # Correct monitor position and id
-        output_file['entry/monitor_1/transformations/transformation'][...] = -1.8
-        output_file['entry/monitor_1/detector_id'][...] = 262144
+        output_file['/entry/monitor_1/transformations/transformation'][...] = -1.8
+        output_file['/entry/monitor_1/detector_id'][...] = 262144
+
+        # Link monitor in the instrument group so that Mantid finds it
+        output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
