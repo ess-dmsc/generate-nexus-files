@@ -117,6 +117,95 @@ def aggregate_events_by_pulse(out_file, optargs, input_group_path, output_group_
     del output_file[input_group_path]
 
 
+def patch_geometry():
+    pixels_per_axis = 512
+    pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
+    pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
+    del output_file['entry/instrument/detector_1/detector_number']
+    output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
+                                                               data=pixel_ids)
+    neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
+    # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
+    # into 512 pixels and the actual active width we see of the detector
+    # I suspect the actually detector area we collect data from is smaller than 0.28x0.28
+    pixel_size = neutron_sensitive_width / pixels_per_axis
+    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
+                                                  dtype=np.float)) - (neutron_sensitive_width / 2.) + (
+                                  pixel_size / 2.)
+    x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
+                                       single_axis_offsets)
+    del output_file['entry/instrument/detector_1/x_pixel_offset']
+    del output_file['entry/instrument/detector_1/y_pixel_offset']
+    output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
+                                                               dtype=np.float64, data=x_offsets)
+    output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
+                                                               dtype=np.float64, data=y_offsets)
+    del output_file['entry/monitor_1/waveforms']
+    del output_file['entry/instrument/detector_1/waveforms_channel_3']
+    del output_file['entry/instrument/linear_axis_1']
+    del output_file['entry/instrument/linear_axis_2']
+    del output_file['entry/sample/transformations/offset_stage_1_to_default_sample']
+    del output_file['entry/sample/transformations/offset_stage_2_to_sample']
+    del output_file['entry/sample/transformations/offset_stage_2_to_stage_1']
+    # Correct the source position
+    output_file['entry/instrument/source/transformations/location'][...] = 27.4
+    # Correct detector_1 position and orientation
+    del output_file['entry/instrument/detector_1/depends_on']
+    depend_on_path = '/entry/instrument/detector_1/transformations/x_offset'
+    output_file['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
+        '|S' + str(len(depend_on_path))))
+    del output_file['entry/instrument/detector_1/transformations/orientation']
+    location_path = 'entry/instrument/detector_1/transformations/location'
+    output_file[location_path][...] = 3.5
+    output_file[location_path].attrs['vector'] = [0., 0., 1.]
+    output_file[location_path].attrs['depends_on'] = '.'
+    del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
+    x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
+                                                                                                 dtype=np.float64,
+                                                                                                 data=0.065)
+    x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
+    translation_label = "translation"
+    x_offset_dataset.attrs.create('transformation_type',
+                                  np.array(translation_label).astype('|S' + str(len(translation_label))))
+    x_offset_dataset.attrs.create('depends_on',
+                                  np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
+    x_offset_dataset.attrs.create('vector',
+                                  [-1., 0., 0.])
+    # Correct monitor position and id
+    output_file['/entry/monitor_1/transformations/transformation'][...] = -1.8
+    output_file['/entry/monitor_1/detector_id'][...] = 262144
+    # Link monitor in the instrument group so that Mantid finds it
+    output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
+    # Link monitor event datasets to monitor in instrument group (for Mantid)
+    output_file['/entry/instrument/monitor_1/event_id'] = output_file['/entry/monitor_event_data/event_id']
+    output_file['/entry/instrument/monitor_1/event_index'] = output_file['/entry/monitor_event_data/event_index']
+    output_file['/entry/instrument/monitor_1/event_time_offset'] = output_file[
+        '/entry/monitor_event_data/event_time_offset']
+    output_file['/entry/instrument/monitor_1/event_time_zero'] = output_file[
+        '/entry/monitor_event_data/event_time_zero']
+    output_file['/entry/instrument/monitor_1/monitor_number'] = output_file[
+        '/entry/instrument/monitor_1/detector_id']
+
+
+def remove_data_not_used_by_mantid():
+    global groups_to_remove
+    # Delete waveform groups (not read by Mantid)
+    for channel in range(3):
+        group_name = f'/entry/instrument/detector_1/waveforms_channel_{channel}'
+        del output_file[group_name]
+    groups_to_remove = []
+
+    def remove_groups_without_nxclass(name, object):
+        if isinstance(object, h5py.Group):
+            if 'NX_class' not in object.attrs.keys():
+                groups_to_remove.append(name)
+
+    output_file.visititems(remove_groups_without_nxclass)
+    for group in reversed(groups_to_remove):
+        print(group)
+        del output_file[group]
+
+
 if __name__ == '__main__':
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as output_file:
@@ -128,99 +217,5 @@ if __name__ == '__main__':
         aggregate_events_by_pulse(output_file, args, '/entry/monitor_1/events', 'monitor_event_data',
                                   event_id_override=262144)
 
-        # Delete waveform groups (not read by Mantid)
-        for channel in range(3):
-            group_name = f'/entry/instrument/detector_1/waveforms_channel_{channel}'
-            del output_file[group_name]
-
-        groups_to_remove = []
-
-
-        def remove_groups_without_nxclass(name, object):
-            if isinstance(object, h5py.Group):
-                if 'NX_class' not in object.attrs.keys():
-                    groups_to_remove.append(name)
-
-
-        output_file.visititems(remove_groups_without_nxclass)
-
-        for group in reversed(groups_to_remove):
-            print(group)
-            del output_file[group]
-
-        pixels_per_axis = 512
-        pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
-        pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
-        del output_file['entry/instrument/detector_1/detector_number']
-        output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
-                                                                   data=pixel_ids)
-
-        neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
-        # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
-        # into 512 pixels and the actual active width we see of the detector
-        # I suspect the actually detector area we collect data from is smaller than 0.28x0.28
-        pixel_size = neutron_sensitive_width / pixels_per_axis
-        single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
-                                                      dtype=np.float)) - (neutron_sensitive_width / 2.) + (
-                                      pixel_size / 2.)
-        x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
-                                           single_axis_offsets)
-
-        del output_file['entry/instrument/detector_1/x_pixel_offset']
-        del output_file['entry/instrument/detector_1/y_pixel_offset']
-        xoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
-                                                                                     dtype=np.float64, data=x_offsets)
-        yoffset_dataset = output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
-                                                                                     dtype=np.float64, data=y_offsets)
-        del output_file['entry/monitor_1/waveforms']
-        del output_file['entry/instrument/detector_1/waveforms_channel_3']
-
-        # Patch the geometry ########################
-        del output_file['entry/instrument/linear_axis_1']
-        del output_file['entry/instrument/linear_axis_2']
-        del output_file['entry/sample/transformations/offset_stage_1_to_default_sample']
-        del output_file['entry/sample/transformations/offset_stage_2_to_sample']
-        del output_file['entry/sample/transformations/offset_stage_2_to_stage_1']
-        # Correct the source position
-        output_file['entry/instrument/source/transformations/location'][...] = 27.4
-        # Correct detector_1 position and orientation
-        del output_file['entry/instrument/detector_1/depends_on']
-        depend_on_path = '/entry/instrument/detector_1/transformations/x_offset'
-        output_file['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
-            '|S' + str(len(depend_on_path))))
-        del output_file['entry/instrument/detector_1/transformations/orientation']
-        location_path = 'entry/instrument/detector_1/transformations/location'
-        output_file[location_path][...] = 3.5
-        output_file[location_path].attrs['vector'] = [0., 0., 1.]
-        output_file[location_path].attrs['depends_on'] = '.'
-        del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
-        x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
-                                                                                                     dtype=np.float64,
-                                                                                                     data=0.065)
-
-        x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
-        translation_label = "translation"
-        x_offset_dataset.attrs.create('transformation_type',
-                                      np.array(translation_label).astype('|S' + str(len(translation_label))))
-        x_offset_dataset.attrs.create('depends_on',
-                                      np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
-        x_offset_dataset.attrs.create('vector',
-                                      [-1., 0., 0.])
-
-        # Correct monitor position and id
-        output_file['/entry/monitor_1/transformations/transformation'][...] = -1.8
-        output_file['/entry/monitor_1/detector_id'][...] = 262144
-
-        # Link monitor in the instrument group so that Mantid finds it
-        output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
-
-        # Link monitor event datasets to monitor in instrument group (for Mantid)
-        output_file['/entry/instrument/monitor_1/event_id'] = output_file['/entry/monitor_event_data/event_id']
-        output_file['/entry/instrument/monitor_1/event_index'] = output_file['/entry/monitor_event_data/event_index']
-        output_file['/entry/instrument/monitor_1/event_time_offset'] = output_file[
-            '/entry/monitor_event_data/event_time_offset']
-        output_file['/entry/instrument/monitor_1/event_time_zero'] = output_file[
-            '/entry/monitor_event_data/event_time_zero']
-
-        output_file['/entry/instrument/monitor_1/monitor_number'] = output_file[
-            '/entry/instrument/monitor_1/detector_id']
+        remove_data_not_used_by_mantid()
+        patch_geometry()
