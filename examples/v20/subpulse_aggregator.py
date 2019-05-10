@@ -42,14 +42,22 @@ def position_to_index(pos, count):
 
 
 def convert_id(detector_id, id_offset=0):
-    x = (detector_id[:] >> 16) & 0xffff
-    y = detector_id[:] & 0xffff
-    nx = 300
-    ny = 300
+    Nx = 512
+
+    x = np.bitwise_and(detector_id[:], 0xffff)
+    y = np.right_shift(detector_id[:], 16)
+
+    # Hist, XEdge, YEdge = np.histogram2d(x, y, bins=(100, 100))
+    # fig = pl.figure()
+    # ax = fig.add_subplot(111)
+    # ax.imshow(Hist)
+    # pl.show()
+
     # Mantid requires 32 bit unsigned, so this should be correct dtype already.
     # Need offset here unless the banks event ids start at zero (Mantid
     # will simply discard events that do not correspond to IDF).
-    return id_offset + position_to_index(x, nx) + nx * position_to_index(y, ny)
+    # return id_offset + position_to_index(x, Nx) + Nx * position_to_index(y, Ny)
+    return id_offset + x + (Nx * y)
 
 
 def write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, event_time_zero_output):
@@ -185,10 +193,10 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
-    event_index_output = np.zeros((wfm_tdc_times.size+1,), dtype=np.uint64)
-    event_time_zero_output = np.zeros((wfm_tdc_times.size,), dtype=np.uint64)
+    event_index_output = np.zeros((wfm_tdc_times.size*6+1,), dtype=np.uint64)
+    event_time_zero_output = np.zeros((wfm_tdc_times.size*6,), dtype=np.uint64)
     subpulse_uuid = (0, 0)
-    subpulse_index = 0
+    subpulse_count = 0
     zero_time_events = 0
     print('Aggregating events by subpulse...', flush=True)
     for event_input_number, (event_wallclock_time, event_id) in enumerate(
@@ -226,10 +234,10 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
             event_index_output[-1] = event_index
         else:
             # Append a new subpulse
-            subpulse_index += 1
             # + 1 to event_index as it indicates the start of the next pulse, not end of current one
-            event_index_output[subpulse_index+1] = event_index + 1
-            event_time_zero_output[subpulse_index] = np.uint64(t0)
+            event_index_output[subpulse_count+1] = event_index + 1
+            event_time_zero_output[subpulse_count] = np.uint64(t0)
+            subpulse_count += 1
 
         subpulse_uuid = next_subpulse_uuid
         event_index += 1
@@ -239,15 +247,15 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     offset_from_source_chopper_tdc = offset_from_source_chopper_tdc[:event_index]
 
     # Truncate subpulse arrays which may have been preallocated too large
-    event_index_output = event_index_output[:subpulse_index+1]
-    event_time_zero_output = event_time_zero_output[:subpulse_index+1]
+    event_index_output = event_index_output[:subpulse_count]
+    event_time_zero_output = event_time_zero_output[:subpulse_count]
 
     plot_histograms(offset_from_source_chopper_tdc, event_offset_output, threshold)
 
     if event_id_override is not None:
-        event_ids = event_id_override * np.ones_like(event_ids)
+        event_id_output = event_id_override * np.ones_like(event_id_output)
     else:
-        event_ids[event_ids > 262143] = 262143
+        event_id_output[event_id_output > 262143] = 262143
     write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
                      event_time_zero_output)
     print(
