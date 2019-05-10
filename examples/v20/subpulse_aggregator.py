@@ -127,11 +127,11 @@ def _tof_shifts(pscdata, psc_frequency=0.):
     return tof_shifts
 
 
-def _which_subpulse(time_after_source_tdc):
+def _which_subpulse(time_after_source_tdc, threshold):
     return np.searchsorted(threshold, time_after_source_tdc, 'left')
 
 
-def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows):
+def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows, threshold):
     fig, (ax1, ax2) = pl.subplots(2, 1)
     ax1.hist(offset_from_source_chopper, bins=2 * 144, range=(0, 72000000))
     for value in threshold:
@@ -148,23 +148,198 @@ def plot_histograms(offset_from_source_chopper, offset_from_wfm_windows):
     pl.subplots_adjust(hspace=0.3)
 
 
-if __name__ == '__main__':
+def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_group_name='event_data',
+                                 event_id_override=None):
     # Nasty hardcoded thresholds for subpulses
     # TODO calculate these from beamline geometry
-    component_name = args.raw_event_path.split('/')[-2]
+    component_name = input_group_path.split('/')[-2]
     if component_name == "monitor_1":
         threshold = np.array([21300000, 31400000, 40500000, 48600000, 56600000], dtype=int)
-    elif component_name == "monitor_2":
-        threshold = np.array([20600000, 30600000, 39400000, 47600000, 55600000], dtype=int)
     else:
         threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
-    low_cutoff = 10000000
-
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
                       5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
     relative_shifts = relative_shifts.astype(np.uint64)
+    # Create output event group
+    output_data_group = out_file['/entry'].create_group(output_group_name)
+    output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
+    # Shift the TDC times
+    source_tdc_times = out_file[optargs.chopper_tdc_path][...]
+    source_tdc_times += optargs.tdc_pulse_time_difference
+    wfm_tdc_times = out_file[optargs.wfm_chopper_tdc_path][...]
+    wfm_2_tdc_times = out_file[optargs.wfm_2_chopper_tdc_path][...]
+    event_ids = out_file[input_group_path + '/event_id'][...]
+    event_ids = convert_id(event_ids)
+    event_time_zero_input = out_file[input_group_path + '/event_time_zero'][...]
+    source_tdc_times, event_ids, event_time_zero_input, wfm_tdc_times, wfm_2_tdc_times = \
+        truncate_to_chopper_time_range(source_tdc_times,
+                                       event_ids,
+                                       event_time_zero_input,
+                                       wfm_tdc_times,
+                                       wfm_2_tdc_times)
+    source_tdc_index = 0
+    wfm_tdc_index = 0
+    wfm_2_tdc_index = 0  # for the second WFM chopper
+    event_index = 0
+    event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
+    event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
+    offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
+    event_index_output = np.array([0], dtype=np.uint64)
+    event_time_zero_output = np.array([], dtype=np.uint64)
+    subpulse_uuid = (0, 0)
+    zero_time_events = 0
+    print('Aggregating events by subpulse...')
+    for event_input_number, (event_wallclock_time, event_id) in enumerate(
+            tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
+        if event_wallclock_time == 0:
+            zero_time_events += 1
+            continue
+        # Find relevant source chopper timestamp
+        tdc_index = np.searchsorted(source_tdc_times[source_tdc_index:], event_wallclock_time,
+                                    'right') - 1 + source_tdc_index
+        source_tdc = source_tdc_times[tdc_index]
 
+        # Find relevant WFM chopper timestamps
+        wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], source_tdc, 'right') + wfm_tdc_index
+        wfm_tdc = wfm_tdc_times[wfm_tdc_index]
+        wfm_2_tdc_index = np.searchsorted(wfm_2_tdc_times[wfm_2_tdc_index:], source_tdc, 'right') + wfm_2_tdc_index
+        wfm_2_tdc = wfm_2_tdc_times[wfm_2_tdc_index]
+        wfm_tdc_mean = np.uint64((wfm_tdc + wfm_2_tdc) // 2)
+
+        # Determine which subpulse the event is in
+        offset_from_source_chopper_tdc[event_input_number] = event_wallclock_time - source_tdc
+        subpulse_index = _which_subpulse(offset_from_source_chopper_tdc[event_input_number], threshold)
+        t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
+
+        if t0 > event_wallclock_time:
+            # Throw this event away
+            continue
+
+        event_offset_output[event_index] = event_wallclock_time - t0
+        event_id_output[event_index] = event_id
+
+        next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
+        if next_subpulse_uuid == subpulse_uuid:
+            # This event is from the same subpulse as the previous one
+            event_index_output[-1] = event_index
+        else:
+            # Append a new subpulse
+            # + 1 to event_index as it indicates the start of the next pulse, not end of current one
+            event_index_output = np.concatenate((event_index_output, [event_index + 1]))
+            event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
+
+        subpulse_uuid = next_subpulse_uuid
+        event_index += 1
+    # Truncate space from arrays which wasn't needed due to bad events
+    event_offset_output = event_offset_output[:event_index]
+    event_id_output = event_id_output[:event_index]
+    offset_from_source_chopper_tdc = offset_from_source_chopper_tdc[:event_index]
+    # Truncate last value as indicate start of a subpulse for which there were no events
+    event_index_output = event_index_output[:-1]
+    plot_histograms(offset_from_source_chopper_tdc, event_offset_output, threshold)
+
+    if event_id_override is not None:
+        event_ids = event_id_override * np.ones_like(event_ids)
+    else:
+        event_ids[event_ids > 262143] = 262143
+    write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
+                     event_time_zero_output)
+    print(
+        'WARNING, encountered {} event_time_zero entries with a value of 0, these were omitted from the output'.format(
+            zero_time_events))
+
+
+def remove_data_not_used_by_mantid():
+    global groups_to_remove
+    # Delete waveform groups (not read by Mantid)
+    for channel in range(3):
+        group_name = f'/entry/instrument/detector_1/waveforms_channel_{channel}'
+        del output_file[group_name]
+    groups_to_remove = []
+
+    def remove_groups_without_nxclass(name, object):
+        if isinstance(object, h5py.Group):
+            if 'NX_class' not in object.attrs.keys():
+                groups_to_remove.append(name)
+
+    output_file.visititems(remove_groups_without_nxclass)
+    for group in reversed(groups_to_remove):
+        print(group)
+        del output_file[group]
+
+
+def patch_geometry():
+    pixels_per_axis = 512
+    pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
+    pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
+    del output_file['entry/instrument/detector_1/detector_number']
+    output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
+                                                               data=pixel_ids)
+    neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
+    # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
+    # into 512 pixels and the actual active width we see of the detector
+    # I suspect the actually detector area we collect data from is smaller than 0.28x0.28
+    pixel_size = neutron_sensitive_width / pixels_per_axis
+    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
+                                                  dtype=np.float)) - (neutron_sensitive_width / 2.) + (
+                                  pixel_size / 2.)
+    x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
+                                       single_axis_offsets)
+    del output_file['entry/instrument/detector_1/x_pixel_offset']
+    del output_file['entry/instrument/detector_1/y_pixel_offset']
+    output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
+                                                               dtype=np.float64, data=x_offsets)
+    output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
+                                                               dtype=np.float64, data=y_offsets)
+    del output_file['entry/monitor_1/waveforms']
+    del output_file['entry/instrument/detector_1/waveforms_channel_3']
+    del output_file['entry/instrument/linear_axis_1']
+    del output_file['entry/instrument/linear_axis_2']
+    del output_file['entry/sample/transformations/offset_stage_1_to_default_sample']
+    del output_file['entry/sample/transformations/offset_stage_2_to_sample']
+    del output_file['entry/sample/transformations/offset_stage_2_to_stage_1']
+    # Correct the source position
+    output_file['entry/instrument/source/transformations/location'][...] = 27.4
+    # Correct detector_1 position and orientation
+    del output_file['entry/instrument/detector_1/depends_on']
+    depend_on_path = '/entry/instrument/detector_1/transformations/x_offset'
+    output_file['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
+        '|S' + str(len(depend_on_path))))
+    del output_file['entry/instrument/detector_1/transformations/orientation']
+    location_path = 'entry/instrument/detector_1/transformations/location'
+    output_file[location_path][...] = 3.5
+    output_file[location_path].attrs['vector'] = [0., 0., 1.]
+    output_file[location_path].attrs['depends_on'] = '.'
+    del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
+    x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
+                                                                                                 dtype=np.float64,
+                                                                                                 data=0.065)
+    x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
+    translation_label = "translation"
+    x_offset_dataset.attrs.create('transformation_type',
+                                  np.array(translation_label).astype('|S' + str(len(translation_label))))
+    x_offset_dataset.attrs.create('depends_on',
+                                  np.array('/' + location_path).astype('|S' + str(len(location_path) + 1)))
+    x_offset_dataset.attrs.create('vector',
+                                  [-1., 0., 0.])
+    # Correct monitor position and id
+    output_file['/entry/monitor_1/transformations/transformation'][...] = -1.8
+    output_file['/entry/monitor_1/detector_id'][...] = 262144
+    # Link monitor in the instrument group so that Mantid finds it
+    output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
+    # Link monitor event datasets to monitor in instrument group (for Mantid)
+    output_file['/entry/instrument/monitor_1/event_id'] = output_file['/entry/monitor_event_data/event_id']
+    output_file['/entry/instrument/monitor_1/event_index'] = output_file['/entry/monitor_event_data/event_index']
+    output_file['/entry/instrument/monitor_1/event_time_offset'] = output_file[
+        '/entry/monitor_event_data/event_time_offset']
+    output_file['/entry/instrument/monitor_1/event_time_zero'] = output_file[
+        '/entry/monitor_event_data/event_time_zero']
+    output_file['/entry/instrument/monitor_1/monitor_number'] = output_file[
+        '/entry/instrument/monitor_1/detector_id']
+
+
+if __name__ == '__main__':
     if not args.in_place:
         print('Copying input file contents to output file...')
         copyfile(args.input_filename, args.output_filename)
@@ -174,99 +349,14 @@ if __name__ == '__main__':
         output_file = args.input_filename
 
     with h5py.File(output_file, 'r+') as raw_file:
-        # Create output event group
-        # output_data_group = raw_file['/entry'].create_group('event_data')
-        output_data_group = raw_file.create_group(args.output_event_path)
-        output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
+        # DENEX detector
+        aggregate_events_by_subpulse(output_file, args, args.raw_event_path)
 
-        # Shift the TDC times
-        source_tdc_times = raw_file[args.chopper_tdc_path][...]
-        source_tdc_times += args.tdc_pulse_time_difference
+        # Monitor
+        aggregate_events_by_subpulse(output_file, args, '/entry/monitor_1/events', 'monitor_event_data',
+                                     event_id_override=262144)
 
-        wfm_tdc_times = raw_file[args.wfm_chopper_tdc_path][...]
-        wfm_2_tdc_times = raw_file[args.wfm_2_chopper_tdc_path][...]
-
-        event_ids = raw_file[args.raw_event_path + '/event_id'][...]
-        event_ids = convert_id(event_ids)
-
-        event_time_zero_input = raw_file[args.raw_event_path + '/event_time_zero'][...]
-
-        source_tdc_times, event_ids, event_time_zero_input, wfm_tdc_times, wfm_2_tdc_times = \
-            truncate_to_chopper_time_range(source_tdc_times,
-                                           event_ids,
-                                           event_time_zero_input,
-                                           wfm_tdc_times,
-                                           wfm_2_tdc_times)
-
-        source_tdc_index = 0
-        wfm_tdc_index = 0
-        wfm_2_tdc_index = 0  # for the second WFM chopper
-        event_index = 0
-        event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
-        event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
-        offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
-        event_index_output = np.array([0], dtype=np.uint64)
-        event_time_zero_output = np.array([], dtype=np.uint64)
-        subpulse_uuid = (0, 0)
-        zero_time_events = 0
-        print('Aggregating events by subpulse...')
-        for event_input_number, (event_wallclock_time, event_id) in enumerate(
-                tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
-            if event_wallclock_time == 0:
-                zero_time_events += 1
-                continue
-            # Find relevant source chopper timestamp
-            tdc_index = np.searchsorted(source_tdc_times[source_tdc_index:], event_wallclock_time,
-                                        'right') - 1 + source_tdc_index
-            source_tdc = source_tdc_times[tdc_index]
-
-            # Find relevant WFM chopper timestamps
-            wfm_tdc_index = np.searchsorted(wfm_tdc_times[wfm_tdc_index:], source_tdc, 'right') + wfm_tdc_index
-            wfm_tdc = wfm_tdc_times[wfm_tdc_index]
-            wfm_2_tdc_index = np.searchsorted(wfm_2_tdc_times[wfm_2_tdc_index:], source_tdc, 'right') + wfm_2_tdc_index
-            wfm_2_tdc = wfm_2_tdc_times[wfm_2_tdc_index]
-            wfm_tdc_mean = np.uint64((wfm_tdc + wfm_2_tdc) // 2)
-
-            # Determine which subpulse the event is in
-            offset_from_source_chopper_tdc[event_input_number] = event_wallclock_time - source_tdc
-            subpulse_index = _which_subpulse(offset_from_source_chopper_tdc[event_input_number])
-            t0 = wfm_tdc_mean + relative_shifts[subpulse_index]
-
-            if t0 > event_wallclock_time:
-                # Throw this event away
-                continue
-
-            event_offset_output[event_index] = event_wallclock_time - t0
-            event_id_output[event_index] = event_id
-
-            next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
-            if next_subpulse_uuid == subpulse_uuid:
-                # This event is from the same subpulse as the previous one
-                event_index_output[-1] = event_index
-            else:
-                # Append a new subpulse
-                # + 1 to event_index as it indicates the start of the next pulse, not end of current one
-                event_index_output = np.concatenate((event_index_output, [event_index + 1]))
-                event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
-
-            subpulse_uuid = next_subpulse_uuid
-            event_index += 1
-
-        # Truncate space from arrays which wasn't needed due to bad events
-        event_offset_output = event_offset_output[:event_index]
-        event_id_output = event_id_output[:event_index]
-        offset_from_source_chopper_tdc = offset_from_source_chopper_tdc[:event_index]
-
-        # Truncate last value as indicate start of a subpulse for which there were no events
-        event_index_output = event_index_output[:-1]
-
-        plot_histograms(offset_from_source_chopper_tdc, event_offset_output)
-
-        write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
-                         event_time_zero_output)
-
-        print(
-            'WARNING, encountered {} event_time_zero entries with a value of 0, these were omitted from the output'.format(
-                zero_time_events))
+        remove_data_not_used_by_mantid()
+        patch_geometry()
 
         pl.show()
