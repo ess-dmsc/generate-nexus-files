@@ -154,9 +154,9 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     # TODO calculate these from beamline geometry
     component_name = input_group_path.split('/')[-2]
     if component_name == "monitor_1":
-        threshold = np.array([21300000, 31400000, 40500000, 48600000, 56600000], dtype=int)
+        threshold = np.array([23500000, 32800000, 40500000, 48000000, 55000000], dtype=int)
     else:
-        threshold = np.array([21300000, 31500000, 40500000, 48500000, 56500000], dtype=int)
+        threshold = np.array([28000000, 39000000, 48000000, 57000000, 65600000], dtype=int)
     relative_shifts = (_tof_shifts(_wfm_psc_1(), psc_frequency=70.0) +
                        _tof_shifts(_wfm_psc_2(), psc_frequency=70.0)) * \
                       5.0e+08  # factor of 0.5 * 1.0e9 (taking mean and converting to nanoseconds)
@@ -185,11 +185,12 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
-    event_index_output = np.array([0], dtype=np.uint64)
-    event_time_zero_output = np.array([], dtype=np.uint64)
+    event_index_output = np.zeros((wfm_tdc_times.size+1,), dtype=np.uint64)
+    event_time_zero_output = np.zeros((wfm_tdc_times.size,), dtype=np.uint64)
     subpulse_uuid = (0, 0)
+    subpulse_index = 0
     zero_time_events = 0
-    print('Aggregating events by subpulse...')
+    print('Aggregating events by subpulse...', flush=True)
     for event_input_number, (event_wallclock_time, event_id) in enumerate(
             tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
         if event_wallclock_time == 0:
@@ -225,9 +226,10 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
             event_index_output[-1] = event_index
         else:
             # Append a new subpulse
+            subpulse_index += 1
             # + 1 to event_index as it indicates the start of the next pulse, not end of current one
-            event_index_output = np.concatenate((event_index_output, [event_index + 1]))
-            event_time_zero_output = np.concatenate((event_time_zero_output, np.array([t0]).astype(np.uint64)))
+            event_index_output[subpulse_index+1] = event_index + 1
+            event_time_zero_output[subpulse_index] = np.uint64(t0)
 
         subpulse_uuid = next_subpulse_uuid
         event_index += 1
@@ -235,8 +237,11 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     event_offset_output = event_offset_output[:event_index]
     event_id_output = event_id_output[:event_index]
     offset_from_source_chopper_tdc = offset_from_source_chopper_tdc[:event_index]
-    # Truncate last value as indicate start of a subpulse for which there were no events
-    event_index_output = event_index_output[:-1]
+
+    # Truncate subpulse arrays which may have been preallocated too large
+    event_index_output = event_index_output[:subpulse_index+1]
+    event_time_zero_output = event_time_zero_output[:subpulse_index+1]
+
     plot_histograms(offset_from_source_chopper_tdc, event_offset_output, threshold)
 
     if event_id_override is not None:
@@ -263,7 +268,7 @@ def remove_data_not_used_by_mantid(out_file):
             if 'NX_class' not in object.attrs.keys():
                 groups_to_remove.append(name)
 
-    output_file.visititems(remove_groups_without_nxclass)
+    out_file.visititems(remove_groups_without_nxclass)
     for group in reversed(groups_to_remove):
         print(group)
         del out_file[group]
