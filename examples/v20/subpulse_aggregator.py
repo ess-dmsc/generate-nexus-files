@@ -25,13 +25,13 @@ parser.add_argument('--output-event-path', type=str,
                     default='/entry/event_data')
 parser.add_argument('--chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_1/top_dead_centre_unix/time')
+                    default='/entry/instrument/chopper_1/top_dead_center/time')
 parser.add_argument('--wfm-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_3/top_dead_centre_unix/time')
+                    default='/entry/instrument/chopper_3/top_dead_center/time')
 parser.add_argument('--wfm-2-chopper-tdc-path', type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_4/top_dead_centre_unix/time')
+                    default='/entry/instrument/chopper_4/top_dead_center/time')
 args = parser.parse_args()
 
 
