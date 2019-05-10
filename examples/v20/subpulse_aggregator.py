@@ -197,13 +197,13 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     event_time_zero_output = np.zeros((wfm_tdc_times.size*6,), dtype=np.uint64)
     subpulse_uuid = (0, 0)
     subpulse_count = 0
-    zero_time_events = 0
+    #zero_time_events = 0
     print('Aggregating events by subpulse...', flush=True)
     for event_input_number, (event_wallclock_time, event_id) in enumerate(
             tqdm(zip(event_time_zero_input, event_ids), total=len(event_time_zero_input))):
-        if event_wallclock_time == 0:
-            zero_time_events += 1
-            continue
+        #if event_wallclock_time == 0:
+        #    zero_time_events += 1
+        #    continue
         # Find relevant source chopper timestamp
         tdc_index = np.searchsorted(source_tdc_times[source_tdc_index:], event_wallclock_time,
                                     'right') - 1 + source_tdc_index
@@ -231,7 +231,7 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
         next_subpulse_uuid = (wfm_tdc_index, subpulse_index)
         if next_subpulse_uuid == subpulse_uuid:
             # This event is from the same subpulse as the previous one
-            event_index_output[-1] = event_index
+            event_index_output[subpulse_count] = event_index
         else:
             # Append a new subpulse
             # + 1 to event_index as it indicates the start of the next pulse, not end of current one
@@ -258,9 +258,9 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
         event_id_output[event_id_output > 262143] = 262143
     write_event_data(output_data_group, event_id_output, event_index_output, event_offset_output,
                      event_time_zero_output)
-    print(
-        'WARNING, encountered {} event_time_zero entries with a value of 0, these were omitted from the output'.format(
-            zero_time_events))
+    #print(
+    #    'WARNING, encountered {} event_time_zero entries with a value of 0, these were omitted from the output'.format(
+    #        zero_time_events))
 
 
 def remove_data_not_used_by_mantid(out_file):
