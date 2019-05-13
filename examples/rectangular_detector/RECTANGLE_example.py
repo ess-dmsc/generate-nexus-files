@@ -60,7 +60,23 @@ def add_detector(parent_node, group_name):
 
     create_dataset(detector_group, 'local_name', 'Simple rectangular detector')
 
-    pixel_shape = builder.add_nx_group(detector_group, 'pixel_shape', 'NXoff_geometry')
+    add_pixel_shape(detector_group)
+
+    pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
+    pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
+    create_dataset(detector_group, 'detector_number', pixel_ids)
+
+    add_detector_transforms(detector)
+
+    return detector_group
+
+
+def add_pixel_shape(detector_group):
+    """
+    Add an NXoff_geometry group which describes the shape of a pixel
+    :param detector_group:
+    """
+    pixel_shape = create_nx_group(detector_group, 'pixel_shape', 'NXoff_geometry')
     pixel_verts = np.array([[-0.001, -0.001, 0.0], [0.001, -0.001, 0.0], [0.001, 0.001, 0.0], [-0.001, 0.001, 0.0]],
                            dtype=np.float32)
     pixel_winding_order = np.array([0, 1, 2, 3], dtype=np.int32)
@@ -69,22 +85,22 @@ def add_detector(parent_node, group_name):
     create_dataset(pixel_shape, 'vertices', pixel_verts, {'units': 'm'})
     create_dataset(pixel_shape, 'winding_order', pixel_winding_order)
 
-    pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
-    pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
-    create_dataset(detector_group, 'detector_number', pixel_ids)
-    return detector_group
 
-
-def add_detector_position(detector_group):
+def add_detector_transforms(detector_group):
+    """
+    Add the transformations describing the position and orientation of the detector
+    :param detector_group:
+    """
     transforms = create_nx_group(detector_group, 'transformations', 'NXtransformations')
     z_offset = create_dataset(transforms, 'beam_direction_offset', 0.5,
                               {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, -1.0],
                                'depends_on': '.'})
-    x_offset = builder.add_transformation(transforms, 'translation', [0.971], 'm', [1.0, 0.0, 0.0], name='location',
-                                          depends_on=z_offset.name)
-    orientation = builder.add_transformation(transforms, 'rotation', [np.pi / 2.0], 'rad', [0.0, 1.0, 0.0],
-                                             name='orientation',
-                                             depends_on=x_offset.name)
+    x_offset = create_dataset(transforms, 'horizontal_direction_offset', 0.2,
+                              {'type': 'translation', 'units': 'm', 'vector': [1.0, 0.0, 0.0],
+                               'depends_on': z_offset.name})
+    orientation = create_dataset(transforms, 'orientation', np.pi / 2.0,
+                                 {'type': 'rotation', 'units': 'rad', 'vector': [0.0, 1.0, 0.0],
+                                  'depends_on': x_offset.name})
     create_dataset(detector_group, 'depends_on', orientation.name)
 
 
@@ -92,6 +108,6 @@ if __name__ == '__main__':
     output_nexus_filename = 'simple_rectangular_detector.nxs'
     with h5py.File(output_nexus_filename, 'w') as output_file:
         entry = create_nx_group(output_file, 'entry', 'NXentry')
-        create_nx_group(entry, 'sample', 'NXsample')
+        sample = create_nx_group(entry, 'sample', 'NXsample')
+        source = create_nx_group(entry, 'source', 'NXsource')
         detector = add_detector(entry, 'detector')
-        add_detector_position(detector)
