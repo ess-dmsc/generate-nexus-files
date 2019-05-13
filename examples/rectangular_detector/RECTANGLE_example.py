@@ -46,12 +46,12 @@ def create_dataset(parent_node, dataset_name, data, attributes=None):
 
 def add_detector(parent_node, group_name):
     pixels_per_axis = 100
-    pixel_size = 0.002
+    pixel_width = 0.002
     detector_side_length = 0.4
     half_detector_side_length = detector_side_length / 2.0
-    half_pixel_width = 0.002 / 2.0
-    single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
-                                                  dtype=np.float)) - half_detector_side_length + half_pixel_width
+    half_pixel_width = pixel_width / 2.0
+    single_axis_offsets = (pixel_width * np.arange(0, pixels_per_axis, 1,
+                                                   dtype=np.float)) - half_detector_side_length + half_pixel_width
     detector_group = create_nx_group(parent_node, group_name, 'NXdetector')
     x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
                                        single_axis_offsets)
@@ -93,13 +93,13 @@ def add_detector_transforms(detector_group):
     """
     transforms = create_nx_group(detector_group, 'transformations', 'NXtransformations')
     z_offset = create_dataset(transforms, 'beam_direction_offset', 0.5,
-                              {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, 1.0],
+                              {'transformation_type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, 1.0],
                                'depends_on': '.'})
-    x_offset = create_dataset(transforms, 'horizontal_direction_offset', 0.2,
-                              {'type': 'translation', 'units': 'm', 'vector': [1.0, 0.0, 0.0],
+    x_offset = create_dataset(transforms, 'horizontal_direction_offset', 0.15,
+                              {'transformation_type': 'translation', 'units': 'm', 'vector': [1.0, 0.0, 0.0],
                                'depends_on': z_offset.name})
-    orientation = create_dataset(transforms, 'orientation', np.pi / 2.0,
-                                 {'type': 'rotation', 'units': 'rad', 'vector': [0.0, 1.0, 0.0],
+    orientation = create_dataset(transforms, 'orientation', np.pi / 4.0,
+                                 {'transformation_type': 'rotation', 'units': 'rad', 'vector': [0.0, 1.0, 0.0],
                                   'depends_on': x_offset.name})
     create_dataset(detector_group, 'depends_on', orientation.name)
 
@@ -107,7 +107,7 @@ def add_detector_transforms(detector_group):
 def add_source_position(source_group):
     transforms = create_nx_group(source_group, 'transformations', 'NXtransformations')
     create_dataset(transforms, 'beam_direction_offset', 5.0,
-                   {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, -1.0],
+                   {'transformation_type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, -1.0],
                     'depends_on': '.'})
 
 
@@ -116,6 +116,7 @@ if __name__ == '__main__':
     with h5py.File(output_nexus_filename, 'w') as output_file:
         entry = create_nx_group(output_file, 'entry', 'NXentry')
         instrument = create_nx_group(entry, 'instrument', 'NXinstrument')
+        create_dataset(instrument, 'name', 'RECTANGLE', {'short_name': 'RECT'})
         sample = create_nx_group(entry, 'sample', 'NXsample')
         source = create_nx_group(instrument, 'source', 'NXsource')
         add_source_position(source)
