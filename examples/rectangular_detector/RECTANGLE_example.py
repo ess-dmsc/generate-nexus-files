@@ -66,7 +66,7 @@ def add_detector(parent_node, group_name):
     pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
     create_dataset(detector_group, 'detector_number', pixel_ids)
 
-    add_detector_transforms(detector)
+    add_detector_transforms(detector_group)
 
     return detector_group
 
@@ -93,7 +93,7 @@ def add_detector_transforms(detector_group):
     """
     transforms = create_nx_group(detector_group, 'transformations', 'NXtransformations')
     z_offset = create_dataset(transforms, 'beam_direction_offset', 0.5,
-                              {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, -1.0],
+                              {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, 1.0],
                                'depends_on': '.'})
     x_offset = create_dataset(transforms, 'horizontal_direction_offset', 0.2,
                               {'type': 'translation', 'units': 'm', 'vector': [1.0, 0.0, 0.0],
@@ -104,10 +104,19 @@ def add_detector_transforms(detector_group):
     create_dataset(detector_group, 'depends_on', orientation.name)
 
 
+def add_source_position(source_group):
+    transforms = create_nx_group(source_group, 'transformations', 'NXtransformations')
+    create_dataset(transforms, 'beam_direction_offset', 5.0,
+                   {'type': 'translation', 'units': 'm', 'vector': [0.0, 0.0, -1.0],
+                    'depends_on': '.'})
+
+
 if __name__ == '__main__':
     output_nexus_filename = 'simple_rectangular_detector.nxs'
     with h5py.File(output_nexus_filename, 'w') as output_file:
         entry = create_nx_group(output_file, 'entry', 'NXentry')
+        instrument = create_nx_group(entry, 'instrument', 'NXinstrument')
         sample = create_nx_group(entry, 'sample', 'NXsample')
-        source = create_nx_group(entry, 'source', 'NXsource')
-        detector = add_detector(entry, 'detector')
+        source = create_nx_group(instrument, 'source', 'NXsource')
+        add_source_position(source)
+        detector = add_detector(instrument, 'detector')
