@@ -1,13 +1,9 @@
 from collections import OrderedDict
 from nexusutils.nexusbuilder import NexusBuilder
-import h5py
 import numpy as np
 import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 from datetime import datetime
-
-airbus_choppers = [1, 2, 6, 7]
-julich_choppers = [3, 4, 5, 8]
 
 
 def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
