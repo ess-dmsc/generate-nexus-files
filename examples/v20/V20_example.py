@@ -82,35 +82,35 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'name', 'Airbus, Source Chopper, ESS Pulse, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', [0., 23.], attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 1)
-        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
     elif number is 2:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Source Chopper, ESS Pulse, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', [0., 50.], attributes={'units': 'deg'})
         # Actually has 2 slits, but only one is used and I don't have dimensions for the second slit
         builder.add_dataset(chopper_group, 'slits', 1)
-        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
     elif number is 3:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 83.71, 94.7, 140.49, 155.79, 193.26, 212.56, 242.32, 265.33, 287.91, 314.37, 330.3]) + 15.0,
                             attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 6)
-        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
     elif number is 4:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 65.04, 76.03, 126.1, 141.4, 182.88, 202.18, 235.67, 254.97, 284.73, 307.74, 330.0]) + 15.0,
                             attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 6)
-        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
     elif number is 5:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 1')
-        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 64.35, 84.99, 125.05, 148.29, 183.41, 205.22, 236.4, 254.27, 287.04, 302.8, 335.53]) + 15.0,
                             attributes={'units': 'deg'})
@@ -120,19 +120,19 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', [0., 140.], attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 1)
-        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
     elif number is 7:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Wavelength-Band Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', [0., 202.], attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 1)
-        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
     elif number is 8:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 2')
-        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units', 'mm'})
-        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units', 'mm'})
+        builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 79.78, 116.38, 136.41, 172.47, 191.73, 221.94, 240.81, 267.69, 287.13, 311.69, 330.89]) + 15.0,
                             attributes={'units': 'deg'})
