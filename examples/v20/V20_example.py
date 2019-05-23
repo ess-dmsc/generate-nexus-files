@@ -237,18 +237,15 @@ def __add_readout_system(builder, parent_group):
         readout_group.create_group('status')
 
 
-def __add_linear_stage(builder):
-    for axis in ('1', '2'):
-        group_name = f'linear_axis_{axis}'
+def __add_motion_devices(builder):
+    group_names = ['linear stage', 'goniometer_top', 'goniometer_bottom']
+    for group_number, group_name in enumerate(group_names):
         group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
         group.create_group('target_value')
-        value = group.create_group('value')
-        value.attrs.create('units', np.array('mm').astype('|S2'))
+        group.create_group('value')
         group.create_group('status')
-        speed = group.create_group('speed')
-        speed.attrs.create('units', np.array('mm/s').astype('|S2'))
-        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{axis}.VAL')
-        builder.add_dataset(group, 'name', f'Linear Axis {axis}')
+        group.create_group('velocity')
+        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{group_number}.VAL')
 
 
 def __create_file_writer_command(filepath):
@@ -317,30 +314,19 @@ def __create_file_writer_command(filepath):
         __add_data_stream(streams, timing_status_topic, f'HZB-V20:TS-RO{readout_system_number}:STATUS2-RBV',
                           f'/entry/instrument/detector_1/{group_name}/status', 'f142', 'int32')
 
-    # Linear stages
-    linear_motion_topic = 'V20_linearStages'
-    for axis in ('1', '2'):
-        group_name = f'linear_axis_{axis}'
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.VAL',
+    # Motion devices
+    motion_topic = 'V20_motion'
+    group_names = ['linear stage', 'goniometer_top', 'goniometer_bottom']
+    for group_number, group_name in enumerate(group_names):
+        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.VAL',
                           f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.RBV',
+        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.RBV',
                           f'/entry/instrument/{group_name}/value', 'f142', 'double')
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.STAT',
+        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.STAT',
                           f'/entry/instrument/{group_name}/status', 'f142', 'int32')
-        __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m{axis}.VELO',
-                          f'/entry/instrument/{group_name}/speed', 'f142', 'double')
+        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.VELO',
+                          f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
 
-    # TODO linear motion values
-    __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m2.RBV',
-                      '/entry/sample/transformations/linear_stage_2_position', 'f142', 'double')
-    __add_data_stream(streams, linear_motion_topic, f'SES-PREMP:MC-MCU-01:m1.RBV',
-                      '/entry/sample/transformations/linear_stage_1_position', 'f142', 'double')
-    # linear_stage_2_link = {'name': 'linear_stage_2_position',
-    #                       'target': '/entry/instrument/linear_axis_2/value'}
-    # linear_stage_1_link = {'name': 'linear_stage_1_position',
-    #                       'target': '/entry/instrument/linear_axis_1/value'}
-    # links = {'/entry/sample/transformations/linear_stage_2_position': linear_stage_2_link,
-    #         '/entry/sample/transformations/linear_stage_1_position': linear_stage_1_link}
     links = {}
 
     converter = NexusToDictConverter()
@@ -399,39 +385,11 @@ if __name__ == '__main__':
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
-        __add_linear_stage(builder)
+        __add_motion_devices(builder)
 
         # Sample
         sample_group = builder.add_sample()
-        builder.add_dataset(sample_group, 'description',
-                            'hBN target with 1.0 mm diameter hole')
-        # builder.add_dataset(sample_group, 'description',
-        #                     'hBN target with 0.2 mm diameter hole')
-        transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
-
-        # Offset of origin of stage 1 from "default" sample position
-        trans_1 = builder.add_transformation(transforms, 'translation', 0.07, 'm', [0.0, 0.0, -1.0],
-                                             name='offset_stage_1_to_default_sample')
-        # Link to stage 1 value NXlog - can't get links to work so using a seconds stream for now
-        linear_1 = transforms.create_group('linear_stage_1_position')  # placeholder, will be replaced by stream
-        __add_attributes(linear_1, {'depends_on': trans_1.name,
-                                    'vector': [0., 1., 0.],
-                                    'transformation_type': 'translation',
-                                    'units': 'mm',
-                                    'NX_class': 'NXlog'})
-        # Offset of origin of stage 2 from origin of stage 1
-        trans_2 = builder.add_transformation(transforms, 'translation', 0.02, 'm', [0.0, 0.0, 1.0],
-                                             name='offset_stage_2_to_stage_1', depends_on=linear_1.name)
-        # Link to stage 2 value NXlog - can't get links to work so using a seconds stream for now
-        linear_2 = transforms.create_group('linear_stage_2_position')  # placeholder, will be replaced by stream
-        __add_attributes(linear_2, {'depends_on': trans_2.name,
-                                    'vector': [1., 0., 0.],
-                                    'transformation_type': 'translation',
-                                    'units': 'mm',
-                                    'NX_class': 'NXlog'})
-        # Offset of sample centre from origin of stage 2 (due to kinematic mount etc)
-        builder.add_transformation(transforms, 'translation', 0.05, 'm', [0.0, 0.0, 1.0],
-                                   name='offset_stage_2_to_sample', depends_on=linear_2.name)
+        builder.add_dataset(sample_group, 'description', '')
 
         # Add a source at the position of the first chopper
         builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598 + 21.7])
