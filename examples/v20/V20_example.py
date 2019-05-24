@@ -313,7 +313,7 @@ def __create_file_writer_command(filepath):
 
     # Motion devices
     motion_topic = 'V20_motion'
-    group_names = ['linear stage', 'goniometer_top', 'goniometer_bottom']
+    group_names = ['linear_stage', 'goniometer_top', 'goniometer_bottom']
     for group_number, group_name in enumerate(group_names):
         __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.VAL',
                           f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
