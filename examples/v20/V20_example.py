@@ -99,6 +99,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 6)
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
+        builder.add_dataset(chopper_group, 'ntp_to_mrf_comparison', 0)
     elif number is 4:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
@@ -241,7 +242,7 @@ def __add_motion_devices(builder):
         group.create_group('value')
         group.create_group('status')
         group.create_group('velocity')
-        builder.add_dataset(group, 'controller_record', f'SES-PREMP:MC-MCU-01:m{group_number}.VAL')
+        builder.add_dataset(group, 'controller_record', f'TUD-SMI:MC-MCU-01:m{group_number}.VAL')
 
 
 def __create_file_writer_command(filepath):
@@ -314,13 +315,13 @@ def __create_file_writer_command(filepath):
     motion_topic = 'V20_motion'
     group_names = ['linear stage', 'goniometer_top', 'goniometer_bottom']
     for group_number, group_name in enumerate(group_names):
-        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.VAL',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.VAL',
                           f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.RBV',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.RBV',
                           f'/entry/instrument/{group_name}/value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.STAT',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.STAT',
                           f'/entry/instrument/{group_name}/status', 'f142', 'int32')
-        __add_data_stream(streams, motion_topic, f'SES-PREMP:MC-MCU-01:m{group_number}.VELO',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.VELO',
                           f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
 
     links = {}
