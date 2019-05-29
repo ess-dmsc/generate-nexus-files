@@ -85,7 +85,7 @@ def _link_log(outfile, log_group, source_path, target_name):
         log_group[f'{target_name}/time'].attrs.create('start',
                                                       np.array(unix_epoch).astype('|S' + str(len(unix_epoch))))
     if 'units' not in log_group[f'{target_name}/time'].attrs:
-        nanosecs = 'nanoseconds'
+        nanosecs = 'ns'
         log_group[f'{target_name}/time'].attrs.create('units',
                                                       np.array(nanosecs).astype('|S' + str(len(nanosecs))))
 
@@ -100,7 +100,6 @@ def _link_log(outfile, log_group, source_path, target_name):
         del log_group[f'{target_name}/time']
         log_group[target_name].create_dataset('time', dtype=float, data=times)
         add_attributes_to_node(log_group[f'{target_name}/time'], times_attrs)
-    
 
 
 def link_logs():
