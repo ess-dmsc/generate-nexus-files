@@ -79,20 +79,28 @@ def _link_log(outfile, log_group, source_path, target_name):
         log_group[f'{target_name}/value'] = log_group[f'{target_name}/raw_value']
     except:
         pass
-    if 'units' in log_group[f'{target_name}/time'].attrs.keys():
-        if log_group[f'{target_name}/time'].attrs.get('units') == b'ns':
-            # Mantid doesn't know about nanoseconds, we'll have to reduce the precision to microseconds
-            microsecs = 'us'
-            log_group[f'{target_name}/time'].attrs.modify('units',
-                                                          np.array(microsecs).astype('|S' + str(len(microsecs))))
-            # Convert nanoseconds to microseconds and store as float not int
-            times = log_group[f'{target_name}/time'][...].astype(float) * 0.001
-            times_attrs = dict(log_group[f'{target_name}/time'].attrs)
-            if 'start' not in times_attrs:
-                times_attrs['start'] = '1970-01-01T00:00:00Z'
-            del log_group[f'{target_name}/time']
-            log_group[target_name].create_dataset('time', dtype=float, data=times)
-            add_attributes_to_node(log_group[f'{target_name}/time'], times_attrs)
+    # Mantid doesn't assume relative unix epoch (should according to NeXus standard)
+    if 'start' not in log_group[f'{target_name}/time'].attrs:
+        unix_epoch = '1970-01-01T00:00:00Z'
+        log_group[f'{target_name}/time'].attrs.create('start',
+                                                      np.array(unix_epoch).astype('|S' + str(len(unix_epoch))))
+    if 'units' not in log_group[f'{target_name}/time'].attrs:
+        nanosecs = 'nanoseconds'
+        log_group[f'{target_name}/time'].attrs.create('units',
+                                                      np.array(nanosecs).astype('|S' + str(len(nanosecs))))
+
+    if log_group[f'{target_name}/time'].attrs.get('units') == b'ns':
+        # Mantid doesn't know about nanoseconds, we'll have to reduce the precision to microseconds
+        microsecs = 'us'
+        log_group[f'{target_name}/time'].attrs.modify('units',
+                                                      np.array(microsecs).astype('|S' + str(len(microsecs))))
+        # Convert nanoseconds to microseconds and store as float not int
+        times = log_group[f'{target_name}/time'][...].astype(float) * 0.001
+        times_attrs = dict(log_group[f'{target_name}/time'].attrs)
+        del log_group[f'{target_name}/time']
+        log_group[target_name].create_dataset('time', dtype=float, data=times)
+        add_attributes_to_node(log_group[f'{target_name}/time'], times_attrs)
+    
 
 
 def link_logs():
