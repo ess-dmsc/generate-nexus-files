@@ -6,7 +6,7 @@ import os
 from os.path import isfile, join
 import subprocess
 from shutil import copyfile
-from .pulse_aggregator import aggregate_events_by_pulse, remove_data_not_used_by_mantid, patch_geometry
+from pulse_aggregator import aggregate_events_by_pulse, remove_data_not_used_by_mantid, patch_geometry
 
 
 @attr.s
@@ -47,29 +47,39 @@ for filename in filenames:
     if extension != '.hdf':
         continue
 
+    print(f'Processing file: {filename}')
+
     # First run pulse aggregation
     output_filename = f'{name}.nxs'
     copyfile(filename, output_filename)
     with h5py.File(output_filename, 'r+') as output_file:
         # DENEX detector
+        print('Aggregating DENEX detector events')
         aggregate_events_by_pulse(output_file, args.chopper_tdc_path, '/entry/instrument/detector_1/raw_event_data',
                                   args.tdc_pulse_time_difference)
 
         # Monitor
+        print('Aggregating monitor events')
         aggregate_events_by_pulse(output_file, args.chopper_tdc_path, '/entry/monitor_1/events',
                                   args.tdc_pulse_time_difference, output_group_name='monitor_event_data',
                                   event_id_override=262144)
 
-        remove_data_not_used_by_mantid()
-        patch_geometry()
+        print(f'Removing groups without NX_class defined')
+        remove_data_not_used_by_mantid(output_file)
+        patch_geometry(output_file)
 
         datasets_to_convert = []
         output_file.visititems(find_variable_length_string_datasets)
 
+        print(f'Converting to fixed length strings')
         for dataset in datasets_to_convert:
             del output_file[dataset.full_path]
             output_file[dataset.parent_path].create_dataset(dataset.name, data=np.array(dataset.text).astype(
                 '|S' + str(len(dataset.text))))
 
     # Run h5format_convert on each file to improve compatibility with HDF5 1.8.x used by Mantid
+    print(f'Running h5format_convert')
     subprocess.run([args.format_convert, output_filename])
+
+    if args.only_first_file:
+        break

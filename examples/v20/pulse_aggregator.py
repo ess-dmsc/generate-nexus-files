@@ -1,22 +1,8 @@
 import h5py
 import numpy as np
-import argparse
 from shutil import copyfile
 import matplotlib.pylab as pl
-
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
-parser.add_argument("-o", "--output-filename", type=str, help='Output filename.')
-parser.add_argument("-t", "--tdc-pulse-time-difference", type=int,
-                    help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
-                    default=0)
-parser.add_argument("-e", "--raw-event-path", type=str,
-                    help='Path to the raw event NXevent_data group in the file',
-                    default='/entry/instrument/detector_1/raw_event_data')
-parser.add_argument("-c", "--chopper-tdc-path", type=str,
-                    help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
-                    default='/entry/instrument/chopper_1/top_dead_center/time')
-args = parser.parse_args()
+from tqdm import tqdm
 
 
 def position_to_index(pos, count):
@@ -87,7 +73,6 @@ def aggregate_events_by_pulse(out_file, chopper_tdc_path, input_group_path, tdc_
 
     event_ids = out_file[input_group_path + '/event_id'][...]
     event_ids = convert_id(event_ids)
-    print(np.max(event_ids))
 
     event_time_zero_input = out_file[input_group_path + '/event_time_zero'][...]
 
@@ -97,7 +82,7 @@ def aggregate_events_by_pulse(out_file, chopper_tdc_path, input_group_path, tdc_
     event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
     event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
     event_index = 0
-    for i, t in enumerate(tdc_times[:-1]):
+    for i, t in enumerate(tqdm(tdc_times[:-1])):
         while event_index < len(event_time_zero_input) and event_time_zero_input[event_index] < tdc_times[i + 1]:
             # append event to pulse i
             if event_time_zero_input[event_index] > tdc_times[i]:
@@ -115,15 +100,15 @@ def aggregate_events_by_pulse(out_file, chopper_tdc_path, input_group_path, tdc_
     write_event_data(output_data_group, event_ids, event_index_output, event_offset_output, tdc_times)
 
     # Delete the raw event data group
-    del output_file[input_group_path]
+    del out_file[input_group_path]
 
 
-def patch_geometry():
+def patch_geometry(outfile):
     pixels_per_axis = 512
     pixel_ids = np.arange(0, pixels_per_axis ** 2, 1, dtype=int)
     pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
-    del output_file['entry/instrument/detector_1/detector_number']
-    output_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
+    del outfile['entry/instrument/detector_1/detector_number']
+    outfile['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
                                                                data=pixel_ids)
     neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
     # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
@@ -135,33 +120,33 @@ def patch_geometry():
                                   pixel_size / 2.)
     x_offsets, y_offsets = np.meshgrid(single_axis_offsets,
                                        single_axis_offsets)
-    del output_file['entry/instrument/detector_1/x_pixel_offset']
-    del output_file['entry/instrument/detector_1/y_pixel_offset']
-    output_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
+    del outfile['entry/instrument/detector_1/x_pixel_offset']
+    del outfile['entry/instrument/detector_1/y_pixel_offset']
+    outfile['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
                                                                dtype=np.float64, data=x_offsets)
-    output_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
+    outfile['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
                                                                dtype=np.float64, data=y_offsets)
-    del output_file['entry/monitor_1/waveforms']
-    del output_file['entry/instrument/detector_1/waveforms_channel_3']
-    del output_file['entry/instrument/linear_axis_1']
-    del output_file['entry/instrument/linear_axis_2']
-    del output_file['entry/sample/transformations/offset_stage_1_to_default_sample']
-    del output_file['entry/sample/transformations/offset_stage_2_to_sample']
-    del output_file['entry/sample/transformations/offset_stage_2_to_stage_1']
+    del outfile['entry/monitor_1/waveforms']
+    del outfile['entry/instrument/detector_1/waveforms_channel_3']
+    del outfile['entry/instrument/linear_axis_1']
+    del outfile['entry/instrument/linear_axis_2']
+    del outfile['entry/sample/transformations/offset_stage_1_to_default_sample']
+    del outfile['entry/sample/transformations/offset_stage_2_to_sample']
+    del outfile['entry/sample/transformations/offset_stage_2_to_stage_1']
     # Correct the source position
-    output_file['entry/instrument/source/transformations/location'][...] = 27.4
+    outfile['entry/instrument/source/transformations/location'][...] = 27.4
     # Correct detector_1 position and orientation
-    del output_file['entry/instrument/detector_1/depends_on']
+    del outfile['entry/instrument/detector_1/depends_on']
     depend_on_path = '/entry/instrument/detector_1/transformations/x_offset'
-    output_file['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
+    outfile['entry/instrument/detector_1'].create_dataset('depends_on', data=np.array(depend_on_path).astype(
         '|S' + str(len(depend_on_path))))
-    del output_file['entry/instrument/detector_1/transformations/orientation']
+    del outfile['entry/instrument/detector_1/transformations/orientation']
     location_path = 'entry/instrument/detector_1/transformations/location'
-    output_file[location_path][...] = 3.5
-    output_file[location_path].attrs['vector'] = [0., 0., 1.]
-    output_file[location_path].attrs['depends_on'] = '.'
-    del output_file['entry/instrument/detector_1/transformations/beam_direction_offset']
-    x_offset_dataset = output_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
+    outfile[location_path][...] = 3.5
+    outfile[location_path].attrs['vector'] = [0., 0., 1.]
+    outfile[location_path].attrs['depends_on'] = '.'
+    del outfile['entry/instrument/detector_1/transformations/beam_direction_offset']
+    x_offset_dataset = outfile['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
                                                                                                  dtype=np.float64,
                                                                                                  data=0.065)
     x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
@@ -173,27 +158,27 @@ def patch_geometry():
     x_offset_dataset.attrs.create('vector',
                                   [-1., 0., 0.])
     # Correct monitor position and id
-    output_file['/entry/monitor_1/transformations/transformation'][...] = -1.8
-    output_file['/entry/monitor_1/detector_id'][...] = 262144
+    outfile['/entry/monitor_1/transformations/transformation'][...] = -1.8
+    outfile['/entry/monitor_1/detector_id'][...] = 262144
     # Link monitor in the instrument group so that Mantid finds it
-    output_file['/entry/instrument/monitor_1'] = output_file['/entry/monitor_1']
+    outfile['/entry/instrument/monitor_1'] = outfile['/entry/monitor_1']
     # Link monitor event datasets to monitor in instrument group (for Mantid)
-    output_file['/entry/instrument/monitor_1/event_id'] = output_file['/entry/monitor_event_data/event_id']
-    output_file['/entry/instrument/monitor_1/event_index'] = output_file['/entry/monitor_event_data/event_index']
-    output_file['/entry/instrument/monitor_1/event_time_offset'] = output_file[
+    outfile['/entry/instrument/monitor_1/event_id'] = outfile['/entry/monitor_event_data/event_id']
+    outfile['/entry/instrument/monitor_1/event_index'] = outfile['/entry/monitor_event_data/event_index']
+    outfile['/entry/instrument/monitor_1/event_time_offset'] = outfile[
         '/entry/monitor_event_data/event_time_offset']
-    output_file['/entry/instrument/monitor_1/event_time_zero'] = output_file[
+    outfile['/entry/instrument/monitor_1/event_time_zero'] = outfile[
         '/entry/monitor_event_data/event_time_zero']
-    output_file['/entry/instrument/monitor_1/monitor_number'] = output_file[
+    outfile['/entry/instrument/monitor_1/monitor_number'] = outfile[
         '/entry/instrument/monitor_1/detector_id']
 
 
-def remove_data_not_used_by_mantid():
+def remove_data_not_used_by_mantid(outfile, chatty=False):
     global groups_to_remove
     # Delete waveform groups (not read by Mantid)
     for channel in range(3):
         group_name = f'/entry/instrument/detector_1/waveforms_channel_{channel}'
-        del output_file[group_name]
+        del outfile[group_name]
     groups_to_remove = []
 
     def remove_groups_without_nxclass(name, object):
@@ -201,13 +186,30 @@ def remove_data_not_used_by_mantid():
             if 'NX_class' not in object.attrs.keys():
                 groups_to_remove.append(name)
 
-    output_file.visititems(remove_groups_without_nxclass)
+    outfile.visititems(remove_groups_without_nxclass)
     for group in reversed(groups_to_remove):
-        print(group)
-        del output_file[group]
+        if chatty:
+            print(f'{group} has no NX_class, removing it')
+        del outfile[group]
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-i", "--input-filename", type=str, help='Input file to convert.')
+    parser.add_argument("-o", "--output-filename", type=str, help='Output filename.')
+    parser.add_argument("-t", "--tdc-pulse-time-difference", type=int,
+                        help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
+                        default=0)
+    parser.add_argument("-e", "--raw-event-path", type=str,
+                        help='Path to the raw event NXevent_data group in the file',
+                        default='/entry/instrument/detector_1/raw_event_data')
+    parser.add_argument("-c", "--chopper-tdc-path", type=str,
+                        help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
+                        default='/entry/instrument/chopper_1/top_dead_center/time')
+    args = parser.parse_args()
+
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as output_file:
         # DENEX detector
@@ -219,5 +221,5 @@ if __name__ == '__main__':
                                   args.tdc_pulse_time_difference, output_group_name='monitor_event_data',
                                   event_id_override=262144)
 
-        remove_data_not_used_by_mantid()
-        patch_geometry()
+        remove_data_not_used_by_mantid(output_file)
+        patch_geometry(output_file)
