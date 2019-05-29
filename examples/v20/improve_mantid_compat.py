@@ -26,10 +26,19 @@ def find_variable_length_string_datasets(name, object):
                                text))
 
 
+def add_nx_class_to_group(group, nx_class_name):
+    group.attrs.create('NX_class', np.array('nx_class_name').astype(f'|S{len(nx_class_name)}'))
+
+
+def add_nx_class_to_groups(group_names, nx_class_name, outfile):
+    for group_name in group_names:
+        add_nx_class_to_group(outfile[group_name], nx_class_name)
+
+
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input-directory', type=str,
                     help='Directory with raw files to convert (all files ending .hdf assumed to be raw)', required=True)
-parser.add_argument('--format-convert', type=str, help='Path to h5format_convert executable', required=True)
+parser.add_argument('--format-convert', type=str, help='Path to h5format_convert and h5repack executables', required=True)
 parser.add_argument("--chopper-tdc-path", type=str,
                     help='Path to the chopper TDC unix timestamps (ns) dataset in the file',
                     default='/entry/instrument/chopper_1/top_dead_center/time')
@@ -47,7 +56,7 @@ for filename in filenames:
     if extension != '.hdf':
         continue
 
-    print(f'Processing file: {filename}')
+    print(f'#############################################\nProcessing file: {filename}')
 
     # First run pulse aggregation
     output_filename = f'{name}.nxs'
@@ -64,22 +73,43 @@ for filename in filenames:
                                   args.tdc_pulse_time_difference, output_group_name='monitor_event_data',
                                   event_id_override=262144)
 
-        print(f'Removing groups without NX_class defined')
-        remove_data_not_used_by_mantid(output_file)
+        print('Adding missing NX_class attributes')
+        add_nx_class_to_groups(['/entry/instrument/linear_axis_1/speed',
+                                '/entry/instrument/linear_axis_1/status',
+                                '/entry/instrument/linear_axis_1/target_value',
+                                '/entry/instrument/linear_axis_1/value',
+                                '/entry/instrument/linear_axis_2/speed',
+                                '/entry/instrument/linear_axis_2/status',
+                                '/entry/instrument/linear_axis_2/target_value',
+                                '/entry/instrument/linear_axis_2/value',
+                                '/entry/sample/transformations/linear_stage_1_position',
+                                '/entry/sample/transformations/linear_stage_2_position'
+                                ], 'NXlog', output_file)
+
+        print('Removing groups without NX_class defined')
+        remove_data_not_used_by_mantid(output_file, chatty=True)
         patch_geometry(output_file)
 
         datasets_to_convert = []
         output_file.visititems(find_variable_length_string_datasets)
 
-        print(f'Converting to fixed length strings')
+        print('Converting to fixed length strings')
         for dataset in datasets_to_convert:
             del output_file[dataset.full_path]
             output_file[dataset.parent_path].create_dataset(dataset.name, data=np.array(dataset.text).astype(
                 '|S' + str(len(dataset.text))))
 
+    print('Running h5repack')
+    name, extension = os.path.splitext(output_filename)
+    repacked_filename = f'{name}_agg.nxs'
+    subprocess.run([os.path.join(args.format_convert, 'h5repack'), output_filename, repacked_filename])
+
+    print('Deleting intermetiate file')
+    os.remove(output_filename)
+
     # Run h5format_convert on each file to improve compatibility with HDF5 1.8.x used by Mantid
-    print(f'Running h5format_convert')
-    subprocess.run([args.format_convert, output_filename])
+    print('Running h5format_convert')
+    subprocess.run([os.path.join(args.format_convert, 'h5format_convert'), repacked_filename])
 
     if args.only_first_file:
         break

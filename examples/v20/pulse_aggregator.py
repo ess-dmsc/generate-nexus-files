@@ -128,8 +128,8 @@ def patch_geometry(outfile):
                                                                dtype=np.float64, data=y_offsets)
     del outfile['entry/monitor_1/waveforms']
     del outfile['entry/instrument/detector_1/waveforms_channel_3']
-    del outfile['entry/instrument/linear_axis_1']
-    del outfile['entry/instrument/linear_axis_2']
+    #del outfile['entry/instrument/linear_axis_1']
+    #del outfile['entry/instrument/linear_axis_2']
     del outfile['entry/sample/transformations/offset_stage_1_to_default_sample']
     del outfile['entry/sample/transformations/offset_stage_2_to_sample']
     del outfile['entry/sample/transformations/offset_stage_2_to_stage_1']
