@@ -74,15 +74,16 @@ def truncate_to_chopper_time_range(chopper_times, event_id, event_times):
     return chopper_times, event_id, event_times
 
 
-def aggregate_events_by_pulse(out_file, optargs, input_group_path, output_group_name='event_data',
+def aggregate_events_by_pulse(out_file, chopper_tdc_path, input_group_path, tdc_pulse_time_difference=0,
+                              output_group_name='event_data',
                               event_id_override=None):
     # Create output event group
     output_data_group = out_file['/entry'].create_group(output_group_name)
     output_data_group.attrs.create('NX_class', 'NXevent_data', None, dtype='<S12')
 
     # Shift the TDC times
-    tdc_times = out_file[optargs.chopper_tdc_path][...]
-    tdc_times += optargs.tdc_pulse_time_difference
+    tdc_times = out_file[chopper_tdc_path][...]
+    tdc_times += tdc_pulse_time_difference
 
     event_ids = out_file[input_group_path + '/event_id'][...]
     event_ids = convert_id(event_ids)
@@ -209,12 +210,13 @@ def remove_data_not_used_by_mantid():
 if __name__ == '__main__':
     copyfile(args.input_filename, args.output_filename)
     with h5py.File(args.output_filename, 'r+') as output_file:
-
         # DENEX detector
-        aggregate_events_by_pulse(output_file, args, args.raw_event_path)
+        aggregate_events_by_pulse(output_file, args.chopper_tdc_path, args.raw_event_path,
+                                  args.tdc_pulse_time_difference)
 
         # Monitor
-        aggregate_events_by_pulse(output_file, args, '/entry/monitor_1/events', 'monitor_event_data',
+        aggregate_events_by_pulse(output_file, args.chopper_tdc_path, '/entry/monitor_1/events',
+                                  args.tdc_pulse_time_difference, output_group_name='monitor_event_data',
                                   event_id_override=262144)
 
         remove_data_not_used_by_mantid()
