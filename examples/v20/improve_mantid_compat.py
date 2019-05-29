@@ -46,6 +46,7 @@ parser.add_argument("--tdc-pulse-time-difference", type=int,
                     help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
                     default=0)
 parser.add_argument('--only-first-file', type=bool, help='For testing, only process first file found', default=False)
+parser.add_argument('--only-this-file', type=str, help='Only process file with this name')
 args = parser.parse_args()
 
 filenames = [join(args.input_directory, f) for f in os.listdir(args.input_directory) if
@@ -56,10 +57,15 @@ for filename in filenames:
     if extension != '.hdf':
         continue
 
+    onlypath, onlyname = os.path.split(filename)
+    if args.only_this_file and onlyname != args.only_this_file:
+        continue
+
     print(f'#############################################\nProcessing file: {filename}')
 
     # First run pulse aggregation
     output_filename = f'{name}.nxs'
+    print('Copying input file')
     copyfile(filename, output_filename)
     with h5py.File(output_filename, 'r+') as output_file:
         # DENEX detector
@@ -104,12 +110,9 @@ for filename in filenames:
     repacked_filename = f'{name}_agg.nxs'
     subprocess.run([os.path.join(args.format_convert, 'h5repack'), output_filename, repacked_filename])
 
-    print('Deleting intermetiate file')
+    print('Deleting intermediate file')
     os.remove(output_filename)
 
     # Run h5format_convert on each file to improve compatibility with HDF5 1.8.x used by Mantid
     print('Running h5format_convert')
     subprocess.run([os.path.join(args.format_convert, 'h5format_convert'), repacked_filename])
-
-    if args.only_first_file:
-        break
