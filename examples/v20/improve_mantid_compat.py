@@ -24,6 +24,11 @@ def find_variable_length_string_datasets(name, object):
             datasets_to_convert.append(
                 DatasetDetails(object.name.split('/')[-1], object.name, '/'.join(object.name.split('/')[:-1]),
                                text))
+    elif isinstance(object, h5py.Group):
+        # Fix attributes
+        for key, value in object.attrs.items():
+            if isinstance(value, str):
+                object.attrs[key] = np.string_(value)
 
 
 def add_nx_class_to_group(group, nx_class_name):
@@ -169,7 +174,7 @@ for filename in filenames:
 
     print('Running h5repack')
     name, extension = os.path.splitext(output_filename)
-    repacked_filename = f'{name}_agg.nxs'
+    repacked_filename = f'{name}_agg_with_monitor.nxs'
     subprocess.run([os.path.join(args.format_convert, 'h5repack'), output_filename, repacked_filename])
 
     print('Deleting intermediate file')
