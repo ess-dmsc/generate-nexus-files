@@ -46,7 +46,6 @@ parser.add_argument("--chopper-tdc-path", type=str,
 parser.add_argument("--tdc-pulse-time-difference", type=int,
                     help='Time difference between TDC timestamps and pulse T0 in integer nanoseconds',
                     default=0)
-parser.add_argument('--only-first-file', type=bool, help='For testing, only process first file found', default=False)
 parser.add_argument('--only-this-file', type=str, help='Only process file with this name')
 args = parser.parse_args()
 
