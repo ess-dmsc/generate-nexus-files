@@ -7,7 +7,7 @@ For use in https://github.com/nexusformat/features
 """
 
 if __name__ == '__main__':
-    output_filename = 'NXdisk_chopper_example.nxs'
+    output_filename = 'example_nx_disk_chopper.nxs'
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, nx_entry_name=nx_entry_name,
@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
-            [0., 83.71, 94.7, 140.49, 155.79, 193.26, 212.56, 242.32, 265.33, 287.91, 314.37, 330.3]) + 15.0,
+            [83.71, 94.7, 140.49, 155.79, 193.26, 212.56, 242.32, 265.33, 287.91, 314.37, 330.3, 360.]) + 15.0,
                             attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 6)
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
