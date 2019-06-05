@@ -23,3 +23,6 @@ if __name__ == '__main__':
         builder.add_dataset(chopper_group, 'slits', 6)
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
+
+        chopper_feature_id = "B89B086951FEFDDF"
+        builder.add_dataset(builder.root, "features", [int(chopper_feature_id, 16)])
