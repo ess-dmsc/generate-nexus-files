@@ -1,0 +1,179 @@
+{
+  "streams": [
+    {
+      "channel": "HZB-V20:Chop-Drv-0101:Ref_Unix_asub.VALF",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0401:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0402:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0101:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0102:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0301:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0501:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0502:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "HZB-V20:Chop-Drv-0302:TDC_array",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "TdcTime", "topic": "//localhost:9092/V20_choppers" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.VAL",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.STAT",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m1.VELO",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.VAL",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.STAT",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "SES-PREMP:MC-MCU-01:m2.VELO",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_linearStages" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:000:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:001:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:002:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:VMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:IMon",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:Det-PwrC-01:02:003:Pw",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_detectorPower" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:TS-SDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:TS-NDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO1:STATUS2-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:TS-SDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:TS-NDiff-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    },
+    {
+      "channel": "HZB-V20:TS-RO2:STATUS2-RBV",
+      "channel_provider_type": "ca",
+      "converter": { "schema": "f142", "topic": "//localhost:9092/V20_timingStatus" }
+    }
+  ]
+}
