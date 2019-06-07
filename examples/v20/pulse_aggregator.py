@@ -79,6 +79,8 @@ def aggregate_events_by_pulse(out_file, chopper_tdc_path, input_group_path, tdc_
     tdc_times, event_ids, event_time_zero_input = truncate_to_chopper_time_range(tdc_times, event_ids,
                                                                                  event_time_zero_input)
 
+    plot_timestamps(event_time_zero_input, tdc_times)
+
     event_index_output = np.zeros_like(tdc_times, dtype=np.uint64)
     event_offset_output = np.zeros_like(event_ids, dtype=np.uint32)
     event_index = 0
@@ -191,6 +193,12 @@ def remove_data_not_used_by_mantid(outfile, chatty=False):
         if chatty:
             print(f'{group} has no NX_class, removing it')
         del outfile[group]
+
+
+def plot_timestamps(timestamps, range_timestamps):
+    fig, ax1 = pl.subplots(1, 1)
+    ax1.hist(timestamps, bins=200, range=(range_timestamps[0], range_timestamps[-1]))
+    print(f'Time range of chopper timestamps is {(range_timestamps[-1]-range_timestamps[0]) * 1e-9} seconds')
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ from os.path import isfile, join
 import subprocess
 from shutil import copyfile
 from pulse_aggregator import aggregate_events_by_pulse, remove_data_not_used_by_mantid, patch_geometry
+import matplotlib.pylab as pl
 
 
 @attr.s
@@ -183,3 +184,5 @@ for filename in filenames:
     # Run h5format_convert on each file to improve compatibility with HDF5 1.8.x used by Mantid
     print('Running h5format_convert')
     subprocess.run([os.path.join(args.format_convert, 'h5format_convert'), repacked_filename])
+
+    pl.show()
