@@ -1,5 +1,5 @@
 -e git+git://github.com/ess-dmsc/python-nexus-utilities.git@b0741e847965bc2e59cea6f4b7c623720d697a4e#egg=nexusutils
--e git+git://github.com/ess-dmsc/nexus-json.git@a02080b4b741e8e2667c0df1a4e40dd127e738fb#egg=nexusjson
+-e git+git://github.com/ess-dmsc/nexus-json.git@36b8f9e4554969afa17bea09643b3dfc36460405#egg=nexusjson
 h5py
 numpy
 tqdm
