@@ -193,8 +193,8 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
     event_offset_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     event_id_output = np.zeros_like(event_time_zero_input, dtype=np.uint32)
     offset_from_source_chopper_tdc = np.zeros_like(event_time_zero_input)
-    event_index_output = np.zeros((wfm_tdc_times.size*6+1,), dtype=np.uint64)
-    event_time_zero_output = np.zeros((wfm_tdc_times.size*6,), dtype=np.uint64)
+    event_index_output = np.zeros((wfm_tdc_times.size * 6 + 1,), dtype=np.uint64)
+    event_time_zero_output = np.zeros((wfm_tdc_times.size * 6,), dtype=np.uint64)
     subpulse_uuid = (0, 0)
     subpulse_count = 0
     print('Aggregating events by subpulse...', flush=True)
@@ -232,7 +232,7 @@ def aggregate_events_by_subpulse(out_file, optargs, input_group_path, output_gro
         else:
             # Append a new subpulse
             # + 1 to event_index as it indicates the start of the next pulse, not end of current one
-            event_index_output[subpulse_count+1] = event_index + 1
+            event_index_output[subpulse_count + 1] = event_index + 1
             event_time_zero_output[subpulse_count] = np.uint64(t0)
             subpulse_count += 1
 
@@ -282,7 +282,7 @@ def patch_geometry(out_file):
     pixel_ids = np.reshape(pixel_ids, (pixels_per_axis, pixels_per_axis))
     del out_file['entry/instrument/detector_1/detector_number']
     out_file['entry/instrument/detector_1/'].create_dataset('detector_number', pixel_ids.shape, dtype=np.int64,
-                                                               data=pixel_ids)
+                                                            data=pixel_ids)
     neutron_sensitive_width = 0.28  # metres, from DENEX data sheet
     # This pixel size is approximate, in practice the EFU configuration/calibration affects both the division
     # into 512 pixels and the actual active width we see of the detector
@@ -296,9 +296,9 @@ def patch_geometry(out_file):
     del out_file['entry/instrument/detector_1/x_pixel_offset']
     del out_file['entry/instrument/detector_1/y_pixel_offset']
     out_file['entry/instrument/detector_1/'].create_dataset('x_pixel_offset', x_offsets.shape,
-                                                               dtype=np.float64, data=x_offsets)
+                                                            dtype=np.float64, data=x_offsets)
     out_file['entry/instrument/detector_1/'].create_dataset('y_pixel_offset', y_offsets.shape,
-                                                               dtype=np.float64, data=y_offsets)
+                                                            dtype=np.float64, data=y_offsets)
     del out_file['entry/monitor_1/waveforms']
     del out_file['entry/instrument/detector_1/waveforms_channel_3']
     del out_file['entry/instrument/linear_axis_1']
@@ -320,8 +320,8 @@ def patch_geometry(out_file):
     out_file[location_path].attrs['depends_on'] = '.'
     del out_file['entry/instrument/detector_1/transformations/beam_direction_offset']
     x_offset_dataset = out_file['entry/instrument/detector_1/transformations'].create_dataset('x_offset', (1,),
-                                                                                                 dtype=np.float64,
-                                                                                                 data=0.065)
+                                                                                              dtype=np.float64,
+                                                                                              data=0.065)
     x_offset_dataset.attrs.create('units', np.array("m").astype('|S1'))
     translation_label = "translation"
     x_offset_dataset.attrs.create('transformation_type',
