@@ -357,10 +357,14 @@ def __create_file_writer_command(filepath):
     iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
     timestamp = iso8601_str_seconds.replace(':', '_')
     timestamp = timestamp.replace('-', '_')
+    start_time = 'STARTTIME'  # NICOS replaces STARTTIME
+    stop_time = None
+    file_name = 'FILENAME'  # NICOS replaces FILENAME
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/FILENAME',  # NICOS replaces FILENAME
+                                                         '/data/kafka-to-nexus/00000143_rewrite.hdf',
                                                          broker='192.168.1.80:9092',
-                                                         start_time='STARTTIME')  # NICOS replaces STARTTIME
+                                                         start_time=start_time,
+                                                         stop_time=stop_time)
     object_to_json_file(write_command, 'V20_file_write_start.json')
     object_to_json_file(stop_command, 'V20_file_write_stop.json')
 
