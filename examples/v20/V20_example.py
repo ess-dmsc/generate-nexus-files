@@ -258,14 +258,14 @@ def __add_readout_system(builder, parent_group):
 
 
 def __add_motion_devices(builder):
-    group_names = ['linear stage', 'goniometer_top', 'goniometer_bottom']
+    group_names = ['linear_stage', 'tilting_angle_1', 'tilting_angle_2']
     for group_number, group_name in enumerate(group_names):
         group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
         group.create_group('target_value')
         group.create_group('value')
         group.create_group('status')
         group.create_group('velocity')
-        builder.add_dataset(group, 'controller_record', f'TUD-SMI:MC-MCU-01:m{group_number}.VAL')
+        builder.add_dataset(group, 'controller_record', f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VAL')
 
 
 def __create_file_writer_command(filepath):
@@ -336,15 +336,15 @@ def __create_file_writer_command(filepath):
 
     # Motion devices
     motion_topic = 'V20_motion'
-    group_names = ['linear_stage', 'goniometer_top', 'goniometer_bottom']
+    group_names = ['linear_stage', 'tilting_angle_1', 'tilting_angle_2']
     for group_number, group_name in enumerate(group_names):
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.VAL',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VAL',
                           f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.RBV',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.RBV',
                           f'/entry/instrument/{group_name}/value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.STAT',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.STAT',
                           f'/entry/instrument/{group_name}/status', 'f142', 'int32')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number}.VELO',
+        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VELO',
                           f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
 
     links = {}
@@ -361,7 +361,7 @@ def __create_file_writer_command(filepath):
     stop_time = None
     file_name = 'FILENAME'  # NICOS replaces FILENAME
     write_command, stop_command = create_writer_commands(tree,
-                                                         '/data/kafka-to-nexus/00000143_rewrite.hdf',
+                                                         '/data/kafka-to-nexus/FILENAME',
                                                          broker='192.168.1.80:9092',
                                                          start_time=start_time,
                                                          stop_time=stop_time)
