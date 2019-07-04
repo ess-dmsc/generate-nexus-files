@@ -4,6 +4,7 @@ import numpy as np
 import nexusformat.nexus as nexus
 from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 from datetime import datetime
+from typing import List
 
 
 def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
@@ -258,14 +259,18 @@ def __add_readout_system(builder, parent_group):
 
 
 def __add_motion_devices(builder):
-    group_names = ['linear_stage', 'tilting_angle_1', 'tilting_angle_2']
-    for group_number, group_name in enumerate(group_names):
-        group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
-        group.create_group('target_value')
-        group.create_group('value')
-        group.create_group('status')
-        group.create_group('velocity')
-        builder.add_dataset(group, 'controller_record', f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VAL')
+
+    def _add_motion(builder, pv_root: str, group_names: List[str], start_number: int):
+        for group_number, group_name in enumerate(group_names):
+            group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXpositioner')
+            group.create_group('target_value')
+            group.create_group('value')
+            group.create_group('status')
+            group.create_group('velocity')
+            builder.add_dataset(group, 'controller_record', pv_root.format(group_number + start_number))
+
+    _add_motion(builder, 'TUD-SMI:MC-MCU-01:m{}.VAL', ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1)
+    _add_motion(builder, 'HZB-V20:MC-MCU-01:m{}.VAL', ['Omega_1', 'Omega_2', 'Lin1'], 10)
 
 
 def __create_file_writer_command(filepath):
@@ -335,17 +340,20 @@ def __create_file_writer_command(filepath):
                           f'/entry/instrument/detector_1/{group_name}/status', 'f142', 'int32')
 
     # Motion devices
-    motion_topic = 'V20_motion'
-    group_names = ['linear_stage', 'tilting_angle_1', 'tilting_angle_2']
-    for group_number, group_name in enumerate(group_names):
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VAL',
-                          f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.RBV',
-                          f'/entry/instrument/{group_name}/value', 'f142', 'double')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.STAT',
-                          f'/entry/instrument/{group_name}/status', 'f142', 'int32')
-        __add_data_stream(streams, motion_topic, f'TUD-SMI:MC-MCU-01:m{group_number + 1}.VELO',
-                          f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
+    def _add_motion_dev(pv_root: str, group_names: List[str], start_index: int):
+        motion_topic = 'V20_motion'
+        for group_number, group_name in enumerate(group_names):
+            __add_data_stream(streams, motion_topic, pv_root+".VAL".format(group_number + start_index),
+                              f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
+            __add_data_stream(streams, motion_topic, pv_root+".RBV".format(group_number + start_index),
+                              f'/entry/instrument/{group_name}/value', 'f142', 'double')
+            __add_data_stream(streams, motion_topic, pv_root+".STAT".format(group_number + start_index),
+                              f'/entry/instrument/{group_name}/status', 'f142', 'int32')
+            __add_data_stream(streams, motion_topic, pv_root+".VELO".format(group_number + start_index),
+                              f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
+
+    _add_motion_dev("TUD-SMI:MC-MCU-01:m{}", ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], start_index=1)
+    _add_motion_dev("HZB-V20:MC-MCU-01:m{}", ['Omega_1', 'Omega_2', 'Lin1'], start_index=10)
 
     links = {}
 
