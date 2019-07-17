@@ -120,6 +120,7 @@ def __add_chopper(builder, number):
         distance_from_sample = -11.5
         record_chopper_position(builder, chopper_group, distance_from_sample)
 
+    builder.add_feature("B89B086951FEFDDF")
     add_nxlog(builder, 'top_dead_center', parent_path=chopper_group.name, number_of_cues=100, units="ns")
     add_nxlog(builder, 'speed', parent_path=chopper_group.name, number_of_cues=10, units="Hz")
     add_nxlog(builder, 'delay', parent_path=chopper_group.name, number_of_cues=10, units="ms")
@@ -195,9 +196,12 @@ def __add_monitors(builder):
     """
     distance_from_sample = -3.298
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
-    monitor_group_1.create_group('waveforms')
-    monitor_group_1.create_group('events')
-    builder.add_dataset(monitor_group_1, 'detector_id', 90000)
+    monitor_event_group = monitor_group_1.create_group('events')
+    builder.add_dataset(monitor_event_group, 'time', np.random.rand(1000).astype('float32'), {'units': 's', 'start': iso_timestamp})
+    builder.add_dataset(monitor_event_group, 'cue_timestamp_zero', np.random.rand(50).astype('float32'),
+                            {'units': 's', 'start': iso_timestamp})
+    builder.add_dataset(monitor_event_group, 'cue_index', np.random.rand(50).astype('int32'))
+
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
     monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
                                                     [0.0, 0.0, 1.0])
@@ -288,7 +292,6 @@ def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m
         index += number_of_samples
 
     # Create an NXlog group in the sample group
-    iso_timestamp = datetime.now().isoformat()
     data_group = builder.add_nx_group(parent_path, nxlogname, 'NXlog')
     builder.add_dataset(data_group, 'time', times.astype('float32'), {'units': 's', 'start': iso_timestamp})
     builder.add_dataset(data_group, 'value', values.astype('float32'), {'units': units})
@@ -301,6 +304,8 @@ if __name__ == '__main__':
     output_filename = 'bigfake.nxs'
     input_filename = None
     nx_entry_name = 'entry'
+    iso_timestamp = datetime.now().isoformat()
+
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
@@ -313,14 +318,18 @@ if __name__ == '__main__':
 
         # Sample
         sample_group = builder.add_sample()
-        builder.add_dataset(sample_group, 'description', '')
+        builder.add_dataset(sample_group, 'name', 'white powder')
+        builder.add_dataset(sample_group, 'chemical_formula', 'C17H21NO4')
+        builder.add_dataset(sample_group, 'mass', 30, {'units':'g'})    
+        add_nxlog(builder, 'temperature', parent_path=sample_group.name, number_of_cues=7, units="K")
+        add_nxlog(builder, 'pressure', parent_path=sample_group.name, number_of_cues=2, units="MPa")
 
         # Add a source at the position of the first chopper
         builder.add_source('BER', 'source', [0.0, 0.0, -50.598 + 21.7])
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
-        builder.add_dataset(builder.get_root(), 'start_time', '8601TIME')  # NICOS will replace 8601TIME
+        builder.add_dataset(builder.get_root(), 'start_time', iso_timestamp)  # NICOS will replace 8601TIME
 
         # Notes on geometry:
 
