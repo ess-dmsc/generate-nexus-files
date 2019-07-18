@@ -219,24 +219,22 @@ def __add_readout_system(builder, parent_group):
 
 
 def __add_motion_devices(builder):
-    def _add_motion(builder, group_names: List[str], start_number: int = 0, nx_class: str = 'NXpositioner',
-                    pv_root: str = None):
-        for group_number, group_name in enumerate(group_names):
-            group = builder.add_nx_group(builder.get_root()['sample/transformations'], group_name, nx_class)
-            group.create_group('target_value')
-            group.create_group('value')
-            group.create_group('status')
-            group.create_group('velocity')
-            if pv_root is not None:
-                builder.add_dataset(group, 'controller_record', pv_root.format(group_number + start_number))
+    global last
+    last = "."
+    def _add_motion(builder, group_name, units = "mm", vector = [0,0,1]):
+        global last
 
-    _add_motion(builder, ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['omega1', 'omega_2', 'phi'], 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL')
-    #_add_motion(builder, ['slit'], nx_class='NXslit')
+        group = add_nxlog(builder, group_name, parent_path=builder.get_root()['sample/transformations'], number_of_cues=1, units=units)
+        attributes = {'vector': vector, 'depends_on': np.string_(last),
+            'transformation_type': np.string_('translation') if "deg" != units else np.string_("rotation")}
+        for name in attributes.keys():
+            group.attrs.create(name, attributes[name])
+        last = group_name
 
-
-def __create_file_writer_command(filepath):
-    pass
+    _add_motion(builder, 'linear_stage', units="mm", vector = [1.0, 0, 0])
+    _add_motion(builder, 'tilting_angle_1', units="deg", vector = [0, 0, 1])
+    _add_motion(builder, 'omega_1', units="deg", vector = [1, 0, 0])
+    _add_motion(builder, 'phi', units="deg", vector = [0, 1, 0])
 
 def __add_data_stream(streams, topic, source, path, module, type=None):
     options = {
@@ -247,14 +245,6 @@ def __add_data_stream(streams, topic, source, path, module, type=None):
     if type is not None:
         options['type'] = type
     streams[path] = options
-
-
-def __add_sample_env_device(group_name, name, description=None):
-    env_group = builder.add_nx_group(builder.get_root()['instrument'], group_name, 'NXenvironment')
-    builder.add_dataset(env_group, 'name', name)
-    if description is not None:
-        builder.add_dataset(env_group, 'description', description)
-    return env_group
 
 
 def __add_attributes(node, attributes):
@@ -300,6 +290,8 @@ def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m
     builder.add_dataset(data_group, 'cue_index', np.array(cue_indices).astype('int32'))
     return data_group
 
+last = "."
+
 
 if __name__ == '__main__':
     output_filename = 'bigfake.nxs'
@@ -336,13 +328,16 @@ if __name__ == '__main__':
         sample_group = builder.add_sample()
         transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         builder.add_dataset(sample_group, 'name', 'white powder')
+        builder.add_dataset(sample_group, 'depends_on', 'transformations/phi')
         builder.add_dataset(sample_group, 'chemical_formula', 'C17H21NO4')
         builder.add_dataset(sample_group, 'mass', 30, {'units':'g'})
         add_nxlog(builder, 'temperature', parent_path=sample_group.name, number_of_cues=7, units="K")
         add_nxlog(builder, 'pressure', parent_path=sample_group.name, number_of_cues=2, units="MPa")
 
         # Add a source at the position of the first chopper
-        builder.add_source('BER', 'source', [0.0, 0.0, -50.598 + 21.7])
+        source = builder.add_source('BER', 'source', [0.0, 0.0, -50.598 + 21.7])
+        builder.add_dataset(source, 'probe', 'neutron')
+
 
         builder.add_user('Gareth Murphy', 'ESS', number=1)
         __add_detector(builder)
