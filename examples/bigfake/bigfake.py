@@ -222,7 +222,7 @@ def __add_motion_devices(builder):
     def _add_motion(builder, group_names: List[str], start_number: int = 0, nx_class: str = 'NXpositioner',
                     pv_root: str = None):
         for group_number, group_name in enumerate(group_names):
-            group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
+            group = builder.add_nx_group(builder.get_root()['sample/transformations'], group_name, nx_class)
             group.create_group('target_value')
             group.create_group('value')
             group.create_group('status')
@@ -232,7 +232,7 @@ def __add_motion_devices(builder):
 
     _add_motion(builder, ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
     _add_motion(builder, ['omega1', 'omega_2', 'phi'], 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['slit'], nx_class='NXslit')
+    #_add_motion(builder, ['slit'], nx_class='NXslit')
 
 
 def __create_file_writer_command(filepath):
@@ -265,7 +265,7 @@ def __add_attributes(node, attributes):
         else:
             node.attrs.create(key, np.array(attributes[key]))
 
-def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m", factor=1):
+def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m", factor=1, attributes={}):
     """
     Adds example NXlog class to the file
     """
@@ -298,6 +298,7 @@ def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m
     builder.add_dataset(data_group, 'cue_timestamp_zero', np.array(cue_timestamps).astype('float32'),
                         {'units': 's', 'start': iso_timestamp})
     builder.add_dataset(data_group, 'cue_index', np.array(cue_indices).astype('int32'))
+    return data_group
 
 
 if __name__ == '__main__':
@@ -309,23 +310,45 @@ if __name__ == '__main__':
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
+        builder.add_dataset(builder.root, 'title', 'example to demonstrate a prospective ESS instrument NeXus file')
         instrument_group = builder.add_instrument('bigfake', 'instrument')
-        builder.add_user('Gareth Murphy', 'ESS', number=1)
-        __add_detector(builder)
-        __add_choppers(builder)
-        __add_monitors(builder)
-        __add_motion_devices(builder)
+        slit_group = builder.add_nx_group(instrument_group, 'slit1', 'NXslit')
+        builder.add_dataset(slit_group, 'depends_on', 'transformations/x_offset')
+        slit_transforms = builder.add_nx_group(slit_group, 'transformations', 'NXtransformations')
+        xo = add_nxlog(builder, 'x_offset', parent_path=slit_transforms.name, number_of_cues=1, units="mm")
+        attributes = {'vector': [1.0, 0.0, 0.0], 'transformation_type': np.string_('translation'),
+                      'depends_on': np.string_("y_offset")}
+        for name in attributes.keys():
+            xo.attrs.create(name, attributes[name])
+        yo = add_nxlog(builder, 'y_offset', parent_path=slit_transforms.name, number_of_cues=2, units="mm")
+        attributes = {'vector': [0.0, 1.0, 0.0], 'transformation_type': np.string_('translation'),
+                    'depends_on': np.string_("distance")}
+        for name in attributes.keys():
+            yo.attrs.create(name, attributes[name])
+        builder.add_transformation(slit_transforms, 'translation', [-1810], 'mm', [0.0, 0.0, 1.0], name='distance',
+                                             depends_on='.')
+        add_nxlog(builder, 'x_gap', parent_path=slit_group.name, number_of_cues=1, units="mm")
+        add_nxlog(builder, 'y_gap', parent_path=slit_group.name, number_of_cues=1, units="mm")
+
+
 
         # Sample
         sample_group = builder.add_sample()
+        transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         builder.add_dataset(sample_group, 'name', 'white powder')
         builder.add_dataset(sample_group, 'chemical_formula', 'C17H21NO4')
-        builder.add_dataset(sample_group, 'mass', 30, {'units':'g'})    
+        builder.add_dataset(sample_group, 'mass', 30, {'units':'g'})
         add_nxlog(builder, 'temperature', parent_path=sample_group.name, number_of_cues=7, units="K")
         add_nxlog(builder, 'pressure', parent_path=sample_group.name, number_of_cues=2, units="MPa")
 
         # Add a source at the position of the first chopper
         builder.add_source('BER', 'source', [0.0, 0.0, -50.598 + 21.7])
+
+        builder.add_user('Gareth Murphy', 'ESS', number=1)
+        __add_detector(builder)
+        __add_choppers(builder)
+        __add_monitors(builder)
+        __add_motion_devices(builder)
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
@@ -342,4 +365,5 @@ if __name__ == '__main__':
         # kafkacat -b 192.168.1.80 -t V20_writerCommand -X message.max.bytes=20000000 V20_file_write_stop.json -P
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
-        plotter.plot_pixel_positions()
+        #plotter.plot_pixel_positions()
+        pass
