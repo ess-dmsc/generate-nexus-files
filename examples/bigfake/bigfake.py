@@ -122,7 +122,7 @@ def __add_chopper(builder, number):
 
     builder.add_feature("B89B086951FEFDDF")
     add_nxlog(builder, 'top_dead_center', parent_path=chopper_group.name, number_of_cues=100, units="ns")
-    add_nxlog(builder, 'speed', parent_path=chopper_group.name, number_of_cues=10, units="Hz")
+    add_nxlog(builder, 'rotation_speed', parent_path=chopper_group.name, number_of_cues=10, units="Hz")
     add_nxlog(builder, 'delay', parent_path=chopper_group.name, number_of_cues=10, units="ms")
 
 
@@ -360,5 +360,5 @@ if __name__ == '__main__':
         # kafkacat -b 192.168.1.80 -t V20_writerCommand -X message.max.bytes=20000000 V20_file_write_stop.json -P
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
-        #plotter.plot_pixel_positions()
+        plotter.plot_pixel_positions()
         pass
