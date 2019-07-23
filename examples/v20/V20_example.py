@@ -445,7 +445,8 @@ if __name__ == '__main__':
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
-        builder.add_dataset(builder.get_root(), 'start_time', '8601TIME')  # NICOS will replace 8601TIME
+        builder.add_dataset(builder.get_root(), 'start_time', '8601TIME')  # NICOS replaces 8601TIME
+        builder.add_dataset(builder.root, 'title', 'TITLE')  # NICOS replaces FILENAME
 
         # Copy event data into detector
         __copy_existing_data()
