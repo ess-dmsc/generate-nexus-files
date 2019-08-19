@@ -178,9 +178,10 @@ def __add_detector(builder):
     :return:
     """
 
-    pixels_per_axis = 300  # 65535 (requires int64)
-    pixel_size = 0.002
-    half_detector_width = 0.3
+    pixels_per_axis = 512
+    detector_width = 0.28
+    pixel_size = detector_width / pixels_per_axis
+    half_detector_width = detector_width / 2.0
     half_pixel_width = pixel_size / 2.0
     single_axis_offsets = (pixel_size * np.arange(0, pixels_per_axis, 1,
                                                   dtype=np.float)) - half_detector_width + half_pixel_width
