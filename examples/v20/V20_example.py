@@ -238,11 +238,11 @@ def __add_monitors(builder):
     :param builder:
     :return:
     """
-    distance_from_sample = -3.298
+    distance_from_sample = -1.8
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     monitor_group_1.create_group('waveforms')
     monitor_group_1.create_group('events')
-    builder.add_dataset(monitor_group_1, 'detector_id', 90000)
+    builder.add_dataset(monitor_group_1, 'detector_number', 262144)
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
     monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
                                                     [0.0, 0.0, 1.0])
