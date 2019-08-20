@@ -209,11 +209,11 @@ def __add_detector(builder):
     # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
     transforms = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-    orientation = builder.add_transformation(transforms, 'rotation', [90.0], 'deg', [0.0, 1.0, 0.0], name='orientation',
-                                             depends_on='.')
+    # orientation = builder.add_transformation(transforms, 'rotation', [90.0], 'deg', [0.0, 1.0, 0.0], name='orientation',
+    #                                          depends_on='.')
     z_offset = builder.add_transformation(transforms, 'translation', [0.049], 'm', [0.0, 0.0, -1.0],
-                                          name='beam_direction_offset', depends_on=orientation.name)
-    x_offset = builder.add_transformation(transforms, 'translation', [0.971], 'm', [1.0, 0.0, 0.0], name='location',
+                                          name='beam_direction_offset', depends_on='.')  # depends_on=orientation.name
+    x_offset = builder.add_transformation(transforms, 'translation', [3.5], 'm', [1.0, 0.0, 0.0], name='location',
                                           depends_on=z_offset.name)
     builder.add_dataset(detector_group, 'depends_on', x_offset.name)
 
@@ -442,7 +442,7 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'description', '')
 
         # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -50.598 + 21.7])
+        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -27.4])
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
