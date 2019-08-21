@@ -313,21 +313,21 @@ def __create_file_writer_command(filepath):
     # Choppers
     chopper_topic = 'V20_choppers'
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0401:TDC_array',
-                      '/entry/instrument/chopper_1/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_1/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0402:TDC_array',
-                      '/entry/instrument/chopper_2/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_2/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0101:TDC_array',
-                      '/entry/instrument/chopper_3/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_3/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0102:TDC_array',
-                      '/entry/instrument/chopper_4/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_4/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0301:TDC_array',
-                      '/entry/instrument/chopper_5/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_5/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0501:TDC_array',
-                      '/entry/instrument/chopper_6/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_6/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0502:TDC_array',
-                      '/entry/instrument/chopper_7/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_7/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0302:TDC_array',
-                      '/entry/instrument/chopper_8/top_dead_center', 'senv')
+                      '/entry/instrument/chopper_8/top_dead_center', 'tdct')
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0101:Ref_Unix_asub.VALF',
                       '/entry/instrument/chopper_3/ntp_to_mrf_comparison', 'f142', 'int32')
 
