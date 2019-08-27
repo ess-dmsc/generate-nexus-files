@@ -157,6 +157,7 @@ def __add_chopper(builder, number):
         record_chopper_position(builder, chopper_group, distance_from_sample)
 
     chopper_group.create_group('top_dead_center')
+    builder.add_feature("B89B086951FEFDDF")
 
 
 def record_chopper_position(builder, chopper_group, distance_from_sample):
@@ -403,6 +404,9 @@ def __add_data_stream(streams, topic, source, path, module, type=None):
     }
     if type is not None:
         options['type'] = type
+    if module == 'f142':
+        # Add cue entries each megabyte for log data
+        options['nexus'] = '{"indices": {"index_every_mb": 1}}'
     streams[path] = options
 
 
