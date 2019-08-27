@@ -461,9 +461,13 @@ if __name__ == '__main__':
         # Sample
         sample_group = builder.add_sample()
         builder.add_dataset(sample_group, 'description', '')
+        builder.add_dataset(sample_group, 'name', '')
+        builder.add_dataset(sample_group, 'chemical_formula', '')
+        builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
 
         # Add a source at the position of the first chopper
-        builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -27.4])
+        source = builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -27.4])
+        builder.add_dataset(source, 'probe', 'neutron')
 
         # Add start_time dataset (required by Mantid)
         iso8601_str_seconds = datetime.now().isoformat().split('.')[0]
