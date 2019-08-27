@@ -262,19 +262,26 @@ def __add_readout_system(builder, parent_group):
 
 def __add_motion_devices(builder):
     def _add_motion(builder, group_names: List[str], start_number: int = 0, nx_class: str = 'NXpositioner',
-                    pv_root: str = None):
+                    pv_root: str = None, value_name: str = "value"):
         for group_number, group_name in enumerate(group_names):
-            group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
-            group.create_group('target_value')
-            group.create_group('value')
-            group.create_group('status')
-            group.create_group('velocity')
+            try:
+                group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
+            except ValueError:
+                # If the group already exists that's fine
+                group = builder.get_root()['instrument'][group_name]
+            group.create_group(f'{value_name}_target')
+            group.create_group(f'{value_name}')
+            group.create_group(f'{value_name}_status')
+            group.create_group(f'{value_name}_velocity')
             if pv_root is not None:
                 builder.add_dataset(group, 'controller_record', pv_root.format(group_number + start_number))
 
     _add_motion(builder, ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
     _add_motion(builder, ['Omega_1', 'Omega_2', 'Lin1'], 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['Slit3'], nx_class='NXslit')
+    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_gap')
+    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_gap')
+    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_center')
+    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_center')
 
 
 def __create_file_writer_command(filepath):
@@ -362,14 +369,24 @@ def __create_file_writer_command(filepath):
 
     def _add_slit(slit_group_name: str, pv_names: List[str]):
         for pv_name in pv_names:
+            if "H-Gap" in pv_name:
+                value_name = "x_gap"
+            elif "V-Gap" in pv_name:
+                value_name = "y_gap"
+            elif "H-Center" in pv_name:
+                value_name = "x_center"
+            elif "V-Center" in pv_name:
+                value_name = "y_center"
+            else:
+                value_name = "value"
             __add_data_stream(streams, motion_topic, f"{pv_name}.VAL",
-                              f'/entry/instrument/{slit_group_name}/target_value', 'f142', 'double')
+                              f'/entry/instrument/{slit_group_name}/{value_name}_target', 'f142', 'double')
             __add_data_stream(streams, motion_topic, f"{pv_name}.RBV",
-                              f'/entry/instrument/{slit_group_name}/value', 'f142', 'double')
+                              f'/entry/instrument/{slit_group_name}/{value_name}', 'f142', 'double')
             __add_data_stream(streams, motion_topic, f"{pv_name}.STAT",
-                              f'/entry/instrument/{slit_group_name}/status', 'f142', 'int32')
+                              f'/entry/instrument/{slit_group_name}/{value_name}_status', 'f142', 'int32')
             __add_data_stream(streams, motion_topic, f"{pv_name}.VELO",
-                              f'/entry/instrument/{slit_group_name}/velocity', 'f142', 'double')
+                              f'/entry/instrument/{slit_group_name}/{value_name}_velocity', 'f142', 'double')
 
     _add_slit("Slit3", ["HZB-V20:MC-SLT-01:SltH-Center", "HZB-V20:MC-SLT-01:SltH-Gap", "HZB-V20:MC-SLT-01:SltV-Center",
                         "HZB-V20:MC-SLT-01:SltV-Gap"])
