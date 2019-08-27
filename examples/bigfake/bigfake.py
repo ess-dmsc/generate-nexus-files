@@ -3,10 +3,7 @@ from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
 
 import numpy as np
-import nexusformat.nexus as nexus
-from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands, object_to_json_file
 from datetime import datetime
-from typing import List
 
 
 def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
@@ -23,6 +20,7 @@ def __copy_and_transform_dataset(source_file, source_path, target_path, transfor
                                                         compression_opts=builder.compress_opts)
     target_dataset[...] = transformed_data
     return target_dataset
+
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
     split_destination = destination_group.split('/')
@@ -197,9 +195,10 @@ def __add_monitors(builder):
     distance_from_sample = -3.298
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     monitor_event_group = monitor_group_1.create_group('events')
-    builder.add_dataset(monitor_event_group, 'time', np.random.rand(1000).astype('float32'), {'units': 's', 'start': iso_timestamp})
+    builder.add_dataset(monitor_event_group, 'time', np.random.rand(1000).astype('float32'),
+                        {'units': 's', 'start': iso_timestamp})
     builder.add_dataset(monitor_event_group, 'cue_timestamp_zero', np.random.rand(50).astype('float32'),
-                            {'units': 's', 'start': iso_timestamp})
+                        {'units': 's', 'start': iso_timestamp})
     builder.add_dataset(monitor_event_group, 'cue_index', np.random.rand(50).astype('int32'))
 
     monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
@@ -221,20 +220,25 @@ def __add_readout_system(builder, parent_group):
 def __add_motion_devices(builder):
     global last
     last = "."
-    def _add_motion(builder, group_name, units = "mm", vector = [0,0,1]):
-        global last
 
-        group = add_nxlog(builder, group_name, parent_path=builder.get_root()['sample/transformations'], number_of_cues=1, units=units)
+    def _add_motion(builder, group_name, units="mm", vector=None):
+        global last
+        if vector is None:
+            vector = [0, 0, 1]
+
+        group = add_nxlog(builder, group_name, parent_path=builder.get_root()['sample/transformations'],
+                          number_of_cues=1, units=units)
         attributes = {'vector': vector, 'depends_on': np.string_(last),
-            'transformation_type': np.string_('translation') if "deg" != units else np.string_("rotation")}
+                      'transformation_type': np.string_('translation') if "deg" != units else np.string_("rotation")}
         for name in attributes.keys():
             group.attrs.create(name, attributes[name])
         last = group_name
 
-    _add_motion(builder, 'linear_stage', units="mm", vector = [1.0, 0, 0])
-    _add_motion(builder, 'tilting_angle_1', units="deg", vector = [0, 0, 1])
-    _add_motion(builder, 'omega_1', units="deg", vector = [1, 0, 0])
-    _add_motion(builder, 'phi', units="deg", vector = [0, 1, 0])
+    _add_motion(builder, 'linear_stage', units="mm", vector=[1.0, 0, 0])
+    _add_motion(builder, 'tilting_angle_1', units="deg", vector=[0, 0, 1])
+    _add_motion(builder, 'omega_1', units="deg", vector=[1, 0, 0])
+    _add_motion(builder, 'phi', units="deg", vector=[0, 1, 0])
+
 
 def __add_data_stream(streams, topic, source, path, module, type=None):
     options = {
@@ -255,7 +259,8 @@ def __add_attributes(node, attributes):
         else:
             node.attrs.create(key, np.array(attributes[key]))
 
-def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m", factor=1, attributes={}):
+
+def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m", factor=1):
     """
     Adds example NXlog class to the file
     """
@@ -271,13 +276,13 @@ def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m
         cue_indices.append(index)
         time += 0.2 * number_of_cues + (np.random.rand() * 20)
         if cue_number > 0:
-            values = np.hstack([values, np.sort(np.random.rand(number_of_samples) * (1/number_of_cues)) + values[-1]])
+            values = np.hstack([values, np.sort(np.random.rand(number_of_samples) * (1 / number_of_cues)) + values[-1]])
             times = np.hstack(
                 (
                     times,
                     cue_timestamps[-1] + (np.sort(np.random.rand(number_of_samples)) * (time - cue_timestamps[-1]))))
         else:
-            values = np.sort(np.random.rand(number_of_samples) * (1/number_of_cues) * factor) + 0.21
+            values = np.sort(np.random.rand(number_of_samples) * (1 / number_of_cues) * factor) + 0.21
             times = np.sort(np.random.rand(number_of_samples)) * time
         index += number_of_samples
 
@@ -290,8 +295,8 @@ def add_nxlog(builder, nxlogname, parent_path='/', number_of_cues=1000, units="m
     builder.add_dataset(data_group, 'cue_index', np.array(cue_indices).astype('int32'))
     return data_group
 
-last = "."
 
+last = "."
 
 if __name__ == '__main__':
     output_filename = 'bigfake.nxs'
@@ -314,15 +319,13 @@ if __name__ == '__main__':
             xo.attrs.create(name, attributes[name])
         yo = add_nxlog(builder, 'y_offset', parent_path=slit_transforms.name, number_of_cues=2, units="mm")
         attributes = {'vector': [0.0, 1.0, 0.0], 'transformation_type': np.string_('translation'),
-                    'depends_on': np.string_("distance")}
+                      'depends_on': np.string_("distance")}
         for name in attributes.keys():
             yo.attrs.create(name, attributes[name])
         builder.add_transformation(slit_transforms, 'translation', [-1810], 'mm', [0.0, 0.0, 1.0], name='distance',
-                                             depends_on='.')
+                                   depends_on='.')
         add_nxlog(builder, 'x_gap', parent_path=slit_group.name, number_of_cues=1, units="mm")
         add_nxlog(builder, 'y_gap', parent_path=slit_group.name, number_of_cues=1, units="mm")
-
-
 
         # Sample
         sample_group = builder.add_sample()
@@ -330,14 +333,13 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'name', 'white powder')
         builder.add_dataset(sample_group, 'depends_on', 'transformations/phi')
         builder.add_dataset(sample_group, 'chemical_formula', 'C17H21NO4')
-        builder.add_dataset(sample_group, 'mass', 30, {'units':'g'})
+        builder.add_dataset(sample_group, 'mass', 30, {'units': 'g'})
         add_nxlog(builder, 'temperature', parent_path=sample_group.name, number_of_cues=7, units="K")
         add_nxlog(builder, 'pressure', parent_path=sample_group.name, number_of_cues=2, units="MPa")
 
         # Add a source at the position of the first chopper
         source = builder.add_source('BER', 'source', [0.0, 0.0, -50.598 + 21.7])
         builder.add_dataset(source, 'probe', 'neutron')
-
 
         builder.add_user('Gareth Murphy', 'ESS', number=1)
         __add_detector(builder)
