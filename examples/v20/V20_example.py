@@ -452,7 +452,8 @@ if __name__ == '__main__':
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
-        builder.add_user('Many people', 'ESS, HZB, STFC', number=1)
+        builder.add_user('Person 1', 'ESS', number=1)
+        builder.add_user('Person 2', 'STFC', number=2)
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
