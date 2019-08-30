@@ -358,18 +358,18 @@ def __create_file_writer_command(filepath):
     def _add_motion_dev(pv_root: str, group_names: List[str], start_index: int):
         motion_topic = 'V20_motion'
         for group_number, group_name in enumerate(group_names):
-            __add_data_stream(streams, motion_topic, pv_root + ".VAL".format(group_number + start_index),
+            __add_data_stream(streams, motion_topic, pv_root + f"{group_number + start_index}.VAL",
                               f'/entry/instrument/{group_name}/target_value', 'f142', 'double')
-            __add_data_stream(streams, motion_topic, pv_root + ".RBV".format(group_number + start_index),
+            __add_data_stream(streams, motion_topic, pv_root + f"{group_number + start_index}.RBV",
                               f'/entry/instrument/{group_name}/value', 'f142', 'double')
-            __add_data_stream(streams, motion_topic, pv_root + ".STAT".format(group_number + start_index),
+            __add_data_stream(streams, motion_topic, pv_root + f"{group_number + start_index}.STAT",
                               f'/entry/instrument/{group_name}/status', 'f142', 'int32')
-            __add_data_stream(streams, motion_topic, pv_root + ".VELO".format(group_number + start_index),
+            __add_data_stream(streams, motion_topic, pv_root + f"{group_number + start_index}.VELO",
                               f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
 
     motion_topic = 'V20_motion'
-    _add_motion_dev("TUD-SMI:MC-MCU-01:m{}", ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], start_index=1)
-    _add_motion_dev("HZB-V20:MC-MCU-01:m{}", ['Omega_1', 'Omega_2', 'Lin1'], start_index=10)
+    _add_motion_dev("TUD-SMI:MC-MCU-01:m", ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], start_index=1)
+    _add_motion_dev("HZB-V20:MC-MCU-01:m", ['Omega_1', 'Omega_2', 'Lin1'], start_index=10)
 
     def _add_slit(slit_group_name: str, pv_names: List[str]):
         nicos_device_name = slit_group_name.lower()
