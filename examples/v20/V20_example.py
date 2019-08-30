@@ -282,6 +282,10 @@ def __add_motion_devices(builder):
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_gap')
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_center')
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_center')
+    builder.get_root()['instrument']['Slit3'].create_group('x_gap_from_nicos_cache')
+    builder.get_root()['instrument']['Slit3'].create_group('y_gap_from_nicos_cache')
+    builder.get_root()['instrument']['Slit3'].create_group('x_center_from_nicos_cache')
+    builder.get_root()['instrument']['Slit3'].create_group('y_center_from_nicos_cache')
 
 
 def __create_file_writer_command(filepath):
@@ -368,17 +372,24 @@ def __create_file_writer_command(filepath):
     _add_motion_dev("HZB-V20:MC-MCU-01:m{}", ['Omega_1', 'Omega_2', 'Lin1'], start_index=10)
 
     def _add_slit(slit_group_name: str, pv_names: List[str]):
+        nicos_device_name = slit_group_name.lower()
+        nicos_topic = "V20_nicosCacheHistory"
         for pv_name in pv_names:
             if "H-Gap" in pv_name:
                 value_name = "x_gap"
+                nicos_value_name = "h_gap"
             elif "V-Gap" in pv_name:
                 value_name = "y_gap"
+                nicos_value_name = "v_gap"
             elif "H-Center" in pv_name:
                 value_name = "x_center"
+                nicos_value_name = "h_center"
             elif "V-Center" in pv_name:
                 value_name = "y_center"
+                nicos_value_name = "v_center"
             else:
                 value_name = "value"
+                nicos_value_name = "value"
             __add_data_stream(streams, motion_topic, f"{pv_name}.VAL",
                               f'/entry/instrument/{slit_group_name}/{value_name}_target', 'f142', 'double')
             __add_data_stream(streams, motion_topic, f"{pv_name}.RBV",
@@ -387,6 +398,9 @@ def __create_file_writer_command(filepath):
                               f'/entry/instrument/{slit_group_name}/{value_name}_status', 'f142', 'int32')
             __add_data_stream(streams, motion_topic, f"{pv_name}.VELO",
                               f'/entry/instrument/{slit_group_name}/{value_name}_velocity', 'f142', 'double')
+
+            __add_data_stream(streams, nicos_topic, f"nicos/{nicos_device_name}{nicos_value_name}/value",
+                              f'/entry/instrument/{slit_group_name}/{value_name}_from_nicos_cache', 'ns10')
 
     _add_slit("Slit3", ["HZB-V20:MC-SLT-01:SltH-Center", "HZB-V20:MC-SLT-01:SltH-Gap", "HZB-V20:MC-SLT-01:SltV-Center",
                         "HZB-V20:MC-SLT-01:SltV-Gap"])
