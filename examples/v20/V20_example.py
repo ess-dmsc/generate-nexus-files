@@ -156,6 +156,7 @@ def __add_chopper(builder, number):
         distance_from_sample = -11.5
         record_chopper_position(builder, chopper_group, distance_from_sample)
 
+    builder.add_feature("B89B086951FEFDDF")
     chopper_group.create_group('top_dead_center')
 
 
@@ -403,6 +404,8 @@ def __add_data_stream(streams, topic, source, path, module, type=None):
     }
     if type is not None:
         options['type'] = type
+    if module == 'ev42':
+        options['adc_pulse_debug'] = True
     streams[path] = options
 
 
