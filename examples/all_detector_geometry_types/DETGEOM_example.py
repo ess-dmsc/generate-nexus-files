@@ -47,7 +47,19 @@ def add_complete_mesh_geometry_detector():
 
 def add_complete_cylinder_geometry_detector():
     detector_group = builder.add_detector_minimal("complete cylinder geometry detector", 4)
-    builder.add_shape(detector_group, "pixel_shape")
+
+    cylinder_group = builder.add_nx_group(detector_group, "detector_shape", "NXcylindrical_geometry")
+    vertices = np.array([[0.0, -0.4, 0.0], [0.5, -0.4, 0.0], [0.0, 0.0, 0.0],
+                         [0.5, 0.0, 0.0], [0.0, 0.3, 0.0],
+                         [0.5, 0.3, 0.0], [0.0, 0.5, 0.0]])
+    cylinders = np.array([[0, 1, 2], [2, 3, 4], [4, 5, 6]])
+    cylinder_detector_number = np.array([[0, 0], [1, 1], [2, 2]])
+    builder.add_dataset(cylinder_group, "vertices", vertices)
+    builder.add_dataset(cylinder_group, "cylinders", cylinders)
+    builder.add_dataset(cylinder_group, "detector_number", cylinder_detector_number)
+
+    detector_numbers = np.array([0, 1, 2])
+    builder.add_dataset(detector_group, "detector_number", detector_numbers)
 
 
 if __name__ == '__main__':
