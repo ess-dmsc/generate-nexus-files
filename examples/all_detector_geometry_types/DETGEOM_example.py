@@ -15,8 +15,8 @@ def add_per_pixel_mesh_geometry_detector():
     x_pixel_offsets, y_pixel_offsets = np.meshgrid(x_offsets, y_offsets)
     detector_numbers = np.array([0, 1, 2, 3])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
-    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets.flatten())
-    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "x_pixel_offset", x_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "y_pixel_offset", y_pixel_offsets.flatten())
 
     transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
     position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
@@ -34,8 +34,8 @@ def add_per_pixel_cylinder_geometry_detector():
     x_pixel_offsets, y_pixel_offsets = np.meshgrid(x_offsets, y_offsets)
     detector_numbers = np.array([0, 1, 2, 3])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
-    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets.flatten())
-    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "x_pixel_offset", x_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "y_pixel_offset", y_pixel_offsets.flatten())
 
     transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
     position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
@@ -88,6 +88,13 @@ if __name__ == '__main__':
     output_filename = 'DETGEOM_example.hdf5'
     with NexusBuilder(output_filename, compress_type='gzip', compress_opts=1) as builder:
         builder.add_instrument("DETGEOM", "instrument")
+        sample_group = builder.add_sample("test sample")
+        builder.add_dataset(sample_group, "name", "test_sample")
+        source_group = builder.add_source("source")
+        transform_group = builder.add_nx_group(source_group, "transformations", "NXtransformation")
+        position = builder.add_transformation(transform_group, "translation", np.array([20.0]), units="m",
+                                              vector=[0.0, 0.0, -1.0], name="position")
+        builder.add_dataset(source_group, "depends_on", position.name)
         builder.add_dataset(builder.root, 'name', 'DETGEOM', {'short_name': 'DETGEOM'})
 
         add_per_pixel_mesh_geometry_detector()
