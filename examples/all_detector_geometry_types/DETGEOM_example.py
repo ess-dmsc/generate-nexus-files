@@ -10,12 +10,13 @@ def add_per_pixel_mesh_geometry_detector():
     off_faces = np.array([[4, 3, 2, 1, 0]])
     builder.add_shape(detector_group, "pixel_shape", vertices, off_faces)
 
-    x_pixel_offsets = np.arange(start=-0.05, stop=0.1, step=0.05)
-    y_pixel_offsets = np.arange(start=-0.05, stop=0.1, step=0.05)
+    x_offsets = np.linspace(start=-0.05, stop=0.05, num=2)
+    y_offsets = np.linspace(start=-0.05, stop=0.05, num=2)
+    x_pixel_offsets, y_pixel_offsets = np.meshgrid(x_offsets, y_offsets)
     detector_numbers = np.array([0, 1, 2, 3])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
-    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets)
-    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets)
+    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets.flatten())
 
     transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
     position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
@@ -28,12 +29,13 @@ def add_per_pixel_cylinder_geometry_detector():
     builder.add_tube_pixel(detector_group, height=0.05, radius=0.025,
                            axis=np.array([0.0, 0.0, 1.0]), centre=np.array([0.0, 0.0, 0.025]))
 
-    x_pixel_offsets = np.arange(start=-0.05, stop=0.1, step=0.05)
-    y_pixel_offsets = np.arange(start=-0.05, stop=0.1, step=0.05)
+    x_offsets = np.arange(start=-0.05, stop=0.05, step=0.05)
+    y_offsets = np.arange(start=-0.05, stop=0.05, step=0.05)
+    x_pixel_offsets, y_pixel_offsets = np.meshgrid(x_offsets, y_offsets)
     detector_numbers = np.array([0, 1, 2, 3])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
-    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets)
-    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets)
+    builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets.flatten())
+    builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets.flatten())
 
     transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
     position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
