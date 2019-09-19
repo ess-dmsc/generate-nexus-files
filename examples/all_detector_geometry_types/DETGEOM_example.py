@@ -17,6 +17,11 @@ def add_per_pixel_mesh_geometry_detector():
     builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets)
     builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets)
 
+    transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
+    position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
+                                          vector=[-1.0, 0.0, 0.0], name="position")
+    builder.add_dataset(detector_group, "depends_on", position.name)
+
 
 def add_per_pixel_cylinder_geometry_detector():
     detector_group = builder.add_detector_minimal("per pixel cylinder geometry detector", 2)
@@ -29,6 +34,11 @@ def add_per_pixel_cylinder_geometry_detector():
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
     builder.add_dataset(detector_group, "x_pixel_offsets", x_pixel_offsets)
     builder.add_dataset(detector_group, "y_pixel_offsets", y_pixel_offsets)
+
+    transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
+    position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
+                                          vector=[-1.0, 0.0, 1.0], name="position")
+    builder.add_dataset(detector_group, "depends_on", position.name)
 
 
 def add_complete_mesh_geometry_detector():
@@ -43,6 +53,11 @@ def add_complete_mesh_geometry_detector():
     builder.add_shape(detector_group, "detector_shape", vertices, off_faces, detector_faces)
     detector_numbers = np.array([0, 1, 2, 3])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
+
+    transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
+    position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
+                                          vector=[1.0, 0.0, 1.0], name="position")
+    builder.add_dataset(detector_group, "depends_on", position.name)
 
 
 def add_complete_cylinder_geometry_detector():
@@ -60,6 +75,11 @@ def add_complete_cylinder_geometry_detector():
 
     detector_numbers = np.array([0, 1, 2])
     builder.add_dataset(detector_group, "detector_number", detector_numbers)
+
+    transform_group = builder.add_nx_group(detector_group, 'transformations', 'NXtransformation')
+    position = builder.add_transformation(transform_group, "translation", np.array([1.0]), units="m",
+                                          vector=[1.0, 0.0, 0.0], name="position")
+    builder.add_dataset(detector_group, "depends_on", position.name)
 
 
 if __name__ == '__main__':
