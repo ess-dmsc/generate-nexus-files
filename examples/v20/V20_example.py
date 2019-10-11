@@ -155,6 +155,10 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 6)
         distance_from_sample = -11.5
         record_chopper_position(builder, chopper_group, distance_from_sample)
+    elif number is 9:
+        builder.add_dataset(chopper_group, 'name', 'Mini-Chopper')
+        chopper_group.create_group('reference_pulse')
+        chopper_group.create_group('neutron_pulse_arrival')
 
     chopper_group.create_group('top_dead_center')
     builder.add_feature("B89B086951FEFDDF")
@@ -343,6 +347,14 @@ def __create_file_writer_command(filepath):
     __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0101:Ref_Unix_asub.VALF',
                       '/entry/instrument/chopper_3/ntp_to_mrf_comparison', 'f142', 'int32')
 
+    # ESS Mini-Chopper
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0102:TDC_array',
+                      '/entry/instrument/chopper_9/top_dead_center', 'tdct')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0103:TDC_array',
+                      '/entry/instrument/chopper_9/reference_pulse', 'tdct')
+    __add_data_stream(streams, chopper_topic, 'HZB-V20:Chop-Drv-0104:TDC_array',
+                      '/entry/instrument/chopper_9/neutron_pulse_arrival', 'tdct')
+
     # Readout system timing status
     timing_status_topic = 'V20_timingStatus'
     for readout_system_number in ('1', '2'):
@@ -470,8 +482,8 @@ if __name__ == '__main__':
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
-        builder.add_user('Person 1', 'ESS', number=1)
-        builder.add_user('Person 2', 'STFC', number=2)
+        # builder.add_user('Person 1', 'ESS', number=1)
+        # builder.add_user('Person 2', 'STFC', number=2)
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
@@ -479,10 +491,10 @@ if __name__ == '__main__':
 
         # Sample
         sample_group = builder.add_sample()
-        builder.add_dataset(sample_group, 'description', '')
-        builder.add_dataset(sample_group, 'name', '')
-        builder.add_dataset(sample_group, 'chemical_formula', '')
-        builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        # builder.add_dataset(sample_group, 'description', '')
+        # builder.add_dataset(sample_group, 'name', '')
+        # builder.add_dataset(sample_group, 'chemical_formula', '')
+        # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
 
         # Add a source at the position of the first chopper
         source = builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -27.4])
