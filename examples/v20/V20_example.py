@@ -172,7 +172,7 @@ def record_chopper_position(builder, chopper_group, distance_from_sample):
 
 
 def __add_choppers(builder):
-    for chopper_number in range(1, 9):
+    for chopper_number in range(1, 10):
         __add_chopper(builder, chopper_number)
 
 
