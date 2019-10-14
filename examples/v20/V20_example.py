@@ -254,6 +254,11 @@ def __add_monitors(builder):
     builder.add_dataset(monitor_group_1, 'depends_on', monitor_1_z_offset.name)
     builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
 
+    for monitor_number in [0, 2, 3]:
+        monitor_group = builder.add_nx_group(builder.get_root(), f'monitor_{monitor_number}', 'NXmonitor')
+        monitor_group.create_group('waveforms')
+        monitor_group.create_group('events')
+
 
 def __add_readout_system(builder, parent_group):
     for readout_system_number in ('1', '2'):
@@ -321,10 +326,12 @@ def __create_file_writer_command(filepath):
 
     # Monitors
     monitor_topic = 'monitor'
-    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
-                      '/entry/monitor_1/events', 'ev42')
-    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
-                      '/entry/monitor_1/waveforms', 'senv')
+    for monitor_number in range(4):
+        __add_data_stream(streams, monitor_topic, f'Monitor_Adc0_Ch{monitor_number}',
+                          f'/entry/monitor_{monitor_number}/events', 'ev42')
+        __add_data_stream(streams, monitor_topic, f'Monitor_Adc0_Ch{monitor_number}',
+                          f'/entry/monitor_{monitor_number}/waveforms', 'senv')
+
 
     # Choppers
     chopper_topic = 'V20_choppers'
