@@ -104,7 +104,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 6)
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
-        builder.add_dataset(chopper_group, 'ntp_to_mrf_comparison', 0)
+        chopper_group.create_group('ntp_to_mrf_comparison')  # Will be replaced by stream
         distance_from_sample = -20.55
         record_chopper_position(builder, chopper_group, distance_from_sample)
     elif number is 4:
