@@ -41,7 +41,7 @@ def __add_chopper(builder, number):
     chopper_group = builder.add_nx_group(instrument_group, 'chopper_' + str(number), 'NXdisk_chopper')
 
     # TDC position is unknown for the Airbus choppers, due to them being refurbished two times
-    if number is 1:
+    if number == 1:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Source Chopper, ESS Pulse, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', [0., 23.], attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 1)
@@ -49,7 +49,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
         distance_from_sample = -27.4
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 2:
+    elif number == 2:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Source Chopper, ESS Pulse, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', [0., 50.], attributes={'units': 'deg'})
         # Actually has 2 slits, but only one is used and I don't have dimensions for the second slit
@@ -58,7 +58,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
         distance_from_sample = -27.4
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 3:
+    elif number == 3:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 83.71, 94.7, 140.49, 155.79, 193.26, 212.56, 242.32, 265.33, 287.91, 314.37, 330.3]) + 15.0,
@@ -69,7 +69,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'ntp_to_mrf_comparison', 0)
         distance_from_sample = -20.55
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 4:
+    elif number == 4:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
             [0., 65.04, 76.03, 126.1, 141.4, 182.88, 202.18, 235.67, 254.97, 284.73, 307.74, 330.0]) + 15.0,
@@ -79,7 +79,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
         distance_from_sample = -20.55
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 5:
+    elif number == 5:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
@@ -89,7 +89,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 6)
         distance_from_sample = -18.6
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 6:
+    elif number == 6:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Wavelength-Band Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', [0., 140.], attributes={'units': 'deg'})
@@ -98,7 +98,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
         distance_from_sample = -17.4
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 7:
+    elif number == 7:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Wavelength-Band Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'slit_edges', [0., 202.], attributes={'units': 'deg'})
@@ -107,7 +107,7 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
         distance_from_sample = -11.5
         record_chopper_position(builder, chopper_group, distance_from_sample)
-    elif number is 8:
+    elif number == 8:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
@@ -181,7 +181,7 @@ def __add_detector(builder):
                                           depends_on=z_offset.name)
     builder.add_dataset(detector_group, 'depends_on', x_offset.name)
 
-    __add_readout_system(builder, detector_group)
+    __add_readout_system(detector_group)
 
     builder.add_fake_event_data(1000, 100)
 
@@ -208,7 +208,7 @@ def __add_monitors(builder):
     builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
 
 
-def __add_readout_system(builder, parent_group):
+def __add_readout_system(parent_group):
     for readout_system_number in ('1', '2'):
         group_name = f'readout_system_{readout_system_number}'
         readout_group = parent_group.create_group(group_name)
