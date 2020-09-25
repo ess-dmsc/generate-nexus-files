@@ -276,7 +276,8 @@ if __name__ == "__main__":
     total_vertices = None
     total_faces = None
     max_vertex_index = 0
-    z_rotation_angles_degrees = np.linspace(40.0, 320.0, num=23)
+    # TODO this wrong, gap should be at bottom of ring not at top, also start and stop angle are guesses
+    z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
         sector_vertices, sector_faces = create_sector(
             df, z_rotation_angle, max_vertex_index
