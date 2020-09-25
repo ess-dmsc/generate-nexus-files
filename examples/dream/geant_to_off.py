@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import Dict
+from tqdm import tqdm
 
 """
 Generates mesh geometry for DREAM Endcap detector from information from a GEANT4 simulation
@@ -58,14 +59,17 @@ def find_voxel_vertices(
 
 
 def create_winding_order(
-    number_of_voxels: int, vertices_in_voxel: int, vertices_in_each_face: int
+    number_of_voxels: int,
+    vertices_in_voxel: int,
+    vertices_in_each_face: int,
+    vertex_start_index: int,
 ) -> pd.DataFrame:
     index_0 = []
     index_1 = []
     index_2 = []
     index_3 = []
     for voxel in range(number_of_voxels):
-        start_index = voxel * vertices_in_voxel
+        start_index = (voxel * vertices_in_voxel) + vertex_start_index
         index_0.extend(
             [
                 start_index,
@@ -180,7 +184,15 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 }
 
 
-def create_sector(geant_df, z_rotation_angle: float):
+def create_sector(
+    geant_df: pd.DataFrame, z_rotation_angle: float, max_vertex_index: int
+):
+    number_of_voxels = len(df.index)
+    vertices_in_voxel = 8
+    faces_in_voxel = 6
+    number_of_vertices = vertices_in_voxel * number_of_voxels
+    number_of_faces = faces_in_voxel * number_of_voxels
+
     x_coords = np.zeros(number_of_vertices)
     y_coords = np.zeros(number_of_vertices)
     z_coords = np.zeros(number_of_vertices)
@@ -200,9 +212,12 @@ def create_sector(geant_df, z_rotation_angle: float):
             0.0,
         )
 
-        # Translate to centre
         voxel_position = np.array(
-            [geant_df["x_centre"][voxel], geant_df["y_centre"][voxel], geant_df["z_centre"][voxel]]
+            [
+                geant_df["x_centre"][voxel],
+                geant_df["y_centre"][voxel],
+                geant_df["z_centre"][voxel],
+            ]
         )
 
         for vert_number, vertex in enumerate(voxel_vertices):
@@ -231,12 +246,11 @@ def create_sector(geant_df, z_rotation_angle: float):
     # Vertices making up each face of each voxel
     number_of_faces = faces_in_voxel * number_of_voxels
     vertices_in_each_face = 4 * np.ones(number_of_faces)
-    vertex_indices = np.arange(0, number_of_voxels * 8, 8)
 
-    voxels = create_winding_order(
-        number_of_voxels, vertices_in_voxel, vertices_in_each_face
+    faces = create_winding_order(
+        number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
     )
-    return vertices, voxels
+    return vertices, faces
 
 
 if __name__ == "__main__":
@@ -259,20 +273,26 @@ if __name__ == "__main__":
         "z",
     ]
 
-    number_of_voxels = len(df.index)
-    vertices_in_voxel = 8
-    faces_in_voxel = 6
-    number_of_vertices = vertices_in_voxel * number_of_voxels
-    number_of_faces = faces_in_voxel * number_of_voxels
-
-    z_rotation_angles_degrees = np.linspace(20., 340., num=32)
-    z_rotation_angle = 0.
-    sector_vertices, sector_voxels = create_sector(df, z_rotation_angle)
+    total_vertices = None
+    total_faces = None
+    max_vertex_index = 0
+    z_rotation_angles_degrees = np.linspace(40.0, 320.0, num=23)
+    for z_rotation_angle in tqdm(z_rotation_angles_degrees):
+        sector_vertices, sector_faces = create_sector(
+            df, z_rotation_angle, max_vertex_index
+        )
+        if total_vertices is None:
+            total_vertices = sector_vertices
+            total_faces = sector_faces
+        else:
+            total_vertices = total_vertices.append(sector_vertices)
+            total_faces = total_faces.append(sector_faces)
+        max_vertex_index = len(total_vertices.index)
 
     write_to_file(
-        "DREAM_endCap_sector.off",
-        number_of_vertices,
-        number_of_faces,
-        sector_vertices,
-        sector_voxels,
+        "DREAM_endCap_sector2.off",
+        len(total_vertices.index),
+        len(total_faces.index),
+        total_vertices,
+        total_faces,
     )
