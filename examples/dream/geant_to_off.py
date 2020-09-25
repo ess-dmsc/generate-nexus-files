@@ -7,7 +7,7 @@ Generates mesh geometry for DREAM Endcap detector from information from a GEANT4
 """
 
 
-def g4trap(
+def find_voxel_vertices(
     dz: float,
     theta: float,
     phi: float,
@@ -186,7 +186,7 @@ def create_sector(geant_df, z_rotation_angle: float):
     z_coords = np.zeros(number_of_vertices)
 
     for voxel in range(number_of_voxels):
-        voxel_vertices = g4trap(
+        voxel_vertices = find_voxel_vertices(
             geant_df["z"][voxel] / 2,
             0.0,
             0.0,
