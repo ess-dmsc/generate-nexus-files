@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 from typing import Dict
 
+"""
+Generates mesh geometry for DREAM Endcap detector from information from a GEANT4 simulation
+"""
+
 
 def g4trap(
     dz: float,
