@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
-from nxloghelper import add_example_nxlog
+from examples.common.nxloghelper import add_example_nxlog
 
 
 def __copy_and_truncate(builder, source_dataset_path, target_dataset_path, truncate_to_size):
@@ -52,7 +52,7 @@ def __copy_existing_data():
 
 
 if __name__ == '__main__':
-    output_filename = 'SANS2D_example.hdf5'
+    output_filename = 'SANS2D_example.nxs'
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
     with NexusBuilder(output_filename, nx_entry_name=nx_entry_name,
@@ -61,19 +61,6 @@ if __name__ == '__main__':
 
         # Define monitor_1 to have the shape of the Utah teapot as example use of NXshape
         builder.add_shape_from_file('../off_files/teapot.off', 'instrument/monitor1', 'shape')
-
-        # __copy_existing_data()
-        #
-        # builder.add_nx_group(builder.get_root(), 'detector_1_events', 'NXevent_data')
-        #
-        # __copy_and_truncate(builder, 'raw_data_1/detector_1_events/event_id', 'raw_data_1/detector_1_events/event_id',
-        #                     7014)
-        # __copy_and_truncate(builder, 'raw_data_1/detector_1_events/event_index',
-        #                     'raw_data_1/detector_1_events/event_index', 10)
-        # __copy_and_truncate(builder, 'raw_data_1/detector_1_events/event_time_zero',
-        #                     'raw_data_1/detector_1_events/event_time_zero', 7014)
-        # __copy_and_truncate(builder, 'raw_data_1/detector_1_events/event_time_offset',
-        #                     'raw_data_1/detector_1_events/event_time_offset', 10)
 
         add_example_nxlog(builder, '/' + nx_entry_name + '/sample/', 10)
 

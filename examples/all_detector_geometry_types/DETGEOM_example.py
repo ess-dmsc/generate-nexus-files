@@ -86,7 +86,7 @@ def add_complete_cylinder_geometry_detector():
 
 
 if __name__ == '__main__':
-    output_filename = 'DETGEOM_example.hdf5'
+    output_filename = 'DETGEOM_example.nxs'
     with NexusBuilder(output_filename, compress_type='gzip', compress_opts=1) as builder:
         builder.add_instrument("DETGEOM", "instrument")
         sample_group = builder.add_sample("test sample")

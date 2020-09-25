@@ -1,9 +1,11 @@
 from nexusutils.nexusbuilder import NexusBuilder
 from nexusutils.detectorplotter import DetectorPlotter
 import numpy as np
+from examples.common.nxloghelper import add_example_nxlog
+
 
 if __name__ == '__main__':
-    output_filename = 'LOKI_example_gzip.hdf5'
+    output_filename = 'LOKI_example_gzip.nxs'
     with NexusBuilder(output_filename, idf_file='LOKI_Tube_Definition.xml',
                       compress_type='gzip', compress_opts=1) as builder:
         builder.add_instrument_geometry_from_idf()
@@ -23,6 +25,8 @@ if __name__ == '__main__':
                 map_file.write("{}    {}\n".format(det_id, spec_number))
 
         builder.add_dataset(builder.root, 'name', 'LOKI', {'short_name': 'LOKI'})
+
+        add_example_nxlog(builder, builder.root.name + '/sample/', 10)
 
     with DetectorPlotter(output_filename) as plotter:
         plotter.plot_pixel_positions()
