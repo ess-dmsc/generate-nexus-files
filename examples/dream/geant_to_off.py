@@ -124,7 +124,7 @@ def write_to_file(
         f.writelines(
             (
                 "OFF\n",
-                "# DREAM End-Cap Sector 3\n",
+                "# DREAM End-Cap\n",
                 f"{number_of_vertices} {number_of_faces} 0\n",
             )
         )
@@ -180,6 +180,65 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 }
 
 
+def create_sector(geant_df, z_rotation_angle: float):
+    x_coords = np.zeros(number_of_vertices)
+    y_coords = np.zeros(number_of_vertices)
+    z_coords = np.zeros(number_of_vertices)
+
+    for voxel in range(number_of_voxels):
+        voxel_vertices = g4trap(
+            geant_df["z"][voxel] / 2,
+            0.0,
+            0.0,
+            geant_df["y2"][voxel] / 2,
+            geant_df["x1"][voxel] / 2,
+            geant_df["x1"][voxel] / 2,
+            0.0,
+            geant_df["y1"][voxel] / 2,
+            geant_df["x2"][voxel] / 2,
+            geant_df["x2"][voxel] / 2,
+            0.0,
+        )
+
+        # Translate to centre
+        voxel_position = np.array(
+            [geant_df["x_centre"][voxel], geant_df["y_centre"][voxel], geant_df["z_centre"][voxel]]
+        )
+
+        for vert_number, vertex in enumerate(voxel_vertices):
+            # Translate voxel to position in SUMO
+            vertex += voxel_position
+
+            # Rotate 10 degrees around y
+            # This means the SUMO doesn't face the sample, and is done to
+            # increase efficiency of the detector
+            vertex = rotate_around_y(-10, vertex)
+
+            sumo_number = geant_df["sumo"][voxel]
+            vertex = rotate_around_x(sumo_number_to_angle[sumo_number], vertex)
+            vertex += sumo_number_to_translation[sumo_number]
+
+            # Rotate sector
+            vertex = rotate_around_z(z_rotation_angle, vertex)
+
+            x_coords[voxel * vertices_in_voxel + vert_number] = vertex[0]
+            y_coords[voxel * vertices_in_voxel + vert_number] = vertex[1]
+            z_coords[voxel * vertices_in_voxel + vert_number] = vertex[2]
+
+    coords = np.column_stack((x_coords, y_coords, z_coords))
+    vertices = pd.DataFrame(coords)
+
+    # Vertices making up each face of each voxel
+    number_of_faces = faces_in_voxel * number_of_voxels
+    vertices_in_each_face = 4 * np.ones(number_of_faces)
+    vertex_indices = np.arange(0, number_of_voxels * 8, 8)
+
+    voxels = create_winding_order(
+        number_of_voxels, vertices_in_voxel, vertices_in_each_face
+    )
+    return vertices, voxels
+
+
 if __name__ == "__main__":
     df = pd.read_csv(
         "LookupTableDreamEndCap_noRRT.txt", delim_whitespace=True, header=None
@@ -200,74 +259,20 @@ if __name__ == "__main__":
         "z",
     ]
 
-    print(df)
-
     number_of_voxels = len(df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
     number_of_vertices = vertices_in_voxel * number_of_voxels
     number_of_faces = faces_in_voxel * number_of_voxels
 
-    x_coords = np.zeros(number_of_vertices)
-    y_coords = np.zeros(number_of_vertices)
-    z_coords = np.zeros(number_of_vertices)
-
-    for voxel in range(number_of_voxels):
-        sector_number = np.floor(df["sect-seg"][voxel] / 100)
-        segment_number = df["sect-seg"][voxel] % 100
-
-        voxel_vertices = g4trap(
-            df["z"][voxel] / 2,
-            0.0,
-            0.0,
-            df["y2"][voxel] / 2,
-            df["x1"][voxel] / 2,
-            df["x1"][voxel] / 2,
-            0.0,
-            df["y1"][voxel] / 2,
-            df["x2"][voxel] / 2,
-            df["x2"][voxel] / 2,
-            0.0,
-        )
-
-        # Translate to centre
-        voxel_position = np.array(
-            [df["x_centre"][voxel], df["y_centre"][voxel], df["z_centre"][voxel]]
-        )
-
-        for vert_number, vertex in enumerate(voxel_vertices):
-            # Translate voxel to position in SUMO
-            vertex += voxel_position
-
-            # Rotate 10 degrees around y
-            # This means the SUMO doesn't face the sample, and is done to
-            # increase efficiency of the detector
-            vertex = rotate_around_y(-10, vertex)
-
-            sumo_number = df["sumo"][voxel]
-            vertex = rotate_around_x(sumo_number_to_angle[sumo_number], vertex)
-            vertex += sumo_number_to_translation[sumo_number]
-
-            x_coords[voxel * vertices_in_voxel + vert_number] = vertex[0]
-            y_coords[voxel * vertices_in_voxel + vert_number] = vertex[1]
-            z_coords[voxel * vertices_in_voxel + vert_number] = vertex[2]
-
-    coords = np.column_stack((x_coords, y_coords, z_coords))
-    vertices = pd.DataFrame(coords)
-
-    # Vertices making up each face of each voxel
-    number_of_faces = faces_in_voxel * number_of_voxels
-    vertices_in_each_face = 4 * np.ones(number_of_faces)
-    vertex_indices = np.arange(0, number_of_voxels * 8, 8)
-
-    voxels = create_winding_order(
-        number_of_voxels, vertices_in_voxel, vertices_in_each_face
-    )
+    z_rotation_angles_degrees = np.linspace(20., 340., num=32)
+    z_rotation_angle = 0.
+    sector_vertices, sector_voxels = create_sector(df, z_rotation_angle)
 
     write_to_file(
         "DREAM_endCap_sector.off",
         number_of_vertices,
         number_of_faces,
-        vertices,
-        voxels,
+        sector_vertices,
+        sector_voxels,
     )
