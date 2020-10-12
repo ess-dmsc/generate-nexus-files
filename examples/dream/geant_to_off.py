@@ -192,9 +192,9 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 def write_to_nexus_file(
     filename: str,
     number_of_vertices: int,
-    number_of_faces: int,
     vertices: np.ndarray,
     voxels: np.ndarray,
+    detector_ids: np.ndarray,
 ):
     vertices_in_face = 4
     faces = np.arange(0, number_of_vertices, vertices_in_face)
@@ -202,9 +202,8 @@ def write_to_nexus_file(
     with NexusBuilder(
         filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
     ) as builder:
-        instrument_group = builder.add_nx_group(
-            builder.root, "DREAM", "NXinstrument"
-        )
+        instrument_group = builder.add_nx_group(builder.root, "DREAM", "NXinstrument")
+        builder.add_dataset(instrument_group, "name", "DREAM")
         detector_group = builder.add_nx_group(
             instrument_group, "endcap_detector", "NXdetector"
         )
@@ -214,21 +213,38 @@ def write_to_nexus_file(
         builder.add_dataset(shape_group, "vertices", vertices)
         builder.add_dataset(shape_group, "winding_order", voxels.flatten())
         builder.add_dataset(shape_group, "faces", faces)
+        builder.add_dataset(shape_group, "detector_faces", detector_ids)
 
 
 def create_sector(
-    geant_df: pd.DataFrame, z_rotation_angle: float, max_vertex_index: int
-) -> (np.ndarray, np.ndarray):
+    geant_df: pd.DataFrame,
+    z_rotation_angle: float,
+    max_vertex_index: int,
+    max_face_index: int,
+) -> (np.ndarray, np.ndarray, np.ndarray):
     number_of_voxels = len(df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
     number_of_vertices = vertices_in_voxel * number_of_voxels
+    number_of_faces = faces_in_voxel * number_of_voxels
 
     x_coords = np.zeros(number_of_vertices)
     y_coords = np.zeros(number_of_vertices)
     z_coords = np.zeros(number_of_vertices)
 
+    voxel_ids = np.zeros((number_of_faces, 2))
+
+    max_voxel_index = max_face_index / faces_in_voxel
+
     for voxel in range(number_of_voxels):
+        # Map each face in the voxel to the voxel ID
+        for face_number_in_voxel in range(faces_in_voxel):
+            face = voxel * faces_in_voxel + face_number_in_voxel + max_face_index
+            voxel_ids[voxel * faces_in_voxel + face_number_in_voxel, 0] = face
+            voxel_ids[voxel * faces_in_voxel + face_number_in_voxel, 1] = (
+                voxel + max_voxel_index
+            )
+
         voxel_vertices = find_voxel_vertices(
             geant_df["z"][voxel] / 2,
             0.0,
@@ -274,13 +290,13 @@ def create_sector(
     vertex_coords = np.column_stack((x_coords, y_coords, z_coords))
 
     # Vertices making up each face of each voxel
-    number_of_faces = faces_in_voxel * number_of_voxels
+
     vertices_in_each_face = 4 * np.ones(number_of_faces)
 
     faces = create_winding_order(
         number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
     )
-    return vertex_coords, faces
+    return vertex_coords, faces, voxel_ids
 
 
 if __name__ == "__main__":
@@ -303,22 +319,29 @@ if __name__ == "__main__":
         "z",
     ]
 
+    faces_in_voxel = 6
+
     total_vertices = None
     total_faces = None
+    total_ids = None
     max_vertex_index = 0
+    max_face_index = 0
     # TODO start and stop angle are inferred from diagrams, need to check
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
-        sector_vertices, sector_faces = create_sector(
-            df, z_rotation_angle, max_vertex_index
+        sector_vertices, sector_faces, sector_ids = create_sector(
+            df, z_rotation_angle, max_vertex_index, max_face_index,
         )
         if total_vertices is None:
             total_vertices = sector_vertices
             total_faces = sector_faces
+            total_ids = sector_ids
         else:
             total_vertices = np.vstack((total_vertices, sector_vertices))
             total_faces = np.vstack((total_faces, sector_faces))
+            total_ids = np.vstack((total_ids, sector_ids))
         max_vertex_index = total_vertices.shape[0]
+        max_face_index = total_ids.shape[0]
 
     write_to_off_file(
         "DREAM_endCap.off",
@@ -331,7 +354,7 @@ if __name__ == "__main__":
     write_to_nexus_file(
         "DREAM_endcap.nxs",
         total_vertices.shape[0],
-        total_faces.shape[0],
         total_vertices,
         total_faces,
+        total_ids,
     )
