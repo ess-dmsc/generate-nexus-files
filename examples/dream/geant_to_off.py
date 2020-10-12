@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict
 from tqdm import tqdm
+from nexusutils.nexusbuilder import NexusBuilder
 
 """
 Generates mesh geometry for DREAM Endcap detector from information from a GEANT4 simulation
@@ -63,7 +64,7 @@ def create_winding_order(
     vertices_in_voxel: int,
     vertices_in_each_face: int,
     vertex_start_index: int,
-) -> pd.DataFrame:
+) -> np.ndarray:
     index_0 = []
     index_1 = []
     index_2 = []
@@ -114,16 +115,20 @@ def create_winding_order(
     data = np.column_stack(
         (vertices_in_each_face, index_0, index_1, index_2, index_3,)
     ).astype(np.int32)
-    return pd.DataFrame(data)
+    return data
 
 
-def write_to_file(
+def write_to_off_file(
     filename: str,
     number_of_vertices: int,
     number_of_faces: int,
-    vertices: pd.DataFrame,
-    voxels: pd.DataFrame,
+    vertices: np.ndarray,
+    voxels: np.ndarray,
 ):
+    """
+    Write mesh geometry to a file in the OFF format
+    https://en.wikipedia.org/wiki/OFF_(file_format)
+    """
     with open(filename, "w") as f:
         f.writelines(
             (
@@ -133,9 +138,9 @@ def write_to_file(
             )
         )
     with open(filename, "a") as f:
-        vertices.to_csv(f, sep=" ", header=None, index=False)
+        pd.DataFrame(vertices).to_csv(f, sep=" ", header=None, index=False)
     with open(filename, "a") as f:
-        voxels.to_csv(f, sep=" ", header=None, index=False)
+        pd.DataFrame(voxels).to_csv(f, sep=" ", header=None, index=False)
 
 
 def rotate_around_x(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
@@ -184,14 +189,40 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 }
 
 
+def write_to_nexus_file(
+    filename: str,
+    number_of_vertices: int,
+    number_of_faces: int,
+    vertices: np.ndarray,
+    voxels: np.ndarray,
+):
+    vertices_in_face = 4
+    faces = np.arange(0, number_of_vertices, vertices_in_face)
+
+    with NexusBuilder(
+        filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
+    ) as builder:
+        instrument_group = builder.add_nx_group(
+            builder.root, "DREAM", "NXinstrument"
+        )
+        detector_group = builder.add_nx_group(
+            instrument_group, "endcap_detector", "NXdetector"
+        )
+        shape_group = builder.add_nx_group(
+            detector_group, "detector_shape", "NXoff_geometry"
+        )
+        builder.add_dataset(shape_group, "vertices", vertices)
+        builder.add_dataset(shape_group, "winding_order", voxels.flatten())
+        builder.add_dataset(shape_group, "faces", faces)
+
+
 def create_sector(
     geant_df: pd.DataFrame, z_rotation_angle: float, max_vertex_index: int
-):
+) -> (np.ndarray, np.ndarray):
     number_of_voxels = len(df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
     number_of_vertices = vertices_in_voxel * number_of_voxels
-    number_of_faces = faces_in_voxel * number_of_voxels
 
     x_coords = np.zeros(number_of_vertices)
     y_coords = np.zeros(number_of_vertices)
@@ -240,8 +271,7 @@ def create_sector(
             y_coords[voxel * vertices_in_voxel + vert_number] = vertex[1]
             z_coords[voxel * vertices_in_voxel + vert_number] = vertex[2]
 
-    coords = np.column_stack((x_coords, y_coords, z_coords))
-    vertices = pd.DataFrame(coords)
+    vertex_coords = np.column_stack((x_coords, y_coords, z_coords))
 
     # Vertices making up each face of each voxel
     number_of_faces = faces_in_voxel * number_of_voxels
@@ -250,7 +280,7 @@ def create_sector(
     faces = create_winding_order(
         number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
     )
-    return vertices, faces
+    return vertex_coords, faces
 
 
 if __name__ == "__main__":
@@ -276,7 +306,7 @@ if __name__ == "__main__":
     total_vertices = None
     total_faces = None
     max_vertex_index = 0
-    # TODO this wrong, gap should be at bottom of ring not at top, also start and stop angle are guesses
+    # TODO start and stop angle are inferred from diagrams, need to check
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
         sector_vertices, sector_faces = create_sector(
@@ -286,14 +316,22 @@ if __name__ == "__main__":
             total_vertices = sector_vertices
             total_faces = sector_faces
         else:
-            total_vertices = total_vertices.append(sector_vertices)
-            total_faces = total_faces.append(sector_faces)
-        max_vertex_index = len(total_vertices.index)
+            total_vertices = np.vstack((total_vertices, sector_vertices))
+            total_faces = np.vstack((total_faces, sector_faces))
+        max_vertex_index = total_vertices.shape[0]
 
-    write_to_file(
-        "DREAM_endCap_sector2.off",
-        len(total_vertices.index),
-        len(total_faces.index),
+    write_to_off_file(
+        "DREAM_endCap.off",
+        total_vertices.shape[0],
+        total_faces.shape[0],
+        total_vertices,
+        total_faces,
+    )
+
+    write_to_nexus_file(
+        "DREAM_endcap.nxs",
+        total_vertices.shape[0],
+        total_faces.shape[0],
         total_vertices,
         total_faces,
     )
