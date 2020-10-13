@@ -210,10 +210,22 @@ def write_to_nexus_file(
         shape_group = builder.add_nx_group(
             detector_group, "detector_shape", "NXoff_geometry"
         )
-        builder.add_dataset(shape_group, "vertices", vertices)
-        builder.add_dataset(shape_group, "winding_order", voxels.flatten())
-        builder.add_dataset(shape_group, "faces", faces)
-        builder.add_dataset(shape_group, "detector_faces", detector_ids)
+        builder.add_dataset(shape_group, "vertices", vertices.astype(np.float64))
+        builder.add_dataset(
+            shape_group, "winding_order", voxels.flatten().astype(np.int32)
+        )
+        builder.add_dataset(shape_group, "faces", faces.astype(np.int32))
+        builder.add_dataset(
+            shape_group, "detector_faces", detector_ids.astype(np.int32)
+        )
+
+        builder.add_dataset(
+            detector_group,
+            "detector_number",
+            np.unique(detector_ids[:, 1]).astype(np.int32),
+        )
+
+        builder.add_fake_event_data(1, 100)
 
 
 def create_sector(
