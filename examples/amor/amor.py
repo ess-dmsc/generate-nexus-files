@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from tqdm import trange
 
 """
 Generates example file with geometry for AMOR instrument with multiblade detector
@@ -127,5 +128,15 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
 
 
 if __name__ == "__main__":
-    vertices, faces = construct_blade(0)
-    write_to_off_file("amor.off", vertices, faces)
+    total_vertices = None
+    total_faces = None
+    for blade_number in trange(9):
+        vertices, faces = construct_blade(blade_number)
+        if total_vertices is None:
+            total_vertices = vertices
+            total_faces = faces
+        else:
+            total_vertices = np.vstack((total_vertices, vertices))
+            total_faces = np.vstack((total_faces, faces))
+
+    write_to_off_file("amor.off", total_vertices, total_faces)
