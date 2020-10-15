@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 """
 Generates example file with geometry for AMOR instrument with multiblade detector
@@ -27,14 +28,14 @@ def get_height_of_edges_of_each_strip() -> np.ndarray:
     return np.linspace(
         -half_strips_per_blade * strip_pitch_m,
         half_strips_per_blade * strip_pitch_m,
-        strips_per_blade,
+        strips_per_blade + 1,
     )
 
 
 def midpoint_between_wires_radial_direction() -> np.ndarray:
     half_wire_pitch_m = wire_pitch_m * 0.5
     return np.linspace(
-        -half_wire_pitch_m, wires_per_blade * wire_pitch_m, wires_per_blade
+        -half_wire_pitch_m, wires_per_blade * wire_pitch_m, wires_per_blade + 1
     )
 
 
@@ -52,26 +53,55 @@ def rotate_around_y(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
 
 def create_winding_order() -> np.ndarray:
     vertices_per_pixel = 4
-    winding_order = np.zeros((vertices_per_pixel, wires_per_blade * strips_per_blade))
+    winding_order = np.zeros((wires_per_blade * strips_per_blade, vertices_per_pixel), dtype=np.int32)
     for strip_number in range(strips_per_blade):
         for wire_number in range(wires_per_blade):
             pixel_number = wire_number + strip_number * wires_per_blade
-            winding_order[0][pixel_number] = (
+            winding_order[pixel_number][0] = (
                 strip_number * (wires_per_blade + 1) + wire_number
             )
-            winding_order[1][pixel_number] = (strip_number + 1) * (
+            winding_order[pixel_number][1] = (strip_number + 1) * (
                 wires_per_blade + 1
             ) + wire_number
-            winding_order[2][pixel_number] = (
+            winding_order[pixel_number][2] = (
                 (strip_number + 1) * (wires_per_blade + 1) + wire_number + 1
             )
-            winding_order[3][pixel_number] = (
+            winding_order[pixel_number][3] = (
                 strip_number * (wires_per_blade + 1) + wire_number + 1
             )
     return winding_order
 
 
-def construct_blade(blade_number: int):
+def write_to_off_file(
+    filename: str,
+    vertices: np.ndarray,
+    faces: np.ndarray,
+):
+    """
+    Write mesh geometry to a file in the OFF format
+    https://en.wikipedia.org/wiki/OFF_(file_format)
+    """
+    number_of_vertices = vertices.shape[1]
+    number_of_faces = faces.shape[0]
+    vertices_per_face = faces.shape[1]
+    with open(filename, "w") as f:
+        f.writelines(
+            (
+                "OFF\n",
+                "# AMOR Multiblade\n",
+                f"{number_of_vertices} {number_of_faces} 0\n",
+            )
+        )
+    with open(filename, "a") as f:
+        pd.DataFrame(vertices).to_csv(f, sep=" ", header=None, index=False)
+
+    # Prepend winding order with number of vertices in face
+    off_faces = np.hstack((vertices_per_face * np.ones((number_of_faces, 1), dtype=np.int32), faces))
+    with open(filename, "a") as f:
+        pd.DataFrame(off_faces).to_csv(f, sep=" ", header=None, index=False)
+
+
+def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
     # The detector pixels are squares on a plane that corresponds to the front surface of the substrate
 
     # Create vertices for pixel corners as if the blade was in the YZ plane
@@ -81,7 +111,7 @@ def construct_blade(blade_number: int):
     xx = np.zeros_like(yy)
     vertices = np.stack((xx, yy, zz))
     # reshape to a flat list of vertices
-    vertices = np.reshape(vertices, (3, wires_per_blade * strips_per_blade))
+    vertices = np.reshape(vertices, (3, (wires_per_blade + 1) * (strips_per_blade + 1)))
 
     winding_order = create_winding_order() + blade_number * vertices.shape[1]
 
@@ -89,6 +119,9 @@ def construct_blade(blade_number: int):
     rotation_angle_deg = 5 + blade_number * angle_between_blades_deg
     # TODO Vectorize rotate_around_y?
 
+    return vertices, winding_order
+
 
 if __name__ == "__main__":
-    construct_blade(0)
+    vertices, faces = construct_blade(0)
+    write_to_off_file("amor.off", vertices, faces)
