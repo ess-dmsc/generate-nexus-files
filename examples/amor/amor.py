@@ -81,7 +81,7 @@ def write_to_off_file(
     Write mesh geometry to a file in the OFF format
     https://en.wikipedia.org/wiki/OFF_(file_format)
     """
-    number_of_vertices = vertices.shape[1]
+    number_of_vertices = vertices.shape[0]
     number_of_faces = faces.shape[0]
     vertices_per_face = faces.shape[1]
     with open(filename, "w") as f:
@@ -112,8 +112,9 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
     vertices = np.stack((xx, yy, zz))
     # reshape to a flat list of vertices
     vertices = np.reshape(vertices, (3, (wires_per_blade + 1) * (strips_per_blade + 1)))
+    vertices = vertices.T
 
-    winding_order = create_winding_order() + blade_number * vertices.shape[1]
+    winding_order = create_winding_order() + blade_number * vertices.shape[0]
 
     # Rotate the blade around y
     rotation_angle_deg = 5 + blade_number * angle_between_blades_deg
