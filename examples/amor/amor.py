@@ -117,10 +117,13 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
     winding_order = create_winding_order() + blade_number * vertices.shape[0]
 
     # Rotate the blade around y
-    rotation_angle_deg = 5 + blade_number * angle_between_blades_deg
-    # TODO Vectorize rotate_around_y?
+    transformed_vertices = np.zeros_like(vertices)
+    for index, vertex in enumerate(vertices):
+        vertex = rotate_around_y(5., vertex)
+        vertex[2] += sample_to_closest_wire_m
+        transformed_vertices[index, :] = rotate_around_y(angle_between_blades_deg * blade_number, vertex)
 
-    return vertices, winding_order
+    return transformed_vertices, winding_order
 
 
 if __name__ == "__main__":
