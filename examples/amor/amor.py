@@ -54,7 +54,9 @@ def rotate_around_y(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
 
 def create_winding_order() -> np.ndarray:
     vertices_per_pixel = 4
-    winding_order = np.zeros((wires_per_blade * strips_per_blade, vertices_per_pixel), dtype=np.int32)
+    winding_order = np.zeros(
+        (wires_per_blade * strips_per_blade, vertices_per_pixel), dtype=np.int32
+    )
     for strip_number in range(strips_per_blade):
         for wire_number in range(wires_per_blade):
             pixel_number = wire_number + strip_number * wires_per_blade
@@ -74,9 +76,7 @@ def create_winding_order() -> np.ndarray:
 
 
 def write_to_off_file(
-    filename: str,
-    vertices: np.ndarray,
-    faces: np.ndarray,
+    filename: str, vertices: np.ndarray, faces: np.ndarray,
 ):
     """
     Write mesh geometry to a file in the OFF format
@@ -97,12 +97,14 @@ def write_to_off_file(
         pd.DataFrame(vertices).to_csv(f, sep=" ", header=None, index=False)
 
     # Prepend winding order with number of vertices in face
-    off_faces = np.hstack((vertices_per_face * np.ones((number_of_faces, 1), dtype=np.int32), faces))
+    off_faces = np.hstack(
+        (vertices_per_face * np.ones((number_of_faces, 1), dtype=np.int32), faces)
+    )
     with open(filename, "a") as f:
         pd.DataFrame(off_faces).to_csv(f, sep=" ", header=None, index=False)
 
 
-def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
+def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     # The detector pixels are squares on a plane that corresponds to the front surface of the substrate
 
     # Create vertices for pixel corners as if the blade was in the YZ plane
@@ -117,26 +119,42 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray):
 
     winding_order = create_winding_order() + blade_number * vertices.shape[0]
 
-    # Rotate the blade around y
+    pixels_per_blade = wires_per_blade * strips_per_blade
+    start_face_index = pixels_per_blade * blade_number
+    end_face_index = pixels_per_blade * (blade_number + 1)
+    start_pixel_id = start_face_index + 1  # Pixel IDs are 1-indexed
+    end_pixel_id = end_face_index + 1
+    pixel_ids = np.column_stack(
+        np.arange(start_face_index, end_face_index),
+        np.arange(start_pixel_id, end_pixel_id),
+    )
+
     transformed_vertices = np.zeros_like(vertices)
     for index, vertex in enumerate(vertices):
-        vertex = rotate_around_y(5., vertex)
+        # Rotate the blade around y
+        vertex = rotate_around_y(5.0, vertex)
+        # Translation from sample position
         vertex[2] += sample_to_closest_wire_m
-        transformed_vertices[index, :] = rotate_around_y(angle_between_blades_deg * blade_number, vertex)
+        transformed_vertices[index, :] = rotate_around_y(
+            angle_between_blades_deg * blade_number, vertex
+        )
 
-    return transformed_vertices, winding_order
+    return transformed_vertices, winding_order, pixel_ids
 
 
 if __name__ == "__main__":
     total_vertices = None
     total_faces = None
+    total_ids = None
     for blade_number in trange(9):
-        vertices, faces = construct_blade(blade_number)
+        vertices, faces, detector_ids = construct_blade(blade_number)
         if total_vertices is None:
             total_vertices = vertices
             total_faces = faces
+            total_ids = detector_ids
         else:
             total_vertices = np.vstack((total_vertices, vertices))
             total_faces = np.vstack((total_faces, faces))
+            total_ids = np.vstack((total_ids, detector_ids))
 
     write_to_off_file("amor.off", total_vertices, total_faces)
