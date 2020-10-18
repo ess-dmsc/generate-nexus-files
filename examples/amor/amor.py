@@ -65,16 +65,16 @@ def create_winding_order() -> np.ndarray:
         for wire_number in range(WIRES_PER_BLADE):
             pixel_number = wire_number + strip_number * WIRES_PER_BLADE
             winding_order[pixel_number][0] = (
-                    strip_number * (WIRES_PER_BLADE + 1) + wire_number
+                strip_number * (WIRES_PER_BLADE + 1) + wire_number
             )
             winding_order[pixel_number][1] = (strip_number + 1) * (
-                    WIRES_PER_BLADE + 1
+                WIRES_PER_BLADE + 1
             ) + wire_number
             winding_order[pixel_number][2] = (
-                    (strip_number + 1) * (WIRES_PER_BLADE + 1) + wire_number + 1
+                (strip_number + 1) * (WIRES_PER_BLADE + 1) + wire_number + 1
             )
             winding_order[pixel_number][3] = (
-                    strip_number * (WIRES_PER_BLADE + 1) + wire_number + 1
+                strip_number * (WIRES_PER_BLADE + 1) + wire_number + 1
             )
     return winding_order
 
@@ -149,30 +149,25 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
 
 
 def write_to_nexus_file(
-    filename: str,
-    number_of_vertices: int,
-    vertices: np.ndarray,
-    voxels: np.ndarray,
-    detector_ids: np.ndarray,
+    filename: str, vertices: np.ndarray, voxels: np.ndarray, detector_ids: np.ndarray,
 ):
+    winding_order = voxels.flatten().astype(np.int32)
+
     vertices_in_face = 4
-    faces = np.arange(0, number_of_vertices, vertices_in_face)
+    faces = np.arange(0, winding_order.size, vertices_in_face)
 
     with NexusBuilder(
         filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
     ) as builder:
-        instrument_group = builder.add_nx_group(builder.root, INSTRUMENT_NAME, "NXinstrument")
-        builder.add_dataset(instrument_group, "name", INSTRUMENT_NAME)
+        instrument_group = builder.add_instrument(INSTRUMENT_NAME)
         detector_group = builder.add_nx_group(
-            instrument_group, "endcap_detector", "NXdetector"
+            instrument_group, "multiblade_detector", "NXdetector"
         )
         shape_group = builder.add_nx_group(
             detector_group, "detector_shape", "NXoff_geometry"
         )
         builder.add_dataset(shape_group, "vertices", vertices.astype(np.float64))
-        builder.add_dataset(
-            shape_group, "winding_order", voxels.flatten().astype(np.int32)
-        )
+        builder.add_dataset(shape_group, "winding_order", winding_order)
         builder.add_dataset(shape_group, "faces", faces.astype(np.int32))
         builder.add_dataset(
             shape_group, "detector_faces", detector_ids.astype(np.int32)
@@ -183,6 +178,9 @@ def write_to_nexus_file(
             "detector_number",
             np.unique(detector_ids[:, 1]).astype(np.int32),
         )
+
+        builder.add_sample()
+        builder.add_source("SINQ_source", position=[0.0, 0.0, -20.0])
 
         builder.add_fake_event_data(1, 100)
 
@@ -205,9 +203,5 @@ if __name__ == "__main__":
     write_to_off_file(f"{INSTRUMENT_NAME}_multiblade.off", total_vertices, total_faces)
 
     write_to_nexus_file(
-        f"{INSTRUMENT_NAME}_multiblade.nxs",
-        total_vertices.shape[0],
-        total_vertices,
-        total_faces,
-        total_ids,
+        f"{INSTRUMENT_NAME}_multiblade.nxs", total_vertices, total_faces, total_ids,
     )
