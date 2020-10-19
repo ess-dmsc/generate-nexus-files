@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from tqdm import trange
 from nexusutils.nexusbuilder import NexusBuilder
+from nexusjson.nexus_to_json import NexusToDictConverter, object_to_json_file
+import nexusformat.nexus as nexus
 
 """
 Generates example file with geometry for AMOR instrument with multiblade detector
@@ -85,6 +87,8 @@ def write_to_off_file(
     """
     Write mesh geometry to a file in the OFF format
     https://en.wikipedia.org/wiki/OFF_(file_format)
+
+    Viewable in geomview, meshlab etc.
     """
     number_of_vertices = vertices.shape[0]
     number_of_faces = faces.shape[0]
@@ -180,9 +184,26 @@ def write_to_nexus_file(
         )
 
         builder.add_sample()
-        builder.add_source("SINQ_source", position=[0.0, 0.0, -20.0])
+        builder.add_source("virtual_source", position=[0.0, 0.0, -30.0])
+
+        # TODO:
+        #  Detector can move and rotate vertically
+        #  4 slits
+        #  spin flipper
+        #  deflector
+        #  polariser
+        #  2 choppers
 
         builder.add_fake_event_data(1, 100)
+
+
+def write_to_json_file(nexus_filename: str, json_filename: str):
+    converter = NexusToDictConverter()
+    nexus_file = nexus.nxload(nexus_filename)
+    streams = {}
+    links = {}
+    nexus_structure = converter.convert(nexus_file, streams, links)
+    object_to_json_file(nexus_structure, json_filename)
 
 
 if __name__ == "__main__":
@@ -202,6 +223,9 @@ if __name__ == "__main__":
 
     write_to_off_file(f"{INSTRUMENT_NAME}_multiblade.off", total_vertices, total_faces)
 
+    nexus_filename = f"{INSTRUMENT_NAME}_multiblade.nxs"
     write_to_nexus_file(
-        f"{INSTRUMENT_NAME}_multiblade.nxs", total_vertices, total_faces, total_ids,
+        nexus_filename, total_vertices, total_faces, total_ids,
     )
+
+    write_to_json_file(nexus_filename, "AMOR_nexus_structure.json")
