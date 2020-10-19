@@ -24,6 +24,8 @@ ANGLE_BETWEEN_SUBSTRATE_AND_NEUTRON_deg = 5.0  # theta on diagrams
 NUMBER_OF_BLADES = 9  # Maybe only 6 currently with digitisers?
 
 INSTRUMENT_NAME = "AMOR"
+EVENT_TOPIC = "AMOR_events"
+EVENT_SOURCE_NAME = "AMOR_EFU"
 
 
 def get_height_of_edges_of_each_strip() -> np.ndarray:
@@ -195,12 +197,30 @@ def write_to_nexus_file(
         #  2 choppers
 
         builder.add_fake_event_data(1, 100)
+        # Remove link to event data in the NXentry
+        del builder.root["event_data_multiblade_detector"]
+
+
+def __add_data_stream(streams, topic, source, path, module, value_type=None):
+    options = {"topic": topic, "source": source, "writer_module": module}
+    if value_type is not None:
+        options["type"] = value_type
+
+    streams[path] = options
 
 
 def write_to_json_file(nexus_filename: str, json_filename: str):
     converter = NexusToDictConverter()
     nexus_file = nexus.nxload(nexus_filename)
+
     streams = {}
+    __add_data_stream(
+        streams,
+        EVENT_TOPIC,
+        EVENT_SOURCE_NAME,
+        f"/entry/instrument/multiblade_detector/event_data",
+        "ev42",
+    )
     links = {}
     nexus_structure = converter.convert(nexus_file, streams, links)
     object_to_json_file(nexus_structure, json_filename)
