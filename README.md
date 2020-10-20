@@ -2,7 +2,7 @@
 
 Generate example NeXus files in the proposed format for ESS from existing NeXus files and Mantid IDFs. Uses https://github.com/ess-dmsc/python-nexus-utilities
 
-Tested with Python 3.6, >=3.4 should be fine. You can install dependencies with
+Tested with Python 3.7, >=3.6 should be fine. You can install dependencies with
 ```
 pip install -r requirements.txt
 ```
