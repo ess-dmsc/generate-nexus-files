@@ -42,7 +42,7 @@ def get_edges_of_each_strip() -> np.ndarray:
 
 
 def midpoint_between_wires_radial_direction() -> np.ndarray:
-    return np.linspace(0, WIRES_PER_BLADE * WIRE_PITCH_m, WIRES_PER_BLADE + 1)
+    return np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE + 1)
 
 
 def rotate_around_x(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
