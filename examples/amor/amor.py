@@ -17,7 +17,7 @@ y axis is vertical
 WIRE_PITCH_m = 0.004
 STRIP_PITCH_m = 0.004
 ANGLE_BETWEEN_BLADES_deg = 0.1448  # lowercase delta on diagrams
-SAMPLE_TO_CLOSEST_WIRE_m = 4.0  # R on diagrams
+SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m = 4.0  # R on diagrams
 WIRES_PER_BLADE = 32
 STRIPS_PER_BLADE = 32
 ANGLE_BETWEEN_SUBSTRATE_AND_NEUTRON_deg = 5.0  # theta on diagrams
@@ -28,10 +28,10 @@ EVENT_TOPIC = "AMOR_events"
 EVENT_SOURCE_NAME = "AMOR_EFU"
 
 
-def get_height_of_edges_of_each_strip() -> np.ndarray:
+def get_edges_of_each_strip() -> np.ndarray:
     """
-    These are the y values for the pixel corner vertices
-    assume beam, and thus z axis and y=0, is half way along height of blade
+    These are the strip edge values for the pixel corner vertices
+    assume beam is centred on the detector in this dimension and thus origin is in the middle
     """
     half_strips_per_blade = STRIPS_PER_BLADE * 0.5
     return np.linspace(
@@ -42,19 +42,16 @@ def get_height_of_edges_of_each_strip() -> np.ndarray:
 
 
 def midpoint_between_wires_radial_direction() -> np.ndarray:
-    half_wire_pitch_m = WIRE_PITCH_m * 0.5
-    return np.linspace(
-        -half_wire_pitch_m, WIRES_PER_BLADE * WIRE_PITCH_m, WIRES_PER_BLADE + 1
-    )
+    return np.linspace(0, WIRES_PER_BLADE * WIRE_PITCH_m, WIRES_PER_BLADE + 1)
 
 
-def rotate_around_y(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
+def rotate_around_x(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
     angle = np.deg2rad(angle_degrees)
     rotation_matrix = np.array(
         [
-            [np.cos(angle), 0, np.sin(angle)],
-            [0, 1, 0],
-            [-np.sin(angle), 0, np.cos(angle)],
+            [1, 0, 0],
+            [0, np.cos(angle), -np.sin(angle)],
+            [0, np.sin(angle), np.cos(angle)],
         ]
     )
     return rotation_matrix.dot(vertex)
@@ -118,10 +115,10 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     # The detector pixels are squares on a plane that corresponds to the front surface of the substrate
 
     # Create vertices for pixel corners as if the blade was in the YZ plane
-    y = get_height_of_edges_of_each_strip()
+    x = get_edges_of_each_strip()
     z = midpoint_between_wires_radial_direction()
-    yy, zz = np.meshgrid(y, z)
-    xx = np.zeros_like(yy)
+    xx, zz = np.meshgrid(x, z)
+    yy = np.zeros_like(xx)
     vertices = np.stack((xx, yy, zz))
     # reshape to a flat list of vertices
     vertices = np.reshape(vertices, (3, (WIRES_PER_BLADE + 1) * (STRIPS_PER_BLADE + 1)))
@@ -142,13 +139,14 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     )
 
     transformed_vertices = np.zeros_like(vertices)
+    # This ensures we create the blades in the order that matches the detector IDs output by the EFU
+    blade_index = abs(blade_number - NUMBER_OF_BLADES) - 1
     for index, vertex in enumerate(vertices):
-        # Rotate the blade around y
-        vertex = rotate_around_y(5.0, vertex)
+        vertex = rotate_around_x(-5.0, vertex)
         # Translation from sample position
-        vertex[2] += SAMPLE_TO_CLOSEST_WIRE_m
-        transformed_vertices[index, :] = rotate_around_y(
-            ANGLE_BETWEEN_BLADES_deg * blade_number, vertex
+        vertex[2] += SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m
+        transformed_vertices[index, :] = rotate_around_x(
+            -ANGLE_BETWEEN_BLADES_deg * blade_index, vertex
         )
 
     return transformed_vertices, winding_order, pixel_ids
