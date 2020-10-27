@@ -64,5 +64,7 @@ if __name__ == '__main__':
 
         add_example_nxlog(builder, '/' + nx_entry_name + '/sample/', 10)
 
+        builder.add_fake_event_data(1000, 100)
+
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
