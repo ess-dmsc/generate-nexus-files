@@ -4,6 +4,7 @@ from tqdm import trange
 from nexusutils.nexusbuilder import NexusBuilder
 from nexusjson.nexus_to_json import NexusToDictConverter, object_to_json_file
 import nexusformat.nexus as nexus
+from contextlib import contextmanager
 
 """
 Generates example file with geometry for AMOR instrument with multiblade detector
@@ -207,21 +208,30 @@ def __add_data_stream(streams, topic, source, path, module, value_type=None):
     streams[path] = options
 
 
+@contextmanager
+def nexus_file(nexus_filename: str):
+    open_file = nexus.nxload(nexus_filename)
+    try:
+        yield open_file
+    finally:
+        open_file.close()
+
+
 def write_to_json_file(nexus_filename: str, json_filename: str):
     converter = NexusToDictConverter()
-    nexus_file = nexus.nxload(nexus_filename)
 
-    streams = {}
-    __add_data_stream(
-        streams,
-        EVENT_TOPIC,
-        EVENT_SOURCE_NAME,
-        f"/entry/instrument/multiblade_detector/event_data",
-        "ev42",
-    )
-    links = {}
-    nexus_structure = converter.convert(nexus_file, streams, links)
-    object_to_json_file(nexus_structure, json_filename)
+    with nexus_file(nexus_filename) as nxs_file:
+        streams = {}
+        __add_data_stream(
+            streams,
+            EVENT_TOPIC,
+            EVENT_SOURCE_NAME,
+            f"/entry/instrument/multiblade_detector/event_data",
+            "ev42",
+        )
+        links = {}
+        nexus_structure = converter.convert(nxs_file, streams, links)
+        object_to_json_file(nexus_structure, json_filename)
 
 
 if __name__ == "__main__":
