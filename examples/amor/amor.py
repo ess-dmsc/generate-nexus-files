@@ -25,8 +25,10 @@ ANGLE_BETWEEN_SUBSTRATE_AND_NEUTRON_deg = 5.0  # theta on diagrams
 NUMBER_OF_BLADES = 9  # Maybe only 6 currently with digitisers?
 
 INSTRUMENT_NAME = "AMOR"
-EVENT_TOPIC = "AMOR_events"
+EVENT_TOPIC = "FREIA_detector"
 EVENT_SOURCE_NAME = "AMOR_EFU"
+NICOS_CACHE_TOPIC = "AMOR_nicosHistoryCache"
+FORWARDER_TOPIC = "AMOR_forwarderData"
 
 
 def get_edges_of_each_strip() -> np.ndarray:
@@ -82,7 +84,9 @@ def create_winding_order() -> np.ndarray:
 
 
 def write_to_off_file(
-    filename: str, vertices: np.ndarray, faces: np.ndarray,
+    filename: str,
+    vertices: np.ndarray,
+    faces: np.ndarray,
 ):
     """
     Write mesh geometry to a file in the OFF format
@@ -144,17 +148,22 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     blade_index = abs(blade_number - NUMBER_OF_BLADES) - 1
     for index, vertex in enumerate(vertices):
         vertex = rotate_around_x(-5.0, vertex)
-        # Translation from sample position
+        # Translation from sample position so we can rotate the blade a small angle on a wide arc
         vertex[2] += SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m
         transformed_vertices[index, :] = rotate_around_x(
             -ANGLE_BETWEEN_BLADES_deg * blade_index, vertex
         )
+        # Shift blade back so that its front edge is at z=0 again
+        vertex[2] -= SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m
 
     return transformed_vertices, winding_order, pixel_ids
 
 
 def write_to_nexus_file(
-    filename: str, vertices: np.ndarray, voxels: np.ndarray, detector_ids: np.ndarray,
+    filename: str,
+    vertices: np.ndarray,
+    voxels: np.ndarray,
+    detector_ids: np.ndarray,
 ):
     winding_order = voxels.flatten().astype(np.int32)
 
@@ -183,6 +192,42 @@ def write_to_nexus_file(
             "detector_number",
             np.unique(detector_ids[:, 1]).astype(np.int32),
         )
+
+        transforms_group = builder.add_nx_group(
+            detector_group, "transformations", "NXtransformations"
+        )
+        translation_1 = builder.add_transformation(
+            transforms_group, "translation", -4.1, "m", [0.0, 0.0, 1.0]
+        )
+        detector_height = builder.add_transformation(
+            transforms_group,
+            "translation",
+            0.0,
+            "m",
+            [0.0, -1.0, 0.0],
+            name="detector_height",
+            depends_on=translation_1,
+        )
+        detector_rotation = builder.add_transformation(
+            transforms_group,
+            "rotation",
+            0.0,
+            "deg",
+            [1.0, 0.0, 0.0],
+            name="detector_rotation",
+            depends_on=detector_height,
+        )
+        detector_pivot_point = builder.add_transformation(
+            transforms_group,
+            "translation",
+            0.1,
+            "m",
+            [0.0, 0.0, 1.0],
+            name="detector_pivot_point",
+            depends_on=detector_rotation,
+        )
+
+        builder.add_depends_on(detector_group, detector_pivot_point)
 
         builder.add_sample()
         builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
@@ -253,7 +298,10 @@ if __name__ == "__main__":
 
     nexus_filename = f"{INSTRUMENT_NAME}_multiblade.nxs"
     write_to_nexus_file(
-        nexus_filename, total_vertices, total_faces, total_ids,
+        nexus_filename,
+        total_vertices,
+        total_faces,
+        total_ids,
     )
 
     write_to_json_file(nexus_filename, "AMOR_nexus_structure.json")
