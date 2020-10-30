@@ -185,7 +185,7 @@ def write_to_nexus_file(
         )
 
         builder.add_sample()
-        builder.add_source("virtual_source", position=[0.0, 0.0, -30.0])
+        builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
 
         # TODO:
         #  Detector can move and rotate vertically

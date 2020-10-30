@@ -33,28 +33,60 @@ def find_voxel_vertices(
     talpha2 = np.tan(alp2)
 
     pt_0 = np.array(
-        (-dz * ttheta_cphi - dy1 * talpha1 - dx1, -dz * ttheta_sphi - dy1, -dz,)
+        (
+            -dz * ttheta_cphi - dy1 * talpha1 - dx1,
+            -dz * ttheta_sphi - dy1,
+            -dz,
+        )
     )
     pt_1 = np.array(
-        (-dz * ttheta_cphi - dy1 * talpha1 + dx1, -dz * ttheta_sphi - dy1, -dz,)
+        (
+            -dz * ttheta_cphi - dy1 * talpha1 + dx1,
+            -dz * ttheta_sphi - dy1,
+            -dz,
+        )
     )
     pt_2 = np.array(
-        (-dz * ttheta_cphi + dy1 * talpha1 - dx2, -dz * ttheta_sphi + dy1, -dz,)
+        (
+            -dz * ttheta_cphi + dy1 * talpha1 - dx2,
+            -dz * ttheta_sphi + dy1,
+            -dz,
+        )
     )
     pt_3 = np.array(
-        (-dz * ttheta_cphi + dy1 * talpha1 + dx2, -dz * ttheta_sphi + dy1, -dz,)
+        (
+            -dz * ttheta_cphi + dy1 * talpha1 + dx2,
+            -dz * ttheta_sphi + dy1,
+            -dz,
+        )
     )
     pt_4 = np.array(
-        (+dz * ttheta_cphi - dy2 * talpha2 - dx3, +dz * ttheta_sphi - dy2, +dz,)
+        (
+            +dz * ttheta_cphi - dy2 * talpha2 - dx3,
+            +dz * ttheta_sphi - dy2,
+            +dz,
+        )
     )
     pt_5 = np.array(
-        (+dz * ttheta_cphi - dy2 * talpha2 + dx3, +dz * ttheta_sphi - dy2, +dz,)
+        (
+            +dz * ttheta_cphi - dy2 * talpha2 + dx3,
+            +dz * ttheta_sphi - dy2,
+            +dz,
+        )
     )
     pt_6 = np.array(
-        (+dz * ttheta_cphi + dy2 * talpha2 - dx4, +dz * ttheta_sphi + dy2, +dz,)
+        (
+            +dz * ttheta_cphi + dy2 * talpha2 - dx4,
+            +dz * ttheta_sphi + dy2,
+            +dz,
+        )
     )
     pt_7 = np.array(
-        (+dz * ttheta_cphi + dy2 * talpha2 + dx4, +dz * ttheta_sphi + dy2, +dz,)
+        (
+            +dz * ttheta_cphi + dy2 * talpha2 + dx4,
+            +dz * ttheta_sphi + dy2,
+            +dz,
+        )
     )
     return pt_0, pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7
 
@@ -113,7 +145,13 @@ def create_winding_order(
         )
 
     data = np.column_stack(
-        (vertices_in_each_face, index_0, index_1, index_2, index_3,)
+        (
+            vertices_in_each_face,
+            index_0,
+            index_1,
+            index_2,
+            index_3,
+        )
     ).astype(np.int32)
     return data
 
@@ -195,6 +233,9 @@ def write_to_nexus_file(
     vertices: np.ndarray,
     voxels: np.ndarray,
     detector_ids: np.ndarray,
+    x_offsets: np.ndarray,
+    y_offsets: np.ndarray,
+    z_offsets: np.ndarray,
 ):
     vertices_in_face = 4
     faces = np.arange(0, number_of_vertices, vertices_in_face)
@@ -225,6 +266,11 @@ def write_to_nexus_file(
             np.unique(detector_ids[:, 1]).astype(np.int32),
         )
 
+        # Record voxel centre positions
+        builder.add_dataset(detector_group, "x_pixel_offset", x_offsets, {"units": "m"})
+        builder.add_dataset(detector_group, "y_pixel_offset", y_offsets, {"units": "m"})
+        builder.add_dataset(detector_group, "z_pixel_offset", z_offsets, {"units": "m"})
+
         builder.add_fake_event_data(1, 100)
 
 
@@ -233,7 +279,7 @@ def create_sector(
     z_rotation_angle: float,
     max_vertex_index: int,
     max_face_index: int,
-) -> (np.ndarray, np.ndarray, np.ndarray):
+) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray):
     number_of_voxels = len(df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
@@ -243,6 +289,10 @@ def create_sector(
     x_coords = np.zeros(number_of_vertices)
     y_coords = np.zeros(number_of_vertices)
     z_coords = np.zeros(number_of_vertices)
+
+    x_centre_coords = np.zeros(number_of_voxels)
+    y_centre_coords = np.zeros(number_of_voxels)
+    z_centre_coords = np.zeros(number_of_voxels)
 
     voxel_ids = np.zeros((number_of_faces, 2))
 
@@ -299,6 +349,25 @@ def create_sector(
             y_coords[voxel * vertices_in_voxel + vert_number] = vertex[1]
             z_coords[voxel * vertices_in_voxel + vert_number] = vertex[2]
 
+        x_centre_coords[voxel] = np.mean(
+            x_coords[
+                voxel * vertices_in_voxel : voxel * vertices_in_voxel
+                + vertices_in_voxel
+            ]
+        )
+        y_centre_coords[voxel] = np.mean(
+            y_coords[
+                voxel * vertices_in_voxel : voxel * vertices_in_voxel
+                + vertices_in_voxel
+            ]
+        )
+        z_centre_coords[voxel] = np.mean(
+            z_coords[
+                voxel * vertices_in_voxel : voxel * vertices_in_voxel
+                + vertices_in_voxel
+            ]
+        )
+
     vertex_coords = np.column_stack((x_coords, y_coords, z_coords))
 
     # Vertices making up each face of each voxel
@@ -308,7 +377,14 @@ def create_sector(
     faces = create_winding_order(
         number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
     )
-    return vertex_coords, faces, voxel_ids
+    return (
+        vertex_coords,
+        faces,
+        voxel_ids,
+        x_centre_coords,
+        y_centre_coords,
+        z_centre_coords,
+    )
 
 
 if __name__ == "__main__":
@@ -336,22 +412,34 @@ if __name__ == "__main__":
     total_vertices = None
     total_faces = None
     total_ids = None
+    x_offsets_total = None
+    y_offsets_total = None
+    z_offsets_total = None
     max_vertex_index = 0
     max_face_index = 0
     # TODO start and stop angle are inferred from diagrams, need to check
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
-        sector_vertices, sector_faces, sector_ids = create_sector(
-            df, z_rotation_angle, max_vertex_index, max_face_index,
+        sector_vertices, sector_faces, sector_ids, x_offsets, y_offsets, z_offsets = create_sector(
+            df,
+            z_rotation_angle,
+            max_vertex_index,
+            max_face_index,
         )
         if total_vertices is None:
             total_vertices = sector_vertices
             total_faces = sector_faces
             total_ids = sector_ids
+            x_offsets_total = x_offsets
+            y_offsets_total = y_offsets
+            z_offsets_total = z_offsets
         else:
             total_vertices = np.vstack((total_vertices, sector_vertices))
             total_faces = np.vstack((total_faces, sector_faces))
             total_ids = np.vstack((total_ids, sector_ids))
+            x_offsets_total = np.vstack((x_offsets_total, x_offsets))
+            y_offsets_total = np.vstack((y_offsets_total, y_offsets))
+            z_offsets_total = np.vstack((z_offsets_total, z_offsets))
         max_vertex_index = total_vertices.shape[0]
         max_face_index = total_ids.shape[0]
 
@@ -369,4 +457,7 @@ if __name__ == "__main__":
         total_vertices,
         total_faces,
         total_ids,
+        x_offsets_total,
+        y_offsets_total,
+        z_offsets_total,
     )
