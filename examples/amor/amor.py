@@ -29,8 +29,8 @@ NUMBER_OF_BLADES = 9  # Maybe only 6 currently with digitisers?
 INSTRUMENT_NAME = "AMOR"
 EVENT_TOPIC = "FREIA_detector"
 EVENT_SOURCE_NAME = "AMOR_EFU"
-NICOS_CACHE_TOPIC = "AMOR_nicosHistoryCache"
 FORWARDER_TOPIC = "AMOR_forwarderData"
+# NICOS_CACHE_TOPIC = "AMOR_nicosHistoryCache"
 
 
 def get_edges_of_each_strip() -> np.ndarray:
