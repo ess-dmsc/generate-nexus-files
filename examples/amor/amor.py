@@ -290,14 +290,6 @@ def write_to_nexus_file(
 
         builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
 
-        # TODO:
-        #  Detector can move and rotate vertically
-        #  4 slits
-        #  spin flipper
-        #  deflector
-        #  polariser
-        #  2 choppers
-
         builder.add_fake_event_data(1, 100)
         # Remove link to event data in the NXentry
         del builder.root["event_data_multiblade_detector"]
