@@ -258,13 +258,13 @@ def write_to_nexus_file(
         sample_transforms_group = builder.add_nx_group(
             sample_group, "transformations", "NXtransformations"
         )
-        builder.add_nx_group(
+        sample_height = builder.add_nx_group(
             sample_transforms_group,
             "SOZ",
             "NXlog",
         )
         __add_attributes_to_group(
-            detector_height,
+            sample_height,
             {
                 "depends_on": ".",
                 "transformation_type": "translation",
@@ -278,7 +278,7 @@ def write_to_nexus_file(
             "NXlog",
         )
         __add_attributes_to_group(
-            detector_height,
+            sample_orientation,
             {
                 "depends_on": "/entry/sample/transformations/SOZ",
                 "transformation_type": "translation",
