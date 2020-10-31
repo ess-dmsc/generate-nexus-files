@@ -211,7 +211,12 @@ def write_to_nexus_file(
             detector_group, "transformations", "NXtransformations"
         )
         builder.add_transformation(
-            transforms_group, "translation", -4.1, "m", [0.0, 0.0, 1.0], name="translation"
+            transforms_group,
+            "translation",
+            -4.1,
+            "m",
+            [0.0, 0.0, 1.0],
+            name="translation",
         )
         detector_height = builder.add_nx_group(
             transforms_group,
@@ -250,7 +255,9 @@ def write_to_nexus_file(
         builder.add_depends_on(detector_group, detector_pivot_point)
 
         sample_group = builder.add_sample()
-        sample_transforms_group = builder.add_nx_group(sample_group, "transformations", "NXtransformations")
+        sample_transforms_group = builder.add_nx_group(
+            sample_group, "transformations", "NXtransformations"
+        )
         builder.add_nx_group(
             sample_transforms_group,
             "SOZ",
@@ -280,7 +287,6 @@ def write_to_nexus_file(
             },
         )
         builder.add_depends_on(sample_group, sample_orientation)
-
 
         builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
 
