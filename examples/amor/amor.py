@@ -5,6 +5,8 @@ from nexusutils.nexusbuilder import NexusBuilder
 from nexusjson.nexus_to_json import NexusToDictConverter, object_to_json_file
 import nexusformat.nexus as nexus
 from contextlib import contextmanager
+from typing import Dict
+import h5py
 
 """
 Generates example file with geometry for AMOR instrument with multiblade detector
@@ -159,6 +161,18 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     return transformed_vertices, winding_order, pixel_ids
 
 
+def __add_attributes_to_group(group: h5py.Group, attributes: Dict):
+    for key in attributes:
+        if isinstance(attributes[key], str):
+            # Since python 3 we have to treat strings like this
+            group.attrs.create(
+                key,
+                np.array(attributes[key]).astype("|S" + str(len(attributes[key]))),
+            )
+        else:
+            group.attrs.create(key, np.array(attributes[key]))
+
+
 def write_to_nexus_file(
     filename: str,
     vertices: np.ndarray,
@@ -199,23 +213,29 @@ def write_to_nexus_file(
         translation_1 = builder.add_transformation(
             transforms_group, "translation", -4.1, "m", [0.0, 0.0, 1.0]
         )
-        detector_height = builder.add_transformation(
+        detector_height = builder.add_nx_group(
             transforms_group,
-            "translation",
-            0.0,
-            "m",
-            [0.0, -1.0, 0.0],
-            name="detector_height",
-            depends_on=translation_1,
+            "COZ",
+            "NXlog",
         )
-        detector_rotation = builder.add_transformation(
-            transforms_group,
-            "rotation",
-            0.0,
-            "deg",
-            [1.0, 0.0, 0.0],
-            name="detector_rotation",
-            depends_on=detector_height,
+        __add_attributes_to_group(
+            detector_height,
+            {
+                "depends_on": "/entry/instrument/multiblade_detector/transformations/transformation",
+                "transformation_type": "translation",
+                "units": "m",
+                "vector": [0.0, -1.0, 0.0],
+            },
+        )
+        detector_orientation = builder.add_nx_group(transforms_group, "COM", "NXlog")
+        __add_attributes_to_group(
+            detector_orientation,
+            {
+                "depends_on": "/entry/instrument/multiblade_detector/transformations/COZ",
+                "transformation_type": "rotation",
+                "units": "deg",
+                "vector": [1.0, 0.0, 0.0],
+            },
         )
         detector_pivot_point = builder.add_transformation(
             transforms_group,
@@ -224,7 +244,7 @@ def write_to_nexus_file(
             "m",
             [0.0, 0.0, 1.0],
             name="detector_pivot_point",
-            depends_on=detector_rotation,
+            depends_on=detector_orientation,
         )
 
         builder.add_depends_on(detector_group, detector_pivot_point)
@@ -271,8 +291,22 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             streams,
             EVENT_TOPIC,
             EVENT_SOURCE_NAME,
-            f"/entry/instrument/multiblade_detector/event_data",
+            "/entry/instrument/multiblade_detector/event_data",
             "ev42",
+        )
+        __add_data_stream(
+            streams,
+            FORWARDER_TOPIC,
+            "COM",
+            "/entry/instrument/multiblade_detector/transformations/COM",
+            "f142",
+        )
+        __add_data_stream(
+            streams,
+            FORWARDER_TOPIC,
+            "COZ",
+            "/entry/instrument/multiblade_detector/transformations/COZ",
+            "f142",
         )
         links = {}
         nexus_structure = converter.convert(nxs_file, streams, links)
