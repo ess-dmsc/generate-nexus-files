@@ -210,8 +210,8 @@ def write_to_nexus_file(
         transforms_group = builder.add_nx_group(
             detector_group, "transformations", "NXtransformations"
         )
-        translation_1 = builder.add_transformation(
-            transforms_group, "translation", -4.1, "m", [0.0, 0.0, 1.0]
+        builder.add_transformation(
+            transforms_group, "translation", -4.1, "m", [0.0, 0.0, 1.0], name="translation"
         )
         detector_height = builder.add_nx_group(
             transforms_group,
@@ -221,7 +221,7 @@ def write_to_nexus_file(
         __add_attributes_to_group(
             detector_height,
             {
-                "depends_on": "/entry/instrument/multiblade_detector/transformations/transformation",
+                "depends_on": "/entry/instrument/multiblade_detector/transformations/translation",
                 "transformation_type": "translation",
                 "units": "m",
                 "vector": [0.0, -1.0, 0.0],
@@ -249,7 +249,39 @@ def write_to_nexus_file(
 
         builder.add_depends_on(detector_group, detector_pivot_point)
 
-        builder.add_sample()
+        sample_group = builder.add_sample()
+        sample_transforms_group = builder.add_nx_group(sample_group, "transformations", "NXtransformations")
+        builder.add_nx_group(
+            sample_transforms_group,
+            "SOZ",
+            "NXlog",
+        )
+        __add_attributes_to_group(
+            detector_height,
+            {
+                "depends_on": ".",
+                "transformation_type": "translation",
+                "units": "m",
+                "vector": [0.0, -1.0, 0.0],
+            },
+        )
+        sample_orientation = builder.add_nx_group(
+            sample_transforms_group,
+            "SOM",
+            "NXlog",
+        )
+        __add_attributes_to_group(
+            detector_height,
+            {
+                "depends_on": "/entry/sample/transformations/SOZ",
+                "transformation_type": "translation",
+                "units": "deg",
+                "vector": [1.0, 0.0, 0.0],
+            },
+        )
+        builder.add_depends_on(sample_group, sample_orientation)
+
+
         builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
 
         # TODO:
@@ -306,6 +338,20 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             FORWARDER_TOPIC,
             "COZ",
             "/entry/instrument/multiblade_detector/transformations/COZ",
+            "f142",
+        )
+        __add_data_stream(
+            streams,
+            FORWARDER_TOPIC,
+            "SOM",
+            "/entry/sample/transformations/SOM",
+            "f142",
+        )
+        __add_data_stream(
+            streams,
+            FORWARDER_TOPIC,
+            "SOZ",
+            "/entry/sample/transformations/SOZ",
             "f142",
         )
         links = {}
