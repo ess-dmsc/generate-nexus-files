@@ -69,6 +69,11 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
     )
     nexus_builder.add_dataset(detector_group, "depends_on", position.name)
 
+    # Record the voxel position
+    nexus_builder.add_dataset(detector_group, "x_pixel_offset", [1.1])
+    nexus_builder.add_dataset(detector_group, "y_pixel_offset", [2.2])
+    nexus_builder.add_dataset(detector_group, "z_pixel_offset", [3.3])
+
 
 if __name__ == "__main__":
     output_filename = "VOXEL_example.nxs"
