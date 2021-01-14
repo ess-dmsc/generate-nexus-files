@@ -3,6 +3,7 @@ import numpy as np
 from typing import Dict
 from tqdm import tqdm
 from nexusutils.nexusbuilder import NexusBuilder
+import datetime
 
 """
 Generates mesh geometry for DREAM Endcap detector from information from a GEANT4 simulation
@@ -273,6 +274,8 @@ def write_to_nexus_file(
         builder.add_dataset(detector_group, "z_pixel_offset", z_offsets, {"units": "m"})
 
         builder.add_fake_event_data(1, 100)
+        # Mantid will refuse to load the file if we don't have a start_time dataset
+        builder.get_root()["start_time"] = datetime.datetime.now().isoformat()
 
 
 def create_sector(

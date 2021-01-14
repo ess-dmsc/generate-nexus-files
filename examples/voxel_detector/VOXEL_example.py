@@ -1,5 +1,6 @@
 from nexusutils.nexusbuilder import NexusBuilder
 import numpy as np
+import datetime
 
 """
 Small example with detector described by an NXoff_geometry group where
@@ -10,9 +11,7 @@ Created to test loading such a geometry in Mantid
 
 
 def add_voxel_detector(nexus_builder: NexusBuilder):
-    detector_group = nexus_builder.add_detector_minimal(
-        "voxel geometry detector", 1
-    )
+    detector_group = nexus_builder.add_detector_minimal("voxel geometry detector", 1)
     # Shape is a regular octahedron
     vertices = np.array(
         [
@@ -78,7 +77,10 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
 if __name__ == "__main__":
     output_filename = "VOXEL_example.nxs"
     with NexusBuilder(
-        output_filename, compress_type="gzip", compress_opts=1
+        output_filename,
+        compress_type="gzip",
+        compress_opts=1,
+        nx_entry_name="entry",
     ) as builder:
         builder.add_instrument("VOXEL", "instrument")
         sample_group = builder.add_sample("test sample")
@@ -99,3 +101,7 @@ if __name__ == "__main__":
         builder.add_dataset(builder.root, "name", "VOXEL", {"short_name": "VOXEL"})
 
         add_voxel_detector(builder)
+
+        # Add some event data and a start_time dataset so we can load with Mantid
+        builder.add_fake_event_data(1, 100)
+        builder.get_root()["start_time"] = datetime.datetime.now().isoformat()
