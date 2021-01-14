@@ -229,7 +229,6 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 
 def write_to_nexus_file(
     filename: str,
-    number_of_vertices: int,
     vertices: np.ndarray,
     voxels: np.ndarray,
     detector_ids: np.ndarray,
@@ -237,8 +236,12 @@ def write_to_nexus_file(
     y_offsets: np.ndarray,
     z_offsets: np.ndarray,
 ):
+    # Slice off first column of voxels as it contains number of vertices in the face (from OFF format)
+    # in NeXus that information is carried by the "faces" dataset
+    winding_order = voxels[:, 1:].flatten().astype(np.int32)
+
     vertices_in_face = 4
-    faces = np.arange(0, number_of_vertices, vertices_in_face)
+    faces = np.arange(0, winding_order.size, vertices_in_face)
 
     with NexusBuilder(
         filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
@@ -252,9 +255,7 @@ def write_to_nexus_file(
             detector_group, "detector_shape", "NXoff_geometry"
         )
         builder.add_dataset(shape_group, "vertices", vertices.astype(np.float64))
-        builder.add_dataset(
-            shape_group, "winding_order", voxels.flatten().astype(np.int32)
-        )
+        builder.add_dataset(shape_group, "winding_order", winding_order)
         builder.add_dataset(shape_group, "faces", faces.astype(np.int32))
         builder.add_dataset(
             shape_group, "detector_faces", detector_ids.astype(np.int32)
@@ -420,7 +421,14 @@ if __name__ == "__main__":
     # TODO start and stop angle are inferred from diagrams, need to check
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
-        sector_vertices, sector_faces, sector_ids, x_offsets, y_offsets, z_offsets = create_sector(
+        (
+            sector_vertices,
+            sector_faces,
+            sector_ids,
+            x_offsets,
+            y_offsets,
+            z_offsets,
+        ) = create_sector(
             df,
             z_rotation_angle,
             max_vertex_index,
@@ -453,7 +461,6 @@ if __name__ == "__main__":
 
     write_to_nexus_file(
         "DREAM_endcap.nxs",
-        total_vertices.shape[0],
         total_vertices,
         total_faces,
         total_ids,
