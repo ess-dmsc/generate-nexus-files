@@ -21,6 +21,11 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
             [-1.0, 0.0, 0.0],
             [0.0, -1.0, 0.0],
             [0.0, 0.0, -1.0],
+            [1.0, 0.0, -2.0],
+            [0.0, 1.0, -2.0],
+            [-1.0, 0.0, -2.0],
+            [0.0, -1.0, -2.0],
+            [0.0, 0.0, -3.0],
         ]
     )
     # Number of vertices followed by vertex indices for each face
@@ -34,9 +39,17 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
             [3, 2, 5, 3],
             [3, 3, 5, 4],
             [3, 4, 5, 1],
+            [3, 6, 5, 9],
+            [3, 9, 5, 8],
+            [3, 8, 5, 7],
+            [3, 7, 5, 6],
+            [3, 6, 10, 7],
+            [3, 7, 10, 8],
+            [3, 8, 10, 9],
+            [3, 9, 10, 6],
         ]
     )
-    detector_numbers = np.array([8])
+    detector_numbers = np.array([8, 9])
     # Map all faces to the same detector number such that the whole shape is defined as a single voxel
     detector_faces = np.array(
         [
@@ -48,6 +61,14 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
             [5, detector_numbers[0]],
             [6, detector_numbers[0]],
             [7, detector_numbers[0]],
+            [8, detector_numbers[1]],
+            [9, detector_numbers[1]],
+            [10, detector_numbers[1]],
+            [11, detector_numbers[1]],
+            [12, detector_numbers[1]],
+            [13, detector_numbers[1]],
+            [14, detector_numbers[1]],
+            [15, detector_numbers[1]],
         ]
     )
     nexus_builder.add_shape(
@@ -69,9 +90,9 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
     nexus_builder.add_dataset(detector_group, "depends_on", position.name)
 
     # Record the voxel position
-    nexus_builder.add_dataset(detector_group, "x_pixel_offset", [1.1])
-    nexus_builder.add_dataset(detector_group, "y_pixel_offset", [2.2])
-    nexus_builder.add_dataset(detector_group, "z_pixel_offset", [3.3])
+    nexus_builder.add_dataset(detector_group, "x_pixel_offset", [1.1, 1.1])
+    nexus_builder.add_dataset(detector_group, "y_pixel_offset", [2.2, 2.2])
+    nexus_builder.add_dataset(detector_group, "z_pixel_offset", [3.3, 1.3])
 
 
 if __name__ == "__main__":
