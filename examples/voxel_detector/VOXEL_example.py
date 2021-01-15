@@ -29,6 +29,7 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
         ]
     )
     # Number of vertices followed by vertex indices for each face
+    # the first column doesn't end up in the NeXus file dataset
     off_faces = np.array(
         [
             [3, 1, 0, 4],
@@ -50,7 +51,7 @@ def add_voxel_detector(nexus_builder: NexusBuilder):
         ]
     )
     detector_numbers = np.array([8, 9])
-    # Map all faces to the same detector number such that the whole shape is defined as a single voxel
+    # Map 8 faces to each number such that the whole shape is defined as two octahedral voxels
     detector_faces = np.array(
         [
             [0, detector_numbers[0]],
