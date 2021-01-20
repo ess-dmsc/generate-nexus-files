@@ -91,7 +91,7 @@ def add_voxel_detector(nexus_builder: NexusBuilder, n_voxels: int = 3):
     nexus_builder.add_dataset(detector_group, "z_pixel_offset", z_offsets)
 
     write_to_off_file(
-        "voxel.off", vertices.shape[0], off_faces.shape[0], vertices, off_faces
+        f"{n_voxels}_voxels.off", vertices.shape[0], off_faces.shape[0], vertices, off_faces
     )
 
 
@@ -121,33 +121,34 @@ def write_to_off_file(
 
 
 if __name__ == "__main__":
-    output_filename = "VOXEL_example.nxs"
-    with NexusBuilder(
-        output_filename,
-        compress_type="gzip",
-        compress_opts=1,
-        nx_entry_name="entry",
-    ) as builder:
-        builder.add_instrument("VOXEL", "instrument")
-        sample_group = builder.add_sample("test sample")
-        builder.add_dataset(sample_group, "name", "test_sample")
-        source_group = builder.add_source("source")
-        transforms_group = builder.add_nx_group(
-            source_group, "transformations", "NXtransformation"
-        )
-        source_position = builder.add_transformation(
-            transforms_group,
-            "translation",
-            np.array([20.0]),
-            units="m",
-            vector=[0.0, 0.0, -1.0],
-            name="position",
-        )
-        builder.add_dataset(source_group, "depends_on", source_position.name)
-        builder.add_dataset(builder.root, "name", "VOXEL", {"short_name": "VOXEL"})
+    for n_vox in [2, 10, 20, 50, 100]:
+        output_filename = f"VOXEL_example_{n_vox}.nxs"
+        with NexusBuilder(
+            output_filename,
+            compress_type="gzip",
+            compress_opts=1,
+            nx_entry_name="entry",
+        ) as builder:
+            builder.add_instrument("VOXEL", "instrument")
+            sample_group = builder.add_sample("test sample")
+            builder.add_dataset(sample_group, "name", "test_sample")
+            source_group = builder.add_source("source")
+            transforms_group = builder.add_nx_group(
+                source_group, "transformations", "NXtransformation"
+            )
+            source_position = builder.add_transformation(
+                transforms_group,
+                "translation",
+                np.array([20.0]),
+                units="m",
+                vector=[0.0, 0.0, -1.0],
+                name="position",
+            )
+            builder.add_dataset(source_group, "depends_on", source_position.name)
+            builder.add_dataset(builder.root, "name", "VOXEL", {"short_name": "VOXEL"})
 
-        add_voxel_detector(builder)
+            add_voxel_detector(builder, n_vox)
 
-        # Add some event data and a start_time dataset so we can load with Mantid
-        builder.add_fake_event_data(1, 100)
-        builder.get_root()["start_time"] = datetime.datetime.now().isoformat()
+            # Add some event data and a start_time dataset so we can load with Mantid
+            builder.add_fake_event_data(1, 100)
+            builder.get_root()["start_time"] = datetime.datetime.now().isoformat()
