@@ -85,7 +85,7 @@ def add_voxel_detector(nexus_builder: NexusBuilder, n_voxels: int = 3):
     # Record the voxel positions
     x_offsets = 1.1 * np.ones(n_voxels, dtype=float)
     y_offsets = 2.2 * np.ones(n_voxels, dtype=float)
-    z_offsets = np.arange(n_voxels, -n_voxels, 2.0, dtype=float)
+    z_offsets = np.arange(-n_voxels, n_voxels, 2.0, dtype=float)
     nexus_builder.add_dataset(detector_group, "x_pixel_offset", x_offsets)
     nexus_builder.add_dataset(detector_group, "y_pixel_offset", y_offsets)
     nexus_builder.add_dataset(detector_group, "z_pixel_offset", z_offsets)
@@ -121,7 +121,7 @@ def write_to_off_file(
 
 
 if __name__ == "__main__":
-    for n_vox in [2, 10, 20, 50, 100]:
+    for n_vox in [2]:
         output_filename = f"VOXEL_example_{n_vox}.nxs"
         with NexusBuilder(
             output_filename,
