@@ -2,6 +2,8 @@ from examples.amor.amor import add_shape_to_detector, create_detector_shape_info
 import argparse
 from nexusutils.nexusbuilder import NexusBuilder
 import h5py
+import datetime
+import numpy as np
 
 """
 This script is intended to supplement old files from AMOR with detector geometry information
@@ -39,7 +41,7 @@ if __name__ == "__main__":
             builder, detector_group, detector_ids, voxels, vertices
         )
 
-        with h5py.File(args.input_file, 'r') as input_file:
+        with h5py.File(args.input_file, "r") as input_file:
             input_file.copy("/instrument/stages", builder.root)
             input_file.copy("/experiment/user", builder.root)
             input_file.copy("/experiment/data", detector_group)
@@ -47,5 +49,11 @@ if __name__ == "__main__":
             input_file.copy("/experiment/title", builder.root)
             input_file.copy("/instrument/facility", builder.root)
 
-            # TODO, don't just copy start_time, convert it to ISO8601
-            input_file.copy("/experiment/start_time", builder.root)
+            time_str = input_file["/experiment/start_time"][...][0].decode('UTF-8')
+            date_time_obj = datetime.datetime.strptime(
+                time_str, "%Y-%m-%d %H:%M:%S"
+            )
+            iso8601_time = date_time_obj.isoformat()
+            builder.root.create_dataset(
+                "start_time", data=np.array(iso8601_time).astype("|S" + str(len(iso8601_time)))
+            )
