@@ -1,4 +1,4 @@
-from .amor import add_shape_to_detector, create_detector_shape_info
+from examples.amor.amor import add_shape_to_detector, create_detector_shape_info
 import argparse
 from nexusutils.nexusbuilder import NexusBuilder
 import h5py
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         required=True,
     )
     args = parser.parse_args()
-    output_filename = f"{args.input_file.split('.')[:-1]}_tweaked.nxs"
+    output_filename = f"{''.join(args.input_file.split('.')[:-1])}_tweaked.nxs"
 
     with NexusBuilder(
         output_filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
@@ -44,6 +44,8 @@ if __name__ == "__main__":
             input_file.copy("/experiment/user", builder.root)
             input_file.copy("/experiment/data", detector_group)
             input_file.copy("/experiment/proposal_id", builder.root)
-            input_file.copy("/experiment/start_time", builder.root)
             input_file.copy("/experiment/title", builder.root)
             input_file.copy("/instrument/facility", builder.root)
+
+            # TODO, don't just copy start_time, convert it to ISO8601
+            input_file.copy("/experiment/start_time", builder.root)
