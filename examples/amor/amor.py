@@ -179,11 +179,6 @@ def write_to_nexus_file(
     voxels: np.ndarray,
     detector_ids: np.ndarray,
 ):
-    winding_order = voxels.flatten().astype(np.int32)
-
-    vertices_in_face = 4
-    faces = np.arange(0, winding_order.size, vertices_in_face)
-
     with NexusBuilder(
         filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
     ) as builder:
@@ -191,32 +186,8 @@ def write_to_nexus_file(
         detector_group = builder.add_nx_group(
             instrument_group, "multiblade_detector", "NXdetector"
         )
-        shape_group = builder.add_nx_group(
-            detector_group, "detector_shape", "NXoff_geometry"
-        )
-        builder.add_dataset(shape_group, "vertices", vertices.astype(np.float64))
-        builder.add_dataset(shape_group, "winding_order", winding_order)
-        builder.add_dataset(shape_group, "faces", faces.astype(np.int32))
-        builder.add_dataset(
-            shape_group, "detector_faces", detector_ids.astype(np.int32)
-        )
-
-        builder.add_dataset(
-            detector_group,
-            "detector_number",
-            np.unique(detector_ids[:, 1]).astype(np.int32),
-        )
-
-        transforms_group = builder.add_nx_group(
-            detector_group, "transformations", "NXtransformations"
-        )
-        builder.add_transformation(
-            transforms_group,
-            "translation",
-            -4.1,
-            "m",
-            [0.0, 0.0, 1.0],
-            name="translation",
+        transforms_group = add_shape_to_detector(
+            builder, detector_group, detector_ids, voxels, vertices
         )
         detector_height = builder.add_nx_group(
             transforms_group,
@@ -295,6 +266,44 @@ def write_to_nexus_file(
         del builder.root["event_data_multiblade_detector"]
 
 
+def add_shape_to_detector(
+    builder: NexusBuilder,
+    detector_group: h5py.Group,
+    detector_ids: np.ndarray,
+    voxels: np.ndarray,
+    vertices: np.ndarray,
+):
+    winding_order = voxels.flatten().astype(np.int32)
+
+    vertices_in_face = 4
+    faces = np.arange(0, winding_order.size, vertices_in_face)
+
+    shape_group = builder.add_nx_group(
+        detector_group, "detector_shape", "NXoff_geometry"
+    )
+    builder.add_dataset(shape_group, "vertices", vertices.astype(np.float64))
+    builder.add_dataset(shape_group, "winding_order", winding_order)
+    builder.add_dataset(shape_group, "faces", faces.astype(np.int32))
+    builder.add_dataset(shape_group, "detector_faces", detector_ids.astype(np.int32))
+    builder.add_dataset(
+        detector_group,
+        "detector_number",
+        np.unique(detector_ids[:, 1]).astype(np.int32),
+    )
+    transforms_group = builder.add_nx_group(
+        detector_group, "transformations", "NXtransformations"
+    )
+    builder.add_transformation(
+        transforms_group,
+        "translation",
+        -4.1,
+        "m",
+        [0.0, 0.0, 1.0],
+        name="translation",
+    )
+    return transforms_group
+
+
 def __add_data_stream(streams, topic, source, path, module, value_type=None):
     options = {"topic": topic, "source": source, "writer_module": module}
     if value_type is not None:
@@ -357,7 +366,7 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
         object_to_json_file(nexus_structure, json_filename)
 
 
-if __name__ == "__main__":
+def create_detector_shape_info():
     total_vertices = None
     total_faces = None
     total_ids = None
@@ -371,6 +380,12 @@ if __name__ == "__main__":
             total_vertices = np.vstack((total_vertices, vertices))
             total_faces = np.vstack((total_faces, faces))
             total_ids = np.vstack((total_ids, detector_ids))
+
+    return total_vertices, total_faces, total_ids
+
+
+if __name__ == "__main__":
+    total_vertices, total_faces, total_ids = create_detector_shape_info()
 
     write_to_off_file(f"{INSTRUMENT_NAME}_multiblade.off", total_vertices, total_faces)
 
