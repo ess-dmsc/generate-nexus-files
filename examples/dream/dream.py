@@ -437,7 +437,8 @@ if __name__ == "__main__":
     max_vertex_index = 0
     max_face_index = 0
     # TODO start and stop angle are inferred from diagrams, need to check
-    z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=23)
+    n_sectors = 23
+    z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=n_sectors)
     for z_rotation_angle in tqdm(z_rotation_angles_degrees):
         (
             sector_vertices,
@@ -470,7 +471,7 @@ if __name__ == "__main__":
         max_face_index = total_ids.shape[0]
 
     write_to_off_file(
-        "DREAM_endCap.off",
+        f"DREAM_endCap_{n_sectors}_sectors.off",
         total_vertices.shape[0],
         total_faces.shape[0],
         total_vertices,
@@ -478,7 +479,7 @@ if __name__ == "__main__":
     )
 
     write_to_nexus_file(
-        "DREAM_endcap.nxs",
+        f"DREAM_endcap_{n_sectors}_sectors.nxs",
         total_vertices,
         total_faces,
         total_ids,
