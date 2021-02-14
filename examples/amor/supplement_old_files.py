@@ -1,4 +1,8 @@
-from examples.amor.amor import add_shape_to_detector, create_detector_shape_info
+from examples.amor.amor import (
+    add_shape_to_detector,
+    create_detector_shape_info,
+    create_pixel_offsets,
+)
 import argparse
 from nexusutils.nexusbuilder import NexusBuilder
 import h5py
@@ -37,8 +41,9 @@ if __name__ == "__main__":
             instrument_group, "multiblade_detector", "NXdetector"
         )
         vertices, voxels, detector_ids = create_detector_shape_info()
+        offsets = create_pixel_offsets()
         transforms_group = add_shape_to_detector(
-            builder, detector_group, detector_ids, voxels, vertices
+            builder, detector_group, detector_ids, voxels, vertices, offsets
         )
 
         with h5py.File(args.input_file, "r") as input_file:
@@ -56,12 +61,12 @@ if __name__ == "__main__":
 
             time_str = input_file["/experiment/start_time"][...][0].decode("UTF-8")
             date_time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
-            iso8601_time = date_time_obj.isoformat()
+            iso8601_time = date_time_obj.isoformat() + ".000000000"
             builder.add_dataset(builder.root, "start_time", iso8601_time)
 
             # Required for loading geometry in Mantid
             builder.add_dataset(builder.root, "name", "AMOR")
             builder.add_source(
-                "SINQ_source", position=[0, 0, 30.]
+                "SINQ_source", position=[0, 0, 30.0]
             )  # TODO add correct position!
             builder.add_sample()

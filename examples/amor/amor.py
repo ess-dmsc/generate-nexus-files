@@ -230,12 +230,8 @@ def write_to_nexus_file(
             instrument_group, "multiblade_detector", "NXdetector"
         )
 
-        builder.add_dataset(detector_group, "x_pixel_offset", offsets[0], {"units": "m"})
-        builder.add_dataset(detector_group, "y_pixel_offset", offsets[1], {"units": "m"})
-        builder.add_dataset(detector_group, "z_pixel_offset", offsets[2], {"units": "m"})
-
         transforms_group = add_shape_to_detector(
-            builder, detector_group, detector_ids, voxels, vertices
+            builder, detector_group, detector_ids, voxels, vertices, offsets
         )
         detector_height = builder.add_nx_group(
             transforms_group,
@@ -320,7 +316,12 @@ def add_shape_to_detector(
     detector_ids: np.ndarray,
     voxels: np.ndarray,
     vertices: np.ndarray,
+    offsets: Tuple[np.ndarray, np.ndarray, np.ndarray],
 ):
+    builder.add_dataset(detector_group, "x_pixel_offset", offsets[0], {"units": "m"})
+    builder.add_dataset(detector_group, "y_pixel_offset", offsets[1], {"units": "m"})
+    builder.add_dataset(detector_group, "z_pixel_offset", offsets[2], {"units": "m"})
+
     winding_order = voxels.flatten().astype(np.int32)
 
     vertices_in_face = 4
