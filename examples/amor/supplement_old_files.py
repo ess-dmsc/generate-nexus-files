@@ -49,11 +49,14 @@ if __name__ == "__main__":
             input_file.copy("/experiment/title", builder.root)
             input_file.copy("/instrument/facility", builder.root)
 
-            time_str = input_file["/experiment/start_time"][...][0].decode('UTF-8')
-            date_time_obj = datetime.datetime.strptime(
-                time_str, "%Y-%m-%d %H:%M:%S"
-            )
+            time_str = input_file["/experiment/start_time"][...][0].decode("UTF-8")
+            date_time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
             iso8601_time = date_time_obj.isoformat()
-            builder.root.create_dataset(
-                "start_time", data=np.array(iso8601_time).astype("|S" + str(len(iso8601_time)))
-            )
+            builder.add_dataset(builder.root, "start_time", iso8601_time)
+
+            # Required for loading geometry in Mantid
+            builder.add_dataset(builder.root, "name", "AMOR")
+            builder.add_source(
+                "SINQ_source", position=[0, 0, 10]
+            )  # TODO add correct position!
+            builder.add_sample()
