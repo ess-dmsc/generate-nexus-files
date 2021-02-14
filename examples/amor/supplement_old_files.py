@@ -57,6 +57,6 @@ if __name__ == "__main__":
             # Required for loading geometry in Mantid
             builder.add_dataset(builder.root, "name", "AMOR")
             builder.add_source(
-                "SINQ_source", position=[0, 0, 10]
+                "SINQ_source", position=[0, 0, 30.]
             )  # TODO add correct position!
             builder.add_sample()
