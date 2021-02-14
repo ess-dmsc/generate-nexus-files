@@ -5,7 +5,7 @@ from nexusutils.nexusbuilder import NexusBuilder
 from nexusjson.nexus_to_json import NexusToDictConverter, object_to_json_file
 import nexusformat.nexus as nexus
 from contextlib import contextmanager
-from typing import Dict
+from typing import Dict, Tuple
 import h5py
 
 """
@@ -33,7 +33,7 @@ FORWARDER_TOPIC = "AMOR_forwarderData"
 # NICOS_CACHE_TOPIC = "AMOR_nicosHistoryCache"
 
 
-def get_edges_of_each_strip() -> np.ndarray:
+def _get_edges_of_each_strip() -> np.ndarray:
     """
     These are the strip edge values for the pixel corner vertices
     assume beam is centred on the detector in this dimension and thus origin is in the middle
@@ -46,8 +46,25 @@ def get_edges_of_each_strip() -> np.ndarray:
     )
 
 
-def midpoint_between_wires_radial_direction() -> np.ndarray:
+def _midpoint_between_wires_radial_direction() -> np.ndarray:
     return np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE + 1)
+
+
+def _get_centre_of_each_strip() -> np.ndarray:
+    """
+    These are the strip centres for the pixel centre positions
+    assume beam is centred on the detector in this dimension and thus origin is in the middle
+    """
+    half_strips_per_blade = STRIPS_PER_BLADE * 0.5
+    return np.linspace(
+        -half_strips_per_blade * STRIP_PITCH_m,
+        half_strips_per_blade * STRIP_PITCH_m,
+        STRIPS_PER_BLADE,
+    )
+
+
+def _wire_positions_radial_direction() -> np.ndarray:
+    return np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE)
 
 
 def rotate_around_x(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:
@@ -122,8 +139,8 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
     # The detector pixels are squares on a plane that corresponds to the front surface of the substrate
 
     # Create vertices for pixel corners as if the blade was in the YZ plane
-    x = get_edges_of_each_strip()
-    z = midpoint_between_wires_radial_direction()
+    x = _get_edges_of_each_strip()
+    z = _midpoint_between_wires_radial_direction()
     xx, zz = np.meshgrid(x, z)
     yy = np.zeros_like(xx)
     vertices = np.stack((xx, yy, zz))
@@ -145,6 +162,32 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
         )
     )
 
+    transformed_vertices = _position_blade(blade_number, vertices)
+
+    return transformed_vertices, winding_order, pixel_ids
+
+
+def _construct_pixel_offsets_for_blade(blade_number: int):
+    # Create vertices for pixel corners as if the blade was in the YZ plane
+    x = _get_centre_of_each_strip()
+    z = _wire_positions_radial_direction()
+    xx, zz = np.meshgrid(x, z)
+    yy = np.zeros_like(xx)
+    constructed_offsets = np.stack((xx, yy, zz))
+    # reshape to a flat list of vertices
+    constructed_offsets = np.reshape(
+        constructed_offsets, (3, WIRES_PER_BLADE * STRIPS_PER_BLADE)
+    )
+    constructed_offsets = constructed_offsets.T
+    offsets = _position_blade(blade_number, constructed_offsets)
+
+    x_offsets = offsets[:, 0]
+    y_offsets = offsets[:, 1]
+    z_offsets = offsets[:, 2]
+    return x_offsets, y_offsets, z_offsets
+
+
+def _position_blade(blade_number, vertices):
     transformed_vertices = np.zeros_like(vertices)
     # This ensures we create the blades in the order that matches the detector IDs output by the EFU
     blade_index = abs(blade_number - NUMBER_OF_BLADES) - 1
@@ -157,8 +200,7 @@ def construct_blade(blade_number: int) -> (np.ndarray, np.ndarray, np.ndarray):
         )
         # Shift blade back so that its front edge is at z=0 again
         vertex[2] -= SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m
-
-    return transformed_vertices, winding_order, pixel_ids
+    return transformed_vertices
 
 
 def __add_attributes_to_group(group: h5py.Group, attributes: Dict):
@@ -178,6 +220,7 @@ def write_to_nexus_file(
     vertices: np.ndarray,
     voxels: np.ndarray,
     detector_ids: np.ndarray,
+    offsets: Tuple[np.ndarray, np.ndarray, np.ndarray],
 ):
     with NexusBuilder(
         filename, compress_type="gzip", compress_opts=1, nx_entry_name="entry"
@@ -186,6 +229,11 @@ def write_to_nexus_file(
         detector_group = builder.add_nx_group(
             instrument_group, "multiblade_detector", "NXdetector"
         )
+
+        builder.add_dataset(detector_group, "x_pixel_offset", offsets[0], {"units": "m"})
+        builder.add_dataset(detector_group, "y_pixel_offset", offsets[1], {"units": "m"})
+        builder.add_dataset(detector_group, "z_pixel_offset", offsets[2], {"units": "m"})
+
         transforms_group = add_shape_to_detector(
             builder, detector_group, detector_ids, voxels, vertices
         )
@@ -384,17 +432,39 @@ def create_detector_shape_info():
     return total_vertices, total_faces, total_ids
 
 
+def create_pixel_offsets():
+    total_x_offsets = None
+    total_y_offsets = None
+    total_z_offsets = None
+    for blade_number in trange(NUMBER_OF_BLADES):
+        x_offsets, y_offsets, z_offsets = _construct_pixel_offsets_for_blade(
+            blade_number
+        )
+        if total_x_offsets is None:
+            total_x_offsets = x_offsets
+            total_y_offsets = y_offsets
+            total_z_offsets = z_offsets
+        else:
+            total_x_offsets = np.hstack((total_x_offsets, x_offsets))
+            total_y_offsets = np.hstack((total_y_offsets, y_offsets))
+            total_z_offsets = np.hstack((total_z_offsets, z_offsets))
+
+    return total_x_offsets, total_y_offsets, total_z_offsets
+
+
 if __name__ == "__main__":
     total_vertices, total_faces, total_ids = create_detector_shape_info()
 
     write_to_off_file(f"{INSTRUMENT_NAME}_multiblade.off", total_vertices, total_faces)
 
+    offsets = create_pixel_offsets()
     nexus_filename = f"{INSTRUMENT_NAME}_multiblade.nxs"
     write_to_nexus_file(
         nexus_filename,
         total_vertices,
         total_faces,
         total_ids,
+        offsets,
     )
 
     write_to_json_file(nexus_filename, "AMOR_nexus_structure.json")
