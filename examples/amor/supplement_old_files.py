@@ -55,9 +55,17 @@ if __name__ == "__main__":
             input_file.copy("/instrument/facility", builder.root)
 
             # Fix groups mislabelled as NXevent_data when they should be NXlog
-            for Log_dataset_name, log_dataset in builder.root["stages"].items():
-                del log_dataset.attrs["NX_class"]
-                log_dataset.attrs.create("NX_class", np.array("NXlog").astype("|S5"))
+            for log_dataset_name, log_dataset in builder.root["stages"].items():
+                if log_dataset_name != "diaphragms":
+                    del log_dataset.attrs["NX_class"]
+                    log_dataset.attrs.create("NX_class", np.array("NXlog").astype("|S5"))
+                else:
+                    for _, dataset in builder.root["stages/diaphragms/middle focus"].items():
+                        del dataset.attrs["NX_class"]
+                        dataset.attrs.create("NX_class", np.array("NXlog").astype("|S5"))
+                    for _, dataset in builder.root["stages/diaphragms/virtual source"].items():
+                        del dataset.attrs["NX_class"]
+                        dataset.attrs.create("NX_class", np.array("NXlog").astype("|S5"))
 
             time_str = input_file["/experiment/start_time"][...][0].decode("UTF-8")
             date_time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
