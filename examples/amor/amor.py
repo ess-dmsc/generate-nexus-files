@@ -363,7 +363,7 @@ def __add_data_stream(streams, topic, source, path, module, value_type=None):
 
 @contextmanager
 def nexus_file(nexus_filename: str):
-    open_file = nexus.nxload(nexus_filename)
+    open_file = nexus.nxload(nexus_filename, mode="r+")
     try:
         yield open_file
     finally:
@@ -374,6 +374,13 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
     converter = NexusToDictConverter()
 
     with nexus_file(nexus_filename) as nxs_file:
+        nxs_file.entry.start_time = np.array(
+            ["8601TIME"], dtype=np.dtype("S9")
+        )  # NICOS replaces 8601TIME
+        nxs_file.entry.title = np.array(
+            ["TITLE"], dtype=np.dtype("S6")
+        )  # NICOS replaces TITLE
+
         streams = {}
         __add_data_stream(
             streams,
