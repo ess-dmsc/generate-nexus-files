@@ -296,7 +296,7 @@ def write_to_nexus_file(
             sample_orientation,
             {
                 "depends_on": "/entry/sample/transformations/SOZ",
-                "transformation_type": "translation",
+                "transformation_type": "rotation",
                 "units": "deg",
                 "vector": [1.0, 0.0, 0.0],
             },
