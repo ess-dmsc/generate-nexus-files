@@ -301,7 +301,7 @@ def write_to_nexus_file(
                 "vector": [1.0, 0.0, 0.0],
             },
         )
-        builder.add_depends_on(sample_group, sample_orientation)
+        builder.add_depends_on(sample_group, sample_orientation.name)
 
         builder.add_source("virtual_source", position=[0.0, 0.0, 30.0])
 
