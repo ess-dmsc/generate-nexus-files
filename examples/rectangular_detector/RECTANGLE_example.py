@@ -119,5 +119,6 @@ if __name__ == '__main__':
         create_dataset(instrument, 'name', 'RECTANGLE', {'short_name': 'RECT'})
         sample = create_nx_group(entry, 'sample', 'NXsample')
         source = create_nx_group(instrument, 'source', 'NXsource')
+        create_dataset(source, "depends_on", "/entry/instrument/source/transformations/beam_direction_offset")
         add_source_position(source)
         detector = add_detector(instrument, 'detector')
