@@ -6,3 +6,4 @@ tqdm
 pandas
 nexusformat
 ipython
+xmltodict
