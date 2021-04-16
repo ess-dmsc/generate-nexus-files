@@ -5,7 +5,7 @@ from xml.parsers.expat import ExpatError
 import xmltodict
 
 
-class NxTomoXML:
+class NxApplicationXML:
 
     def __init__(self, xml_path):
         self._xml_path = xml_path
@@ -39,7 +39,8 @@ class NxTomoXML:
         if status:
             self._dict_to_json_format()
             with open(save_path, 'w') as json_file:
-                json.dump(self.nx_tomo_dict, json_file)
+                data = self.nx_tomo_dict['ns0:definition']["ns0:group"]
+                json.dump(data, json_file, indent=4)
         return status
 
     def _dict_to_json_format(self):
@@ -50,7 +51,7 @@ if __name__ == '__main__':
 
     file_dir = path.dirname(path.abspath(__file__))
     nx_tomo_xml_path = path.join(file_dir, "NXtomo.xml")
-    tomo_xml = NxTomoXML(nx_tomo_xml_path)
+    tomo_xml = NxApplicationXML(nx_tomo_xml_path)
     tomo_xml.xml_to_json(path.join(file_dir, "NXtomo.json"))
 
 
