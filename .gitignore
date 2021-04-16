@@ -1,1 +1,4 @@
 *.nxs
+.DS_Store
+.idea
+venv
