@@ -39,7 +39,7 @@ class FileWriterNexusConfigCreator:
                 'group': (self.CHILDREN, self.ClassTypes.LIST),
                 'link': (self.LINK, self.ClassTypes.RAW)}
 
-    def nxs_conf_obj_factory(self, class_type, args):
+    def nxs_config_object_factory(self, class_type, args):
         """
         Encapsulates argument in args using an object of type class_type.
 
@@ -62,7 +62,7 @@ class FileWriterNexusConfigCreator:
         data = self.edit_dict_key_value_pair(self._nxs_definition_xml)
         return {self.CHILDREN: [data]}
 
-    def edit_dict_key_value_pair(self, sub_dict):
+    def edit_dict_key_value_pair(self, sub_dict, parent=None):
         """
         Edits XML key-value pair to comply with expected format for
         file writer nexus configuration file.
@@ -74,14 +74,15 @@ class FileWriterNexusConfigCreator:
             if key in self.translator:
                 new_key = self.translator[key][0]
                 class_type = self.translator[key][1]
-                data[new_key] = self.nxs_conf_obj_factory(class_type,
-                                                          sub_dict[key])
+                data[new_key] = self.nxs_config_object_factory(class_type,
+                                                               sub_dict[key])
                 if isinstance(sub_dict[key], list):
                     tmp_list = []
                     for item in sub_dict[key]:
-                        tmp_list.append(self.edit_dict_key_value_pair(item))
+                        tmp_list.append(self.edit_dict_key_value_pair(item,
+                                                                      new_key))
                     data[new_key] = tmp_list
-        if self.CHILDREN not in data:
+        if self.CHILDREN not in data and parent is not self.LINK:
             data[self.CHILDREN] = self.get_stream_information()
 
         return data
