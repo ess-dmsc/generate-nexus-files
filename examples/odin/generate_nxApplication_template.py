@@ -1,29 +1,101 @@
 import json
+from math import isnan
+
+import pandas as pd
+import xmltodict
 from enum import Enum
 from os import path
 from lxml import etree
 from xml.parsers.expat import ExpatError
-import xmltodict
+
+CHILDREN = 'children'
+GROUP = 'group'
+LINK = 'link'
+NAME = 'name'
+SOURCE = 'source'
+STREAM = 'stream'
+TARGET = 'target'
+TOPIC = 'topic'
+TYPE = 'type'
+WRITER_MODULE = 'writer_module'
+
+
+class DeviceConfigurationFromXLS:
+
+    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE]
+
+    def __init__(self, file_path):
+        self._load_configuration_file(file_path)
+
+    def _load_configuration_file(self, file_path):
+        """
+        Loads excel configuration file to get device data stream information.
+        """
+        try:
+            self.configuration = pd.read_excel(file_path)
+        except FileNotFoundError as err:
+            self.configuration = None
+            print(err)
+
+    def get_configuration_as_dict(self):
+        """
+        Translates the configuration raw file content to a organized dictionary.
+
+        ::return:: returns a dictionary containing information about data stream
+        that the kafka-to-nexus file writer will use.
+        """
+        data_in_dict = {}
+        if self.configuration is not None:
+            used_keys = []
+            for key in self.configuration:
+                if key in self.list_excel_cols:
+                    used_keys.append(key)
+            if set(used_keys) == set(self.list_excel_cols):
+                data_in_dict = self._construct_config_dict()
+            else:
+                raise KeyError("Missing columns in excel configuration file.")
+
+        return data_in_dict
+
+    def _construct_config_dict(self):
+        """
+        Constructs the dictionary from the raw file content/
+
+        ::return:: returns the processed configuration data in a structured
+        dictionary.
+        """
+        data = self.configuration
+        config_dict = {}
+        for idx, name in enumerate(data[NAME]):
+            config_dict.update({name: {
+                TOPIC: data[TOPIC][idx],
+                SOURCE: data[SOURCE][idx],
+                WRITER_MODULE: data[WRITER_MODULE][idx],
+            }})
+        return config_dict
+
+    def _replace_nans(self):
+        for key in self.configuration:
+            for idx, item in enumerate(self.configuration[key]):
+                item = str(item)
+                if 'nan' in item or 'NaN' in item:
+                    self.configuration[key][idx] = None
 
 
 class FileWriterNexusConfigCreator:
     class ClassTypes(Enum):
         LIST, DICT, RAW = range(3)
 
-    CHILDREN = 'children'
-    GROUP = 'group'
-    LINK = 'link'
-    NAME = 'name'
-    SOURCE = 'source'
-    STREAM = 'stream'
-    TARGET = 'target'
-    TOPIC = 'topic'
-    TYPE = 'type'
-    WRITER_MODULE = 'writer_module'
+    XML_NAME = '@name'
+    XML_TYPE = '@type'
+    XML_TARGET = '@target'
+    XML_GROUP = 'group'
+    XML_LINK = 'link'
 
-    def __init__(self, nxs_definition_xml):
+    def __init__(self, nxs_definition_xml, xls_path):
         self._nxs_definition_xml = nxs_definition_xml
         self.translator = self.get_translation()
+        self.configuration = DeviceConfigurationFromXLS(xls_path).get_configuration_as_dict()
 
     def get_translation(self):
         """
@@ -33,11 +105,11 @@ class FileWriterNexusConfigCreator:
 
         ::return:: returns the translation as a dictionary.
         """
-        return {'@type': (self.TYPE, self.ClassTypes.RAW),
-                '@name': (self.NAME, self.ClassTypes.RAW),
-                '@target': (self.TARGET, self.ClassTypes.RAW),
-                'group': (self.CHILDREN, self.ClassTypes.LIST),
-                'link': (self.LINK, self.ClassTypes.RAW)}
+        return {self.XML_TYPE: (TYPE, self.ClassTypes.RAW),
+                self.XML_NAME: (NAME, self.ClassTypes.RAW),
+                self.XML_TARGET: (TARGET, self.ClassTypes.RAW),
+                self.XML_GROUP: (CHILDREN, self.ClassTypes.LIST),
+                self.XML_LINK: (LINK, self.ClassTypes.RAW)}
 
     def nxs_config_object_factory(self, class_type, args):
         """
@@ -60,7 +132,7 @@ class FileWriterNexusConfigCreator:
             consistent with nexus config json file used by the file writer.
         """
         data = self.edit_dict_key_value_pair(self._nxs_definition_xml)
-        return {self.CHILDREN: [data]}
+        return {CHILDREN: [data]}
 
     def edit_dict_key_value_pair(self, sub_dict, parent=None):
         """
@@ -70,45 +142,61 @@ class FileWriterNexusConfigCreator:
         ::return:: returns modified sub dictionary.
         """
         data = {}
+        name = "name"
         for key in sub_dict:
+            if key == self.XML_NAME:
+                name = sub_dict[self.XML_NAME]
             if key in self.translator:
                 new_key = self.translator[key][0]
                 class_type = self.translator[key][1]
                 data[new_key] = self.nxs_config_object_factory(class_type,
                                                                sub_dict[key])
-                if new_key == self.CHILDREN or new_key == self.LINK:
+                if new_key == CHILDREN or new_key == LINK:
                     tmp_list = []
                     for item in sub_dict[key]:
                         tmp_list.append(self.edit_dict_key_value_pair(item,
                                                                       new_key))
                     data[new_key] = tmp_list
-        if self.CHILDREN not in data and parent is not self.LINK:
-            data[self.CHILDREN] = self.get_stream_information()
+        if CHILDREN not in data and parent is not LINK:
+            data[CHILDREN] = self.get_stream_information(name)
 
         return data
 
-    def get_stream_information(self):
+    def get_stream_information(self, name):
         """
         Get the stream information for the file writer to add in the
         file writer config json file.
         """
         stream_info = [{
-            self.TYPE: self.STREAM,
-            self.STREAM: {
-                    self.TOPIC: '',
-                    self.SOURCE: '',
-                    self.WRITER_MODULE: '',
+            TYPE: STREAM,
+            STREAM: {
+                TOPIC: '',
+                SOURCE: '',
+                WRITER_MODULE: '',
             },
         }]
+
+        if name in self.configuration:
+            if self._item_is_string(name, TOPIC):
+                stream_info[0][STREAM][TOPIC] = self.configuration[name][TOPIC]
+            if self._item_is_string(name, SOURCE):
+                stream_info[0][STREAM][SOURCE] = self.configuration[name][SOURCE]
+            if self._item_is_string(name, WRITER_MODULE):
+                stream_info[0][STREAM][WRITER_MODULE] = self.configuration[name][WRITER_MODULE]
+
         return stream_info
+
+    def _item_is_string(self, name, kind):
+        return isinstance(self.configuration[name][kind], str)
 
 
 class NxApplicationXMLToJson:
     nodes_to_remove = ["field"]
     NAMESPACE = "{http://definition.nexusformat.org/nxdl/3.1}"
 
-    def __init__(self, xml_path):
+    def __init__(self, xml_path, xls_path):
         self._xml_path = xml_path
+        self._config_xls_path = xls_path
         self.nx_tomo_dict = {}
         self.json_template = {}
 
@@ -137,7 +225,7 @@ class NxApplicationXMLToJson:
             status = self.load_template_from_xml()
         if status:
             dict_cont = self.nx_tomo_dict['definition']['group']
-            nxs_config_creator = FileWriterNexusConfigCreator(dict_cont)
+            nxs_config_creator = FileWriterNexusConfigCreator(dict_cont, self._config_xls_path)
             data = nxs_config_creator.generate_nexus_file_writer_config()
             with open(save_path, 'w') as json_file:
                 json.dump(data, json_file, indent=4)
@@ -164,5 +252,6 @@ class NxApplicationXMLToJson:
 if __name__ == '__main__':
     file_dir = path.dirname(path.abspath(__file__))
     nx_tomo_xml_path = path.join(file_dir, "NXtomo.xml")
-    tomo_xml = NxApplicationXMLToJson(nx_tomo_xml_path)
+    config_xls_file = path.join(file_dir, "config.xlsx")
+    tomo_xml = NxApplicationXMLToJson(nx_tomo_xml_path, config_xls_file)
     tomo_xml.xml_to_json(path.join(file_dir, "NXtomo.json"))
