@@ -1,5 +1,4 @@
 import json
-from math import isnan
 
 import pandas as pd
 import xmltodict
