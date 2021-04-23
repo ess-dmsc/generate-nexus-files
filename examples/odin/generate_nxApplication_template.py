@@ -76,7 +76,7 @@ class FileWriterNexusConfigCreator:
                 class_type = self.translator[key][1]
                 data[new_key] = self.nxs_config_object_factory(class_type,
                                                                sub_dict[key])
-                if isinstance(sub_dict[key], list):
+                if new_key == self.CHILDREN or new_key == self.LINK:
                     tmp_list = []
                     for item in sub_dict[key]:
                         tmp_list.append(self.edit_dict_key_value_pair(item,
