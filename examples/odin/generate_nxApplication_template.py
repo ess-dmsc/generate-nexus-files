@@ -7,10 +7,12 @@ from os import path
 from lxml import etree
 from xml.parsers.expat import ExpatError
 
+ATTRIBUTES = 'attributes'
 CHILDREN = 'children'
 GROUP = 'group'
 LINK = 'link'
 NAME = 'name'
+NX_CLASS = 'NX_class'
 SOURCE = 'source'
 STREAM = 'stream'
 TARGET = 'target'
@@ -52,7 +54,7 @@ class DeviceConfigurationFromXLS:
             if set(used_keys) == set(self.list_excel_cols):
                 data_in_dict = self._construct_config_dict()
             else:
-                raise KeyError("Missing columns in excel configuration file.")
+                raise KeyError('Missing columns in excel configuration file.')
 
         return data_in_dict
 
@@ -141,7 +143,7 @@ class FileWriterNexusConfigCreator:
         ::return:: returns modified sub dictionary.
         """
         data = {}
-        name = "name"
+        name = NAME
         for key in sub_dict:
             if key == self.XML_NAME:
                 name = sub_dict[self.XML_NAME]
@@ -158,6 +160,9 @@ class FileWriterNexusConfigCreator:
                     data[new_key] = tmp_list
         if CHILDREN not in data and parent is not LINK:
             data[CHILDREN] = self.get_stream_information(name)
+        if TYPE in data and NAME in data:
+            data[ATTRIBUTES] = {NX_CLASS: data[TYPE]}
+            data[TYPE] = GROUP
 
         return data
 
@@ -190,14 +195,14 @@ class FileWriterNexusConfigCreator:
 
 
 class NxApplicationXMLToJson:
-    nodes_to_remove = ["field"]
-    NAMESPACE = "{http://definition.nexusformat.org/nxdl/3.1}"
+    NAMESPACE = '{http://definition.nexusformat.org/nxdl/3.1}'
 
-    def __init__(self, xml_path, xls_path):
+    def __init__(self, xml_path, xls_path, nodes_to_remove=['field']):
         self._xml_path = xml_path
         self._config_xls_path = xls_path
         self.nx_tomo_dict = {}
         self.json_template = {}
+        self.nodes_to_remove = nodes_to_remove
 
     def load_template_from_xml(self):
         """
@@ -233,16 +238,16 @@ class NxApplicationXMLToJson:
     def _remove_nodes_from_tree(self, tree):
         """
         Removes occurrences of specific nodes from tree.
-        The undesired nodes are specified in nodes_to_remove.
+        The undesired nodes are specified in self.nodes_to_remove.
 
         ::return:: Returns tree where undesired nodes are removed.
         """
         properties = [f'{self.NAMESPACE}{list_item}'
                       for list_item in self.nodes_to_remove]
         tree_root = tree.getroot()
-        nodes_to_remove = [tree_root.findall(f'.//{prop}')
+        remove_nodes = [tree_root.findall(f'.//{prop}')
                            for prop in properties]
-        for node in nodes_to_remove[0]:
+        for node in remove_nodes[0]:
             node.getparent().remove(node)
 
         return tree_root
@@ -250,7 +255,7 @@ class NxApplicationXMLToJson:
 
 if __name__ == '__main__':
     file_dir = path.dirname(path.abspath(__file__))
-    nx_tomo_xml_path = path.join(file_dir, "NXtomo.xml")
-    config_xls_file = path.join(file_dir, "config.xlsx")
+    nx_tomo_xml_path = path.join(file_dir, 'NXtomo.xml')
+    config_xls_file = path.join(file_dir, 'config.xlsx')
     tomo_xml = NxApplicationXMLToJson(nx_tomo_xml_path, config_xls_file)
-    tomo_xml.xml_to_json(path.join(file_dir, "NXtomo.json"))
+    tomo_xml.xml_to_json(path.join(file_dir, 'NXtomo.json'))
