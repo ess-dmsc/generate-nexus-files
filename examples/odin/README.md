@@ -3,12 +3,12 @@
 This sub-folder is used to store the scripts that will be used to generate
 different part of the NeXuS file format and data streaming for ODIN.
 
-At present state it contains code to automatically generate a NeXuS json
+At present state it contains code to automatically generate a NeXuS JSON
 template file for NICOS file writing based on the nxTomo from nexus-definitions
 github:
 https://github.com/nexusformat/definitions.
 
-## Generate NeXus template json file for the NICOS file writer
+## Generate NeXus template JSON file for the NICOS file writer
 
 The generate_nXApplication_template.py is a 
 runnable python file used to generate the template JSON file.
@@ -23,7 +23,7 @@ The constructor call to NXApplicationXMLToJson class, as seen in the main method
 is supplied two file paths: a path to the config.xlsx (described below), and a path
 to the xml file from nexus-definition, in this case NXtomo.xml.
 Calling the xml_to_json function in NXApplicationXMLToJson will create a
-NeXuS template json configuration file for the NICOS file writer. In the example
+NeXuS template JSON configuration file for the NICOS file writer. In the example
 provided it will be called NXtomo.json and created directly in the odin sub-folder.
 
 The NXapplicationXMLToJson has in its class attribute list a reference to an object
