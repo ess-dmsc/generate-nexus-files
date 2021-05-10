@@ -69,6 +69,7 @@ if __name__ == "__main__":
 
             time_str = input_file["/experiment/start_time"][...][0].decode("UTF-8")
             date_time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+            date_time_obj = date_time_obj - datetime.timedelta(hours=1)  # Change it to UTC
             iso8601_time = date_time_obj.isoformat() + ".000000000"
             builder.add_dataset(builder.root, "start_time", iso8601_time)
 
