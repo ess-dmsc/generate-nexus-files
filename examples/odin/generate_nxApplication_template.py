@@ -9,6 +9,8 @@ from xml.parsers.expat import ExpatError
 
 ATTRIBUTES = 'attributes'
 CHILDREN = 'children'
+CONFIG = 'config'
+DATA_TYPE = 'dtype'
 GROUP = 'group'
 LINK = 'link'
 NAME = 'name'
@@ -18,12 +20,14 @@ STREAM = 'stream'
 TARGET = 'target'
 TOPIC = 'topic'
 TYPE = 'type'
-WRITER_MODULE = 'writer_module'
+VALUES = 'values'
+VALUE_UNITS = 'value_units'
+WRITER_MODULE = 'module'
 
 
 class DeviceConfigurationFromXLS:
 
-    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE]
+    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE, DATA_TYPE, VALUE_UNITS]
 
     def __init__(self, file_path):
         self._load_configuration_file(file_path)
@@ -68,11 +72,10 @@ class DeviceConfigurationFromXLS:
         data = self.configuration
         config_dict = {}
         for idx, name in enumerate(data[NAME]):
-            config_dict.update({name: {
-                TOPIC: data[TOPIC][idx],
-                SOURCE: data[SOURCE][idx],
-                WRITER_MODULE: data[WRITER_MODULE][idx],
-            }})
+            tmp_dict = {}
+            for key in self.list_excel_cols:
+                tmp_dict[key] = data[key][idx]
+            config_dict.update({name: tmp_dict})
         return config_dict
 
     def _replace_nans(self):
@@ -161,7 +164,9 @@ class FileWriterNexusConfigCreator:
         if CHILDREN not in data and parent is not LINK:
             data[CHILDREN] = self.get_stream_information(name)
         if TYPE in data and NAME in data:
-            data[ATTRIBUTES] = {NX_CLASS: data[TYPE]}
+            data[ATTRIBUTES] = [{NAME: NX_CLASS,
+                                 DATA_TYPE: 'string',
+                                 VALUES: data[TYPE]}]
             data[TYPE] = GROUP
 
         return data
@@ -172,21 +177,28 @@ class FileWriterNexusConfigCreator:
         file writer config json file.
         """
         stream_info = [{
-            TYPE: STREAM,
-            STREAM: {
-                TOPIC: '',
+            WRITER_MODULE: '',
+            CONFIG: {
                 SOURCE: '',
-                WRITER_MODULE: '',
+                TOPIC: '',
+                DATA_TYPE: '',
+                VALUE_UNITS: '',
             },
         }]
 
         if name in self.configuration:
-            if self._item_is_string(name, TOPIC):
-                stream_info[0][STREAM][TOPIC] = self.configuration[name][TOPIC]
-            if self._item_is_string(name, SOURCE):
-                stream_info[0][STREAM][SOURCE] = self.configuration[name][SOURCE]
             if self._item_is_string(name, WRITER_MODULE):
-                stream_info[0][STREAM][WRITER_MODULE] = self.configuration[name][WRITER_MODULE]
+                stream_info[0][WRITER_MODULE] = self.configuration[name][
+                    WRITER_MODULE]
+            if self._item_is_string(name, SOURCE):
+                stream_info[0][CONFIG][SOURCE] = self.configuration[name][SOURCE]
+            if self._item_is_string(name, TOPIC):
+                stream_info[0][CONFIG][TOPIC] = self.configuration[name][TOPIC]
+            if self._item_is_string(name, DATA_TYPE):
+                stream_info[0][CONFIG][DATA_TYPE] = self.configuration[name][DATA_TYPE]
+            if self._item_is_string(name, VALUE_UNITS):
+                stream_info[0][CONFIG][VALUE_UNITS] = self.configuration[name][VALUE_UNITS]
+
 
         return stream_info
 
@@ -246,7 +258,7 @@ class NxApplicationXMLToJson:
                       for list_item in self.nodes_to_remove]
         tree_root = tree.getroot()
         remove_nodes = [tree_root.findall(f'.//{prop}')
-                           for prop in properties]
+                        for prop in properties]
         for node in remove_nodes[0]:
             node.getparent().remove(node)
 

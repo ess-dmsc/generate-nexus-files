@@ -1,0 +1,146 @@
+{
+    "children": [
+        {
+            "type": "group",
+            "name": "entry",
+            "children": [
+                {
+                    "type": "group",
+                    "name": "instrument",
+                    "children": [
+                        {
+                            "type": "NXsource",
+                            "children": [
+                                {
+                                    "module": "",
+                                    "config": {
+                                        "source": "",
+                                        "topic": "",
+                                        "dtype": "",
+                                        "value_units": ""
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "group",
+                            "name": "detector",
+                            "children": [
+                                {
+                                    "module": "f142",
+                                    "config": {
+                                        "source": "d1",
+                                        "topic": "Topic_1",
+                                        "dtype": "string",
+                                        "value_units": "mm"
+                                    }
+                                }
+                            ],
+                            "attributes": [
+                                {
+                                    "name": "NX_class",
+                                    "dtype": "string",
+                                    "values": "NXdetector"
+                                }
+                            ]
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXinstrument"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "sample",
+                    "children": [
+                        {
+                            "module": "f142",
+                            "config": {
+                                "source": "PV:my_pv2",
+                                "topic": "Topic_2",
+                                "dtype": "string",
+                                "value_units": "mm"
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXsample"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "control",
+                    "children": [
+                        {
+                            "module": "f142",
+                            "config": {
+                                "source": "mon1",
+                                "topic": "Topic_3",
+                                "dtype": "string",
+                                "value_units": "mm"
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXmonitor"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "data",
+                    "link": [
+                        {
+                            "name": "data",
+                            "target": "/NXentry/NXinstrument/detector:NXdetector/data"
+                        },
+                        {
+                            "name": "rotation_angle",
+                            "target": "/NXentry/NXsample/rotation_angle"
+                        },
+                        {
+                            "name": "image_key",
+                            "target": "/NXentry/NXinstrument/detector:NXdetector/image_key"
+                        }
+                    ],
+                    "children": [
+                        {
+                            "module": "",
+                            "config": {
+                                "source": "",
+                                "topic": "",
+                                "dtype": "",
+                                "value_units": ""
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "NX_class",
+                    "dtype": "string",
+                    "values": "NXentry"
+                }
+            ]
+        }
+    ]
+}
