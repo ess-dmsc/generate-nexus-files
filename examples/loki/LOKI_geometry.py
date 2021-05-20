@@ -164,10 +164,11 @@ class Bank:
         self._bank_side_b = bank_geo['B']
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
+        self._tubes = {}
+
+        # Check that provided geometry seems feasible.
         self._is_bank_cuboid()
         self._check_tube_center_distance()
-        self._tube_length = self._calculate_tube_length()
-        self._tubes = []
 
     def get_corners(self):
         return self._bank_side_a + self._bank_side_b
@@ -177,7 +178,7 @@ class Bank:
 
     def _get_tube_points(self, grid_corners) -> List[tuple]:
         # Check if something is wrong with the supplied geometry data.
-        axis, const_coord = self._is_orthogonal_to_axis(grid_corners)
+        axis, const_coord = self._orthogonal_to_axis(grid_corners)
 
         # Third element in tuples below is always the index of the coordinate
         # that is constant for the generated 3D tube grid.
@@ -205,6 +206,7 @@ class Bank:
                 point_3d[idx_d] = new_point[0]
                 point_3d[idx_w] = new_point[1]
                 tube_3d_points.append(tuple(point_3d))
+
         return tube_3d_points
 
     def build_detector_bank(self):
@@ -213,7 +215,7 @@ class Bank:
 
         tube_id = 1
         for point_a, point_b in zip(tube_points_side_a, tube_points_side_b):
-            self._tubes.append(Tube(point_a, point_b, tube_id))
+            self._tubes[tube_id] = Tube(point_a, point_b, tube_id)
 
         return tube_points_side_a, tube_points_side_b
 
@@ -240,7 +242,7 @@ class Bank:
             raise ValueError(f'Error: Bank {self._bank_id} '
                              f'does not form a cuboid.')
 
-    def _is_orthogonal_to_axis(self, grid_corners):
+    def _orthogonal_to_axis(self, grid_corners):
         for i in range(3):
             point_coord = [point[i] for point in grid_corners]
             if len(set(point_coord)) == 1:
