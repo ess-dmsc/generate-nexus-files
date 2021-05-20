@@ -1,5 +1,8 @@
+import datetime
+
 import numpy as np
-from nexusutils.nexusbuilder import NexusBuilder
+import pandas as pd  # type: ignore
+from nexusutils.nexusbuilder import NexusBuilder  # type: ignore
 
 
 def write_to_nexus_file(

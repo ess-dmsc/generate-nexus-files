@@ -1,9 +1,9 @@
 import datetime
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
-import pandas as pd
-from tqdm import tqdm
+import pandas as pd  # type:ignore
+from tqdm import tqdm  # type:ignore
 
 from utils import write_to_nexus_file, write_to_off_file
 
@@ -24,7 +24,16 @@ def find_voxel_vertices(
     dx3: float,
     dx4: float,
     alp2: float,
-) -> (float, float, float, float, float, float, float, float):
+) -> Tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
     """
     Ported from GEANT4
     http://www.apc.univ-paris7.fr/~franco/g4doxy/html/G4Trap_8cc-source.html
@@ -210,7 +219,7 @@ def create_sector(
     z_rotation_angle: float,
     max_vertex_index: int,
     max_face_index: int,
-) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     number_of_voxels = len(df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
@@ -383,7 +392,7 @@ if __name__ == "__main__":
         max_face_index = total_ids.shape[0]
 
     write_to_off_file(
-        f"DREAM_endCap_{n_sectors}_sectors.off",
+        f"DREAM_endcap_{n_sectors}_sectors.off",
         total_vertices.shape[0],
         total_faces.shape[0],
         total_vertices,
