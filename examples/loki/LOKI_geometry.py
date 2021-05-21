@@ -177,42 +177,33 @@ class Bank:
         return self._bank_id
 
     def _get_tube_points(self, grid_corners) -> List[tuple]:
-        # Check if something is wrong with the supplied geometry data.
-        axis, const_coord = self._orthogonal_to_axis(grid_corners)
 
-        # Third element in tuples below is always the index of the coordinate
-        # that is constant for the generated 3D tube grid.
-        idx_d, idx_w, idx_const = self.idx_3D_mesh_dict[axis[0]]
-        points_2d = [(point[idx_d], point[idx_w]) for point in grid_corners]
-        local_origin = np.array(points_2d[0])
+        # First make a check that the corner points are in a plane.
+        # Otherwise something is wrong with the provided geometry.
+        self._grid_corners_in_plane(grid_corners)
 
-        # Base vectors for the local 2D coordinate system.
-        # The base vectors of the local coordinate system
+        # The base vectors (in a plane) of the local coordinate system
         # are non-orthogonal and not normalized. This makes it easy to find the
         # global coordinates of the tube center points.
-        vec_1 = np.array(points_2d[1]) - local_origin
+        local_origin = np.array(grid_corners[0])
+        vec_1 = np.array(grid_corners[1]) - local_origin
         vec_1 /= self._tube_depth - 1
-        vec_2 = np.array(points_2d[3]) - local_origin
+        vec_2 = np.array(grid_corners[3]) - local_origin
         vec_2 /= self._tube_width - 1
 
         # Generate tube grid for one side of the detector bank that
         # is defined by grid corners.
-        point_3d = [0, 0, 0]
-        point_3d[idx_const] = const_coord
-        tube_3d_points = []
+        tube_points = []
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
                 new_point = local_origin + vec_1 * x_i + vec_2 * y_i
-                point_3d[idx_d] = new_point[0]
-                point_3d[idx_w] = new_point[1]
-                tube_3d_points.append(tuple(point_3d))
+                tube_points.append(tuple(new_point))
 
-        return tube_3d_points
+        return tube_points
 
     def build_detector_bank(self):
         tube_points_side_a = self._get_tube_points(self._bank_side_a)
         tube_points_side_b = self._get_tube_points(self._bank_side_b)
-
         tube_id = 1
         for point_a, point_b in zip(tube_points_side_a, tube_points_side_b):
             self._tubes[tube_id] = Tube(point_a, point_b, tube_id)
@@ -242,15 +233,16 @@ class Bank:
             raise ValueError(f'Error: Bank {self._bank_id} '
                              f'does not form a cuboid.')
 
-    def _orthogonal_to_axis(self, grid_corners):
+    def _grid_corners_in_plane(self, grid_corners):
         for i in range(3):
             point_coord = [point[i] for point in grid_corners]
             if len(set(point_coord)) == 1:
-                return self.axis_label[i], point_coord[0]
+                return
         else:
             print(grid_corners)
-            raise RuntimeError(f'Something is wrong with the corner coordinates'
-                               f' in bank {self._bank_id}.')
+            raise RuntimeError(f'Something is wrong with the corner points'
+                               f' in bank {self._bank_id}.'
+                               f'The corner points are not in a plane.')
 
 
 if __name__ == '__main__':
