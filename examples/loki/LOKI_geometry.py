@@ -153,10 +153,6 @@ class Bank:
     """
     Abstraction of a detector bank consisting of multiple tubes.
     """
-    axis_label = ['x', 'y', 'z']
-    idx_3D_mesh_dict = {axis_label[0]: (1, 2, 0),
-                        axis_label[1]: (0, 2, 1),
-                        axis_label[2]: (0, 1, 2)}
 
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
