@@ -1,9 +1,14 @@
+from collections import OrderedDict
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 from typing import Dict, List
-from detector_banks_geo import FRACTIONAL_PRECISION, IMAGING_TUBE_D, \
-    TUBE_DEPTH, loki_banks
+
+from numpy.linalg import norm
+
+from detector_banks_geo import FRACTIONAL_PRECISION, NUM_OUTER_STRAWS, \
+    IMAGING_TUBE_D, TUBE_DEPTH, TUBE_FIRST_STRAW_ANGLE, \
+    TUBE_FIRST_STRAW_DIST_FROM_CP, loki_banks
 
 N_VERTICES = 3
 STRAW_RESOLUTION = 512
@@ -132,21 +137,37 @@ class Tube:
     """
     Abstraction of a tube in a detector bank that holds several straws.
     coordinates should be provided as the center coordinates of the tube.
+    It is also possible for the user to provide x, y and z offset to
+    repeat the same tube geometry in a detector bank.
+    This saves time and space when generating large number of detector banks
+    with essentially the same tube geometry, albeit shifted.
     """
 
-    def __init__(self, point_a: tuple, point_b: tuple, tube_id: int):
+    def __init__(self, point_start: tuple, point_end: tuple):
         self._diameter = IMAGING_TUBE_D
-        self._straws = []
-        self._tube_id = tube_id
-        self._vertex_a = Vertex(*point_a)
-        self._vertex_b = Vertex(*point_b)
+        self._point_start = point_start
+        self._point_end = point_end
+        self._xyz_offsets = {}
+        self._straw = {}
 
-    def populate_with_straws(self, detector_bank_id):
+    def set_xyz_offsets(self, xyz_offsets: Dict):
+        self._xyz_offsets = xyz_offsets
+
+    def get_xyz_offsets(self):
+        return self._xyz_offsets
+
+    def get_endpoints(self):
+        return self._point_start, self._point_end
+
+    def populate_with_uniform_straws(self, detector_bank_id):
         """
-        Populates the tube with straws based on the detector bank id and
-        tube location in the 3D space.
+        Populates the tube with straws based on tube location in the 3D space.
         """
-        pass
+        straw_start_angle = TUBE_FIRST_STRAW_ANGLE
+        straw_angle_rotation = 2 * np.pi / NUM_OUTER_STRAWS
+        straw_dist_from_tube_center = TUBE_FIRST_STRAW_DIST_FROM_CP
+
+        self._straw[1] = None
 
 
 class Bank:
@@ -160,7 +181,8 @@ class Bank:
         self._bank_side_b = bank_geo['B']
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
-        self._tubes = {}
+        self._detector_tube = Tube(tuple(self._bank_side_a[0]),
+                                   tuple(self._bank_side_b[0]))
 
         # Check that provided geometry seems feasible.
         self._is_bank_cuboid()
@@ -172,7 +194,7 @@ class Bank:
     def get_bank_id(self):
         return self._bank_id
 
-    def _get_tube_points(self, grid_corners) -> List[tuple]:
+    def _get_tube_point_offsets(self, grid_corners) -> List[tuple]:
 
         # First make a check that the corner points are in a plane.
         # Otherwise something is wrong with the provided geometry.
@@ -187,24 +209,22 @@ class Bank:
         vec_2 = np.array(grid_corners[3]) - local_origin
         vec_2 /= self._tube_width - 1
 
-        # Generate tube grid for one side of the detector bank that
-        # is defined by grid corners.
-        tube_points = []
+        # Generate tube offsets according to tube layout and the provided
+        # grid corners.
+        xyz_offsets = OrderedDict()
+        tube_id = 1
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
-                new_point = local_origin + vec_1 * x_i + vec_2 * y_i
-                tube_points.append(tuple(new_point))
-
-        return tube_points
+                xyz_offset = vec_1 * x_i + vec_2 * y_i
+                xyz_offsets[tube_id] = tuple(xyz_offset)
+                tube_id += 1
+        return xyz_offsets
 
     def build_detector_bank(self):
-        tube_points_side_a = self._get_tube_points(self._bank_side_a)
-        tube_points_side_b = self._get_tube_points(self._bank_side_b)
-        tube_id = 1
-        for point_a, point_b in zip(tube_points_side_a, tube_points_side_b):
-            self._tubes[tube_id] = Tube(point_a, point_b, tube_id)
-
-        return tube_points_side_a, tube_points_side_b
+        tube_point_offsets = self._get_tube_point_offsets(self._bank_side_a)
+        self._detector_tube.set_xyz_offsets(tube_point_offsets)
+        self._detector_tube.populate_with_uniform_straws(self._bank_id)
+        return self._detector_tube
 
     def _calculate_tube_length(self, idx=0):
         return np.linalg.norm(np.array(self._bank_side_a[idx]) -
@@ -248,17 +268,30 @@ if __name__ == '__main__':
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
         bank = Bank(loki_banks[loki_bank_id], loki_bank_id)
-        side_a, side_b = bank.build_detector_bank()
+        detector_tube = bank.build_detector_bank()
         if plot_tube_locations:
             r = random.random()
             b = random.random()
             g = random.random()
             color = (r, g, b)
-            ax.scatter3D([x[0] for x in side_a],
-                         [y[1] for y in side_a],
-                         [z[2] for z in side_a], color=color)
-            ax.scatter3D([x[0] for x in side_b],
-                         [y[1] for y in side_b],
-                         [z[2] for z in side_b], color=color)
+            xyz_offs = detector_tube.get_xyz_offsets().values()
+            x_offset = [item[0] for item in xyz_offs]
+            y_offset = [item[1] for item in xyz_offs]
+            z_offset = [item[2] for item in xyz_offs]
+            start_point, end_point = detector_tube.get_endpoints()
+            # ax.scatter3D([start_point[0] + x for x in x_offset],
+            #              [start_point[1] + y for y in y_offset],
+            #              [start_point[2] + z for z in z_offset], color=color)
+            # ax.scatter3D([end_point[0] + x for x in x_offset],
+            #              [end_point[1] + y for y in y_offset],
+            #              [end_point[2] + z for z in z_offset], color=color)
+            for idx in range(len(x_offset)):
+                x_start = start_point[0] + x_offset[idx]
+                x_end = end_point[0] + x_offset[idx]
+                ax.plot([start_point[0] + x_offset[idx], end_point[0] + x_offset[idx]],
+                        [start_point[1] + y_offset[idx], end_point[1] + y_offset[idx]],
+                        [start_point[2] + z_offset[idx], end_point[2] + z_offset[idx]],
+                        color=color)
+
         detector_banks.append(bank)
     plt.show()
