@@ -1,13 +1,12 @@
-from collections import OrderedDict
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from collections import OrderedDict
+from enum import Enum
 from typing import Dict, List
-
-from numpy.linalg import norm
-
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
-    IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, loki_banks
+    IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
+    TUBE_FIRST_STRAW_DIST_FROM_CP, loki_banks
 
 N_VERTICES = 3
 STRAW_RESOLUTION = 512
@@ -47,6 +46,10 @@ class VertexIdIterator:
 vertex_id_iter = iter(VertexIdIterator())
 
 
+class DetectorAlignment(Enum):
+    HORIZONTAL, VERTICAL = range(2)
+
+
 class Vertex:
     """
     Description of a single vertex in a 3D space.
@@ -73,7 +76,7 @@ class Cylinder:
     3 vertices. In this case it will be used to describe a pixel.
     """
 
-    def __init__(self, vertices_coordinates: tuple):
+    def __init__(self, vertices_coordinates: List):
         if len(set(vertices_coordinates)) != N_VERTICES:
             raise RuntimeError('Three unique vertices are expected to fully'
                                'describe the cylinder geometry')
@@ -97,7 +100,7 @@ class Pixel(Cylinder):
     Description of a detector pixel geometrically described as a cylinder.
     """
 
-    def __init__(self, vertices_coordinates: tuple, pixel_number: int):
+    def __init__(self, vertices_coordinates: List, pixel_number: int):
         super().__init__(vertices_coordinates)
         self._pixel_number = pixel_number
 
@@ -116,19 +119,58 @@ class Straw:
 
     def __init__(self, point_a: tuple, point_b: tuple, point_c: tuple,
                  detector_bank_id: int):
+        # Point A is the center point on side A of the detector bank.
+        # Point B is on side A of the detector bank, radially out from Point A.
+        # Point C is the center point on side B of the detector bank.
         self._point_a = point_a
         self._point_b = point_b
         self._point_c = point_c
-        self._xyz_offset = [None] * NUM_STRAWS_PER_TUBE
-        self._calculate_straw_offsets()
+        self._straw_xyz_offsets = [None] * NUM_STRAWS_PER_TUBE
         self._detector_bank_id = detector_bank_id
         # self._straw_id = self._get_straw_start()
         # self._define_pixels_in_straw()
         self._pixels = []
 
-    def _calculate_straw_offsets(self):
-        straw_offs = 0
-        self._xyz_offset = straw_offs
+    def set_straw_offsets(self, alignment: DetectorAlignment,
+                          base_vec_1: np.array, plot_all: bool = False):
+        straw_offs = [np.array([0, 0, 0])]
+        if alignment is DetectorAlignment.HORIZONTAL:
+            def rotation(theta):
+                return np.array(
+                    [[1, 0, 0],
+                     [0, -np.sin(theta), np.cos(theta)],
+                     [0, np.cos(theta), np.sin(theta)]])
+        else:
+            def rotation(theta):
+                return np.array(
+                    [[np.cos(theta), 0, np.sin(theta)],
+                     [0, 1, 0],
+                     [-np.sin(theta), 0, np.cos(theta)]])
+        base_vec_1 = base_vec_1 / np.linalg.norm(base_vec_1)
+        rotation_angle = np.deg2rad(360 / (NUM_STRAWS_PER_TUBE - 1))
+        for straw_idx in range(NUM_STRAWS_PER_TUBE - 1):
+            tmp_angle = rotation_angle * straw_idx + \
+                        STRAW_ALIGNMENT_OFFSET_ANGLE
+            rotated_vector = np.dot(rotation(tmp_angle), base_vec_1)
+            straw_offs.append(rotated_vector * TUBE_FIRST_STRAW_DIST_FROM_CP)
+        if plot_all:
+            ax_tmp = plt.axes(projection='3d')
+            ax_tmp.scatter3D([value[0] for value in straw_offs],
+                             [value[1] for value in straw_offs],
+                             [value[2] for value in straw_offs])
+            plt.show()
+        straw_offs = Straw.reorder_straw_offsets_in_list(straw_offs)
+        self._straw_xyz_offsets = straw_offs
+
+    @staticmethod
+    def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
+        mid_point = int((NUM_STRAWS_PER_TUBE - 1) / 2 + 1)
+        straw_offs_sorted = [0] * len(straw_offs_unsorted)
+        straw_offs_sorted[mid_point] = straw_offs_unsorted[0]
+        straw_offs_sorted[:mid_point] = straw_offs_unsorted[mid_point:]
+        straw_offs_sorted[mid_point:] = reversed(
+            straw_offs_unsorted[1:mid_point])
+        return straw_offs_sorted
 
     def _define_pixels_in_straw(self):
         for i in range(STRAW_RESOLUTION):
@@ -151,7 +193,9 @@ class Tube:
     with essentially the same tube geometry, albeit shifted.
     """
 
-    def __init__(self, point_start: tuple, point_end: tuple):
+    def __init__(self, point_start: tuple, point_end: tuple,
+                 alignment: DetectorAlignment):
+        self._alignment = alignment
         self._diameter = IMAGING_TUBE_D
         self._point_start = point_start
         self._point_end = point_end
@@ -168,16 +212,20 @@ class Tube:
         return self._point_start, self._point_end
 
     def populate_with_uniform_straws(self, detector_bank_id: int,
-                                     radial_vector: tuple):
+                                     base_vec_1: np.array,
+                                     base_vec_2: np.array):
         """
         Populates the tube with straws based on tube location in the 3D space.
         """
+        r_vector = (base_vec_1 + base_vec_2)
+        r_vector /= np.linalg.norm(base_vec_1 + base_vec_2)
         point_radial = np.array(self._point_start) + \
-                       (STRAW_DIAMETER / 2) * np.array(radial_vector)
+                       (STRAW_DIAMETER / 2) * np.array(r_vector)
         self._straw = Straw(self._point_start,
                             tuple(point_radial),
                             self._point_end,
                             detector_bank_id)
+        self._straw.set_straw_offsets(self._alignment, base_vec_1)
 
 
 class Bank:
@@ -187,8 +235,7 @@ class Bank:
 
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
-        self._bank_side_a = bank_geo['A']
-        self._bank_side_b = bank_geo['B']
+        self._bank_geometry = bank_geo
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
 
@@ -198,27 +245,28 @@ class Bank:
 
         # Check that the corner points are in a plane.
         # Otherwise something is wrong with the provided geometry.
-        self._grid_corners_in_plane(self._bank_side_a)
+        self._grid_corners_in_plane(self._bank_geometry['A'])
 
         # The base vectors (in a plane) of the local coordinate system
         # are non-orthogonal and not normalized. This makes it easy to find the
         # global coordinates of the tube center points in the detector bank.
-        local_origin = np.array(self._bank_side_a[0])
-        self._base_vec_1 = np.array(self._bank_side_a[1]) - local_origin
+        local_origin = np.array(self._bank_geometry['A'][0])
+        self._base_vec_1 = np.array(self._bank_geometry['A'][1]) - local_origin
         self._base_vec_1 /= self._tube_depth - 1
-        self._base_vec_2 = np.array(self._bank_side_a[3]) - local_origin
+        self._base_vec_2 = np.array(self._bank_geometry['A'][3]) - local_origin
         self._base_vec_2 /= self._tube_width - 1
-        self._detector_tube = Tube(tuple(self._bank_side_a[0]),
-                                   tuple(self._bank_side_b[0]))
+        self._bank_alignment = self._get_detector_bank_orientation()
+        self._detector_tube = Tube(tuple(self._bank_geometry['A'][0]),
+                                   tuple(self._bank_geometry['B'][0]),
+                                   self._bank_alignment)
 
     def get_corners(self):
-        return self._bank_side_a + self._bank_side_b
+        return self._bank_geometry['A'] + self._bank_geometry['B']
 
     def get_bank_id(self):
         return self._bank_id
 
-    def _get_tube_point_offsets(self, grid_corners) -> List[tuple]:
-
+    def _get_tube_point_offsets(self) -> List[tuple]:
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
         xyz_offsets = OrderedDict()
@@ -231,21 +279,20 @@ class Bank:
         return xyz_offsets
 
     def build_detector_bank(self):
-        tube_point_offsets = self._get_tube_point_offsets(self._bank_side_a)
+        tube_point_offsets = self._get_tube_point_offsets()
         self._detector_tube.set_xyz_offsets(tube_point_offsets)
-        r_vector = (self._base_vec_1 + self._base_vec_2)
-        r_vector /= np.linalg.norm(self._base_vec_1 + self._base_vec_2)
         self._detector_tube.populate_with_uniform_straws(self._bank_id,
-                                                         tuple(r_vector))
+                                                         self._base_vec_1,
+                                                         self._base_vec_2)
         return self._detector_tube
 
     def _calculate_tube_length(self, index=0):
-        return np.linalg.norm(np.array(self._bank_side_a[index]) -
-                              np.array(self._bank_side_b[index]))
+        return np.linalg.norm(np.array(self._bank_geometry['A'][index]) -
+                              np.array(self._bank_geometry['B'][index]))
 
     def _check_tube_center_distance(self):
-        width = np.linalg.norm(np.array(self._bank_side_a[0]) -
-                               np.array(self._bank_side_a[1]))
+        width = np.linalg.norm(np.array(self._bank_geometry['A'][0]) -
+                               np.array(self._bank_geometry['A'][1]))
         center_dist = round(width / (self._tube_depth - 1),
                             FRACTIONAL_PRECISION)
         if center_dist < IMAGING_TUBE_D:
@@ -256,7 +303,7 @@ class Bank:
 
     def _is_bank_cuboid(self):
         euclid_dist = []
-        for idx in range(len(self._bank_side_a)):
+        for idx in range(len(self._bank_geometry['A'])):
             euclid_dist.append(self._calculate_tube_length(idx))
         if len(set(euclid_dist)) != 1:
             raise ValueError(f'Error: Bank {self._bank_id} '
@@ -273,11 +320,27 @@ class Bank:
                                f' in bank {self._bank_id}.'
                                f'The corner points are not in a plane.')
 
+    def _get_detector_bank_orientation(self):
+        unit_vectors_xyz = {'x': np.array([1, 0, 0]), \
+                            'y': np.array([0, 1, 0]),
+                            'z': np.array([0, 0, 1])}
+
+        tube_direction = np.array(self._bank_geometry['A'][0]) - \
+                         np.array(self._bank_geometry['B'][0])
+        for key in unit_vectors_xyz:
+            scalar_product = np.dot(unit_vectors_xyz[key], tube_direction)
+            if scalar_product and key == 'x':
+                return DetectorAlignment.HORIZONTAL
+            elif scalar_product and key == 'y':
+                return DetectorAlignment.VERTICAL
+
+        raise ValueError(f'The alignment of bank detector {self._bank_id} is'
+                         f'unreasonable.')
+
 
 if __name__ == '__main__':
     plot_tube_locations = True
     detector_banks: List[Bank] = []
-
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
         bank = Bank(loki_banks[loki_bank_id], loki_bank_id)
