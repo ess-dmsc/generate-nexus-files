@@ -6,9 +6,8 @@ from typing import Dict, List
 
 from numpy.linalg import norm
 
-from detector_banks_geo import FRACTIONAL_PRECISION, NUM_OUTER_STRAWS, \
-    IMAGING_TUBE_D, TUBE_DEPTH, TUBE_FIRST_STRAW_ANGLE, \
-    TUBE_FIRST_STRAW_DIST_FROM_CP, loki_banks
+from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
+    IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, loki_banks
 
 N_VERTICES = 3
 STRAW_RESOLUTION = 512
@@ -115,12 +114,21 @@ class Straw:
     Abstraction of a single straw consisting of STRAW_RESOLUTION pixels.
     """
 
-    def __init__(self, x: float, y: float, z: float, detector_bank_id: int):
-        self._x, self._y, self.z = x, y, z
+    def __init__(self, point_a: tuple, point_b: tuple, point_c: tuple,
+                 detector_bank_id: int):
+        self._point_a = point_a
+        self._point_b = point_b
+        self._point_c = point_c
+        self._xyz_offset = [None] * NUM_STRAWS_PER_TUBE
+        self._calculate_straw_offsets()
         self._detector_bank_id = detector_bank_id
-        self._straw_id = self._get_straw_start()
+        # self._straw_id = self._get_straw_start()
+        # self._define_pixels_in_straw()
         self._pixels = []
-        self._define_pixels_in_straw()
+
+    def _calculate_straw_offsets(self):
+        straw_offs = 0
+        self._xyz_offset = straw_offs
 
     def _define_pixels_in_straw(self):
         for i in range(STRAW_RESOLUTION):
@@ -147,8 +155,8 @@ class Tube:
         self._diameter = IMAGING_TUBE_D
         self._point_start = point_start
         self._point_end = point_end
-        self._xyz_offsets = {}
-        self._straw = {}
+        self._xyz_offsets: Dict = {}
+        self._straw: Straw = None
 
     def set_xyz_offsets(self, xyz_offsets: Dict):
         self._xyz_offsets = xyz_offsets
@@ -159,15 +167,17 @@ class Tube:
     def get_endpoints(self):
         return self._point_start, self._point_end
 
-    def populate_with_uniform_straws(self, detector_bank_id):
+    def populate_with_uniform_straws(self, detector_bank_id: int,
+                                     radial_vector: tuple):
         """
         Populates the tube with straws based on tube location in the 3D space.
         """
-        straw_start_angle = TUBE_FIRST_STRAW_ANGLE
-        straw_angle_rotation = 2 * np.pi / NUM_OUTER_STRAWS
-        straw_dist_from_tube_center = TUBE_FIRST_STRAW_DIST_FROM_CP
-
-        self._straw[1] = None
+        point_radial = np.array(self._point_start) + \
+                       (STRAW_DIAMETER / 2) * np.array(radial_vector)
+        self._straw = Straw(self._point_start,
+                            tuple(point_radial),
+                            self._point_end,
+                            detector_bank_id)
 
 
 class Bank:
@@ -181,12 +191,25 @@ class Bank:
         self._bank_side_b = bank_geo['B']
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
-        self._detector_tube = Tube(tuple(self._bank_side_a[0]),
-                                   tuple(self._bank_side_b[0]))
 
         # Check that provided geometry seems feasible.
         self._is_bank_cuboid()
         self._check_tube_center_distance()
+
+        # Check that the corner points are in a plane.
+        # Otherwise something is wrong with the provided geometry.
+        self._grid_corners_in_plane(self._bank_side_a)
+
+        # The base vectors (in a plane) of the local coordinate system
+        # are non-orthogonal and not normalized. This makes it easy to find the
+        # global coordinates of the tube center points in the detector bank.
+        local_origin = np.array(self._bank_side_a[0])
+        self._base_vec_1 = np.array(self._bank_side_a[1]) - local_origin
+        self._base_vec_1 /= self._tube_depth - 1
+        self._base_vec_2 = np.array(self._bank_side_a[3]) - local_origin
+        self._base_vec_2 /= self._tube_width - 1
+        self._detector_tube = Tube(tuple(self._bank_side_a[0]),
+                                   tuple(self._bank_side_b[0]))
 
     def get_corners(self):
         return self._bank_side_a + self._bank_side_b
@@ -196,26 +219,13 @@ class Bank:
 
     def _get_tube_point_offsets(self, grid_corners) -> List[tuple]:
 
-        # First make a check that the corner points are in a plane.
-        # Otherwise something is wrong with the provided geometry.
-        self._grid_corners_in_plane(grid_corners)
-
-        # The base vectors (in a plane) of the local coordinate system
-        # are non-orthogonal and not normalized. This makes it easy to find the
-        # global coordinates of the tube center points.
-        local_origin = np.array(grid_corners[0])
-        vec_1 = np.array(grid_corners[1]) - local_origin
-        vec_1 /= self._tube_depth - 1
-        vec_2 = np.array(grid_corners[3]) - local_origin
-        vec_2 /= self._tube_width - 1
-
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
         xyz_offsets = OrderedDict()
         tube_id = 1
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
-                xyz_offset = vec_1 * x_i + vec_2 * y_i
+                xyz_offset = self._base_vec_1 * x_i + self._base_vec_2 * y_i
                 xyz_offsets[tube_id] = tuple(xyz_offset)
                 tube_id += 1
         return xyz_offsets
@@ -223,12 +233,15 @@ class Bank:
     def build_detector_bank(self):
         tube_point_offsets = self._get_tube_point_offsets(self._bank_side_a)
         self._detector_tube.set_xyz_offsets(tube_point_offsets)
-        self._detector_tube.populate_with_uniform_straws(self._bank_id)
+        r_vector = (self._base_vec_1 + self._base_vec_2)
+        r_vector /= np.linalg.norm(self._base_vec_1 + self._base_vec_2)
+        self._detector_tube.populate_with_uniform_straws(self._bank_id,
+                                                         tuple(r_vector))
         return self._detector_tube
 
-    def _calculate_tube_length(self, idx=0):
-        return np.linalg.norm(np.array(self._bank_side_a[idx]) -
-                              np.array(self._bank_side_b[idx]))
+    def _calculate_tube_length(self, index=0):
+        return np.linalg.norm(np.array(self._bank_side_a[index]) -
+                              np.array(self._bank_side_b[index]))
 
     def _check_tube_center_distance(self):
         width = np.linalg.norm(np.array(self._bank_side_a[0]) -
@@ -279,19 +292,15 @@ if __name__ == '__main__':
             y_offset = [item[1] for item in xyz_offs]
             z_offset = [item[2] for item in xyz_offs]
             start_point, end_point = detector_tube.get_endpoints()
-            # ax.scatter3D([start_point[0] + x for x in x_offset],
-            #              [start_point[1] + y for y in y_offset],
-            #              [start_point[2] + z for z in z_offset], color=color)
-            # ax.scatter3D([end_point[0] + x for x in x_offset],
-            #              [end_point[1] + y for y in y_offset],
-            #              [end_point[2] + z for z in z_offset], color=color)
             for idx in range(len(x_offset)):
                 x_start = start_point[0] + x_offset[idx]
                 x_end = end_point[0] + x_offset[idx]
-                ax.plot([start_point[0] + x_offset[idx], end_point[0] + x_offset[idx]],
-                        [start_point[1] + y_offset[idx], end_point[1] + y_offset[idx]],
-                        [start_point[2] + z_offset[idx], end_point[2] + z_offset[idx]],
+                ax.plot([start_point[0] + x_offset[idx],
+                         end_point[0] + x_offset[idx]],
+                        [start_point[1] + y_offset[idx],
+                         end_point[1] + y_offset[idx]],
+                        [start_point[2] + z_offset[idx],
+                         end_point[2] + z_offset[idx]],
                         color=color)
-
         detector_banks.append(bank)
     plt.show()
