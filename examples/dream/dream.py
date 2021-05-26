@@ -359,36 +359,42 @@ if __name__ == "__main__":
     # TODO start and stop angle are inferred from diagrams, need to check
     n_sectors = 23
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=n_sectors)
-    for z_rotation_angle in tqdm(z_rotation_angles_degrees):
-        (
-            sector_vertices,
-            sector_faces,
-            sector_ids,
-            x_offsets,
-            y_offsets,
-            z_offsets,
-        ) = create_sector(
-            df,
-            z_rotation_angle,
-            max_vertex_index,
-            max_face_index,
-        )
-        if total_vertices is None:
-            total_vertices = sector_vertices
-            total_faces = sector_faces
-            total_ids = sector_ids
-            x_offsets_total = x_offsets
-            y_offsets_total = y_offsets
-            z_offsets_total = z_offsets
-        else:
-            total_vertices = np.vstack((total_vertices, sector_vertices))
-            total_faces = np.vstack((total_faces, sector_faces))
-            total_ids = np.vstack((total_ids, sector_ids))
-            x_offsets_total = np.vstack((x_offsets_total, x_offsets))
-            y_offsets_total = np.vstack((y_offsets_total, y_offsets))
-            z_offsets_total = np.vstack((z_offsets_total, z_offsets))
-        max_vertex_index = total_vertices.shape[0]
-        max_face_index = total_ids.shape[0]
+    from alive_progress import alive_bar
+
+    with alive_bar(
+        len(z_rotation_angles_degrees), bar="blocks", spinner="triangles"
+    ) as bar:
+        for z_rotation_angle in z_rotation_angles_degrees:
+            (
+                sector_vertices,
+                sector_faces,
+                sector_ids,
+                x_offsets,
+                y_offsets,
+                z_offsets,
+            ) = create_sector(
+                df,
+                z_rotation_angle,
+                max_vertex_index,
+                max_face_index,
+            )
+            if total_vertices is None:
+                total_vertices = sector_vertices
+                total_faces = sector_faces
+                total_ids = sector_ids
+                x_offsets_total = x_offsets
+                y_offsets_total = y_offsets
+                z_offsets_total = z_offsets
+            else:
+                total_vertices = np.vstack((total_vertices, sector_vertices))
+                total_faces = np.vstack((total_faces, sector_faces))
+                total_ids = np.vstack((total_ids, sector_ids))
+                x_offsets_total = np.vstack((x_offsets_total, x_offsets))
+                y_offsets_total = np.vstack((y_offsets_total, y_offsets))
+                z_offsets_total = np.vstack((z_offsets_total, z_offsets))
+            max_vertex_index = total_vertices.shape[0]
+            max_face_index = total_ids.shape[0]
+            bar()
 
     write_to_off_file(
         f"DREAM_endcap_{n_sectors}_sectors.off",
