@@ -2,7 +2,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd  # type:ignore
-from tqdm import tqdm  # type:ignore
+from alive_progress import alive_bar
 
 from utils import write_to_nexus_file, write_to_off_file
 
@@ -359,7 +359,6 @@ if __name__ == "__main__":
     # TODO start and stop angle are inferred from diagrams, need to check
     n_sectors = 23
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=n_sectors)
-    from alive_progress import alive_bar
 
     with alive_bar(
         len(z_rotation_angles_degrees), bar="blocks", spinner="triangles"
