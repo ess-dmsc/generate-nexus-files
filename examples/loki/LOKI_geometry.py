@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Dict, List
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
-    TUBE_FIRST_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
+    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
 
 N_VERTICES = 3
 
@@ -168,7 +168,7 @@ class Straw:
             tmp_angle = rotation_angle * straw_idx + \
                         STRAW_ALIGNMENT_OFFSET_ANGLE
             rotated_vector = np.dot(rotation(tmp_angle), base_vec_1)
-            straw_offs.append(rotated_vector * TUBE_FIRST_STRAW_DIST_FROM_CP)
+            straw_offs.append(rotated_vector * TUBE_OUTER_STRAW_DIST_FROM_CP)
         if plot_all:
             ax_tmp = plt.axes(projection='3d')
             ax_tmp.scatter3D([value[0] for value in straw_offs],
