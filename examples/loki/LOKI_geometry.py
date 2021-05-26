@@ -6,10 +6,9 @@ from enum import Enum
 from typing import Dict, List
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
-    TUBE_FIRST_STRAW_DIST_FROM_CP, loki_banks
+    TUBE_FIRST_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
 
 N_VERTICES = 3
-STRAW_RESOLUTION = 512
 
 
 def calc_straw_offset(bank_id) -> int:
@@ -30,6 +29,20 @@ def calc_straw_local() -> int:
 
 def calc_pixel_id(straw, local_pixel_position) -> int:
     return 1 + local_pixel_position + straw * STRAW_RESOLUTION
+
+
+def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
+    """
+    Sorting of straw offsets based on information from LoKI detector bank
+    description.
+    """
+    mid_point = int((NUM_STRAWS_PER_TUBE - 1) / 2 + 1)
+    straw_offs_sorted = [0] * len(straw_offs_unsorted)
+    straw_offs_sorted[mid_point] = straw_offs_unsorted[0]
+    straw_offs_sorted[:mid_point] = straw_offs_unsorted[mid_point:]
+    straw_offs_sorted[mid_point:] = reversed(
+        straw_offs_unsorted[1:mid_point])
+    return straw_offs_sorted
 
 
 class VertexIdIterator:
@@ -100,15 +113,19 @@ class Pixel(Cylinder):
     Description of a detector pixel geometrically described as a cylinder.
     """
 
-    def __init__(self, vertices_coordinates: List, pixel_number: int):
+    def __init__(self, vertices_coordinates: List, pixel_number_start: int):
         super().__init__(vertices_coordinates)
-        self._pixel_number = pixel_number
+        self._pixel_number_start = pixel_number_start
+        self.pixel_xyz_offsets = []
 
-    def get_pixel_number(self) -> int:
-        return self._pixel_number
+    def set_pixel_xyz_offsets(self, pixel_offsets):
+        self.pixel_xyz_offsets = pixel_offsets
+
+    def get_pixel_number_start(self) -> int:
+        return self._pixel_number_start
 
     def __repr__(self):
-        return f'Pixel number {self._pixel_number}: \n' + \
+        return f'First pixel number {self._pixel_number_start}: \n' + \
                super().__repr__()
 
 
@@ -127,9 +144,8 @@ class Straw:
         self._point_c = point_c
         self._straw_xyz_offsets = [None] * NUM_STRAWS_PER_TUBE
         self._detector_bank_id = detector_bank_id
+        self._pixel = None
         # self._straw_id = self._get_straw_start()
-        # self._define_pixels_in_straw()
-        self._pixels = []
 
     def set_straw_offsets(self, alignment: DetectorAlignment,
                           base_vec_1: np.array, plot_all: bool = False):
@@ -159,24 +175,34 @@ class Straw:
                              [value[1] for value in straw_offs],
                              [value[2] for value in straw_offs])
             plt.show()
-        straw_offs = Straw.reorder_straw_offsets_in_list(straw_offs)
+        straw_offs = reorder_straw_offsets_in_list(straw_offs)
         self._straw_xyz_offsets = straw_offs
 
-    @staticmethod
-    def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
-        mid_point = int((NUM_STRAWS_PER_TUBE - 1) / 2 + 1)
-        straw_offs_sorted = [0] * len(straw_offs_unsorted)
-        straw_offs_sorted[mid_point] = straw_offs_unsorted[0]
-        straw_offs_sorted[:mid_point] = straw_offs_unsorted[mid_point:]
-        straw_offs_sorted[mid_point:] = reversed(
-            straw_offs_unsorted[1:mid_point])
-        return straw_offs_sorted
-
-    def _define_pixels_in_straw(self):
-        for i in range(STRAW_RESOLUTION):
-            straw_number = self._get_straw_number()
-            tmp_vertices = [Vertex(calc_pixel_id()) for i in range(N_VERTICES)]
-            self._pixels.append(Pixel(tmp_vertices, ))
+    def populate_with_pixels(self, plot_all: bool = False):
+        """
+        Populates the tube straw with pixels according to its pixel resolution.
+        """
+        vector_along_straw = np.array(self._point_c) - np.array(self._point_a)
+        vector_along_straw /= STRAW_RESOLUTION
+        pixel_end_point = tuple(np.array(self._point_a) + vector_along_straw)
+        vertices_first_pixel = [self._point_a, self._point_b, pixel_end_point]
+        pixel_number_start = calc_pixel_id(0, 0)  # TODO: Fix this to use correct pixel id equations.
+        self._pixel = Pixel(vertices_first_pixel, pixel_number_start)
+        offsets_pixel = [tuple(vector_along_straw * j)
+                         for j in range(STRAW_RESOLUTION)]
+        if plot_all:
+            ax_tmp = plt.axes(projection='3d')
+            res = pixel_end_point
+            x0 = res[0]
+            y0 = res[1]
+            z0 = res[2]
+            ax_tmp.scatter3D([value[0] + x0 for value in offsets_pixel],
+                             [value[1] + y0 for value in offsets_pixel],
+                             [value[2] + z0 for value in offsets_pixel])
+            print(tuple(res + np.array(offsets_pixel[-1])))
+            print(self._point_c)
+            plt.show()
+        self._pixel.set_pixel_xyz_offsets(offsets_pixel)
 
     def _get_straw_number(self) -> int:
         # needs equations to determine pixel ids.
@@ -226,6 +252,7 @@ class Tube:
                             self._point_end,
                             detector_bank_id)
         self._straw.set_straw_offsets(self._alignment, base_vec_1)
+        self._straw.populate_with_pixels()
 
 
 class Bank:

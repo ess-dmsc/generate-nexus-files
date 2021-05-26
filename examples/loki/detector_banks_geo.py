@@ -1,4 +1,4 @@
-from numpy import arctan, sqrt, deg2rad
+from numpy import sqrt, deg2rad
 
 FRACTIONAL_PRECISION = 2
 IMAGING_TUBE_D = 25.4
@@ -7,18 +7,11 @@ TUBE_DEPTH = 4
 # Straw information.
 NUM_STRAWS_PER_TUBE = 7
 STRAW_DIAMETER = 8.00
+STRAW_RESOLUTION = 512
 STRAW_Y_LOC = 1.14
 STRAW_Z_LOC = 7.67
-TUBE_FIRST_STRAW_ANGLE = arctan(STRAW_Y_LOC/STRAW_Z_LOC)
 STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_FIRST_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC**2 + STRAW_Z_LOC**2)
-STRAW_OFFS_IN_TUBE = [(-7.67, -1.14),
-                      (-2.85, -7.21),
-                      (4.82, -6.07),
-                      (0, 0),
-                      (-4.82, 6.07),
-                      (2.85, 7.21),
-                      (7.67, 1.14)]  # Expressed in 2D (x,y) coordinates.
 
 loki_banks = {0: {'A': [(-500, -781, 5012.5),
                         (-500, -799.84, 5091.28),
