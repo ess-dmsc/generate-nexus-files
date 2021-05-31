@@ -1,3 +1,4 @@
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -9,26 +10,6 @@ from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
 
 N_VERTICES = 3
-
-
-def calc_straw_offset(bank_id) -> int:
-    """
-    Calculates the straw offset.
-
-    ::return:: returns the straw offset based on the bank ID.
-    """
-    return bank_id
-
-
-def calc_straw_local() -> int:
-    """
-    Calculates the local straw number.
-    """
-    pass
-
-
-def calc_pixel_id(straw, local_pixel_position) -> int:
-    return 1 + local_pixel_position + straw * STRAW_RESOLUTION
 
 
 def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
@@ -45,7 +26,7 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
     return straw_offs_sorted
 
 
-class VertexIdIterator:
+class IdIterator:
     def __iter__(self):
         self._id: int = 0
         return self
@@ -55,8 +36,9 @@ class VertexIdIterator:
         self._id += 1
         return current_id
 
-
-vertex_id_iter = iter(VertexIdIterator())
+    @staticmethod
+    def reset():
+        return iter(IdIterator())
 
 
 class DetectorAlignment(Enum):
@@ -96,8 +78,7 @@ class Cylinder:
         else:
             self._vertices = []
             for vertex_coordinates in vertices_coordinates:
-                self._vertices.append(Vertex(*vertex_coordinates,
-                                             next(vertex_id_iter)))
+                self._vertices.append(Vertex(*vertex_coordinates))
 
     def get_vertices_ids(self) -> List[int]:
         return [self._vertices[i].get_vertex_id() for i in range(N_VERTICES)]
@@ -107,26 +88,36 @@ class Cylinder:
                f'B: {self._vertices[1]} \n' \
                f'C: {self._vertices[2]}'
 
+    def get_vertices_coordinates(self):
+        return {'Vertex A': self._vertices[0].get_coordinates(),
+                'Vertex B': self._vertices[1].get_coordinates(),
+                'Vertex C': self._vertices[2].get_coordinates()}
+
 
 class Pixel(Cylinder):
     """
     Description of a detector pixel geometrically described as a cylinder.
     """
 
-    def __init__(self, vertices_coordinates: List, pixel_number_start: int):
+    def __init__(self, vertices_coordinates: List):
         super().__init__(vertices_coordinates)
-        self._pixel_number_start = pixel_number_start
         self.pixel_xyz_offsets = []
+        self.pixel_id_iter = iter(IdIterator())
+        self.nominal_vertices_coordinates: Dict = \
+            self.get_vertices_coordinates()
 
-    def set_pixel_xyz_offsets(self, pixel_offsets):
+    def set_pixel_xyz_offsets(self, pixel_offsets: np.array):
         self.pixel_xyz_offsets = pixel_offsets
-
-    def get_pixel_number_start(self) -> int:
-        return self._pixel_number_start
 
     def __repr__(self):
         return f'First pixel number {self._pixel_number_start}: \n' + \
                super().__repr__()
+
+    def compound_data_in_dict(self, offset: np.array) -> Dict:
+        data_dict = self.nominal_vertices_coordinates
+        for pixel_offset in self.pixel_xyz_offsets:
+            data_dict[next(self.pixel_id_iter)] = tuple(pixel_offset + offset)
+        return data_dict
 
 
 class Straw:
@@ -144,8 +135,8 @@ class Straw:
         self._point_c = point_c
         self._straw_xyz_offsets = [None] * NUM_STRAWS_PER_TUBE
         self._detector_bank_id = detector_bank_id
+        self._straw_id_iter = iter(IdIterator())
         self._pixel = None
-        # self._straw_id = self._get_straw_start()
 
     def set_straw_offsets(self, alignment: DetectorAlignment,
                           base_vec_1: np.array, plot_all: bool = False):
@@ -186,8 +177,7 @@ class Straw:
         vector_along_straw /= STRAW_RESOLUTION
         pixel_end_point = tuple(np.array(self._point_a) + vector_along_straw)
         vertices_first_pixel = [self._point_a, self._point_b, pixel_end_point]
-        pixel_number_start = calc_pixel_id(0, 0)  # TODO: Fix this to use correct pixel id equations.
-        self._pixel = Pixel(vertices_first_pixel, pixel_number_start)
+        self._pixel = Pixel(vertices_first_pixel)
         offsets_pixel = [tuple(vector_along_straw * j)
                          for j in range(STRAW_RESOLUTION)]
         if plot_all:
@@ -204,9 +194,12 @@ class Straw:
             plt.show()
         self._pixel.set_pixel_xyz_offsets(offsets_pixel)
 
-    def _get_straw_number(self) -> int:
-        # needs equations to determine pixel ids.
-        return calc_straw_offset(self._detector_bank_id) + calc_straw_local()
+    def compound_data_in_dict(self, offset: np.array) -> Dict:
+        data_dict = {}
+        for straw_offset in self._straw_xyz_offsets:
+            data_dict[next(self._straw_id_iter)] = \
+                self._pixel.compound_data_in_dict(straw_offset + offset)
+        return data_dict
 
 
 class Tube:
@@ -227,6 +220,7 @@ class Tube:
         self._point_end = point_end
         self._xyz_offsets: Dict = {}
         self._straw: Straw = None
+        self._tube_id_iter = iter(IdIterator())
 
     def set_xyz_offsets(self, xyz_offsets: Dict):
         self._xyz_offsets = xyz_offsets
@@ -253,6 +247,15 @@ class Tube:
                             detector_bank_id)
         self._straw.set_straw_offsets(self._alignment, base_vec_1)
         self._straw.populate_with_pixels()
+
+    def compound_data_in_dict(self) -> Dict:
+        data_dict = {}
+        self._tube_id_iter = self._tube_id_iter.reset()
+        next(self._tube_id_iter)
+        for tube_offset in self._xyz_offsets:
+            data_dict[next(self._tube_id_iter)] = \
+                self._straw.compound_data_in_dict(tube_offset)
+        return data_dict
 
 
 class Bank:
@@ -364,9 +367,13 @@ class Bank:
         raise ValueError(f'The alignment of bank detector {self._bank_id} is'
                          f'unreasonable.')
 
+    def compound_data_in_dict(self) -> Dict:
+        return {self._bank_id: self._detector_tube.compound_data_in_dict()}
+
 
 if __name__ == '__main__':
     plot_tube_locations = True
+    generate_nexus_content = True
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
@@ -394,3 +401,13 @@ if __name__ == '__main__':
                         color=color)
         detector_banks.append(bank)
     plt.show()
+
+    data = {}
+    if generate_nexus_content:
+        for bank in detector_banks:
+            data[bank.get_bank_id()] = bank.compound_data_in_dict()
+
+        with open('detector_geometry.json', 'w') as file:
+            json.dump(data, file)
+
+
