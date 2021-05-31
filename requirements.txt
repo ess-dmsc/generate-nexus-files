@@ -4,5 +4,6 @@ h5py
 numpy
 tqdm
 pandas
+matplotlib
 nexusformat
 ipython

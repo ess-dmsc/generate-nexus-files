@@ -1,4 +1,4 @@
-import json
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -26,9 +26,18 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
     return straw_offs_sorted
 
 
+def write_csv_file(csv_data):
+    column_names = ['bank id', 'tube id', 'straw id', 'pixel id', 'vertex A']
+    with open('detector_geometry.csv', 'w') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(column_names)
+        for row in csv_data:
+            csv_writer.writerow(row)
+
+
 class IdIterator:
-    def __iter__(self):
-        self._id: int = 0
+    def __iter__(self, start=1):
+        self._id: int = start
         return self
 
     def __next__(self):
@@ -38,7 +47,11 @@ class IdIterator:
 
     @staticmethod
     def reset():
-        return iter(IdIterator())
+        return IdIterator()
+
+
+pixel_id_iter = iter(IdIterator())
+straw_id_iter = iter(IdIterator())
 
 
 class DetectorAlignment(Enum):
@@ -102,22 +115,31 @@ class Pixel(Cylinder):
     def __init__(self, vertices_coordinates: List):
         super().__init__(vertices_coordinates)
         self.pixel_xyz_offsets = []
-        self.pixel_id_iter = iter(IdIterator())
         self.nominal_vertices_coordinates: Dict = \
             self.get_vertices_coordinates()
 
     def set_pixel_xyz_offsets(self, pixel_offsets: np.array):
         self.pixel_xyz_offsets = pixel_offsets
 
-    def __repr__(self):
-        return f'First pixel number {self._pixel_number_start}: \n' + \
-               super().__repr__()
-
     def compound_data_in_dict(self, offset: np.array) -> Dict:
-        data_dict = self.nominal_vertices_coordinates
+        point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        data_dict = {}
         for pixel_offset in self.pixel_xyz_offsets:
-            data_dict[next(self.pixel_id_iter)] = tuple(pixel_offset + offset)
+            data_dict[next(pixel_id_iter)] = \
+                tuple(point_a + pixel_offset + offset)
         return data_dict
+
+    def compound_data_in_list(self, bank_id: int, tube_id: int,
+                              straw_id: int, offset: np.array) -> List:
+        point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        data_list: List = []
+        for pixel_offset in self.pixel_xyz_offsets:
+            data_list.append((bank_id,
+                              tube_id,
+                              straw_id,
+                              next(pixel_id_iter),
+                              tuple(point_a + pixel_offset + offset)))
+        return data_list
 
 
 class Straw:
@@ -135,7 +157,6 @@ class Straw:
         self._point_c = point_c
         self._straw_xyz_offsets = [None] * NUM_STRAWS_PER_TUBE
         self._detector_bank_id = detector_bank_id
-        self._straw_id_iter = iter(IdIterator())
         self._pixel = None
 
     def set_straw_offsets(self, alignment: DetectorAlignment,
@@ -197,9 +218,17 @@ class Straw:
     def compound_data_in_dict(self, offset: np.array) -> Dict:
         data_dict = {}
         for straw_offset in self._straw_xyz_offsets:
-            data_dict[next(self._straw_id_iter)] = \
+            data_dict[next(straw_id_iter)] = \
                 self._pixel.compound_data_in_dict(straw_offset + offset)
         return data_dict
+
+    def compound_data_in_list(self, tube_id: int, offset: np.array) -> List:
+        data_list: List = []
+        for straw_offset in self._straw_xyz_offsets:
+            data_list += self._pixel.compound_data_in_list(
+                self._detector_bank_id, tube_id,
+                next(straw_id_iter), straw_offset + offset)
+        return data_list
 
 
 class Tube:
@@ -220,7 +249,6 @@ class Tube:
         self._point_end = point_end
         self._xyz_offsets: Dict = {}
         self._straw: Straw = None
-        self._tube_id_iter = iter(IdIterator())
 
     def set_xyz_offsets(self, xyz_offsets: Dict):
         self._xyz_offsets = xyz_offsets
@@ -250,12 +278,20 @@ class Tube:
 
     def compound_data_in_dict(self) -> Dict:
         data_dict = {}
-        self._tube_id_iter = self._tube_id_iter.reset()
-        next(self._tube_id_iter)
+        tube_id_iterator = iter(IdIterator())
         for tube_offset in self._xyz_offsets:
-            data_dict[next(self._tube_id_iter)] = \
+            data_dict[next(tube_id_iterator)] = \
                 self._straw.compound_data_in_dict(tube_offset)
         return data_dict
+
+    def compound_data_in_list(self) -> List:
+        data_list: List = []
+        tube_id_iterator = iter(IdIterator())
+        for tube_offset in self._xyz_offsets:
+            data_list += self._straw.compound_data_in_list(
+                next(tube_id_iterator),
+                tube_offset)
+        return data_list
 
 
 class Bank:
@@ -296,7 +332,7 @@ class Bank:
     def get_bank_id(self):
         return self._bank_id
 
-    def _get_tube_point_offsets(self) -> List[tuple]:
+    def _get_tube_point_offsets(self) -> OrderedDict:
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
         xyz_offsets = OrderedDict()
@@ -333,8 +369,8 @@ class Bank:
 
     def _is_bank_cuboid(self):
         euclid_dist = []
-        for idx in range(len(self._bank_geometry['A'])):
-            euclid_dist.append(self._calculate_tube_length(idx))
+        for index in range(len(self._bank_geometry['A'])):
+            euclid_dist.append(self._calculate_tube_length(index))
         if len(set(euclid_dist)) != 1:
             raise ValueError(f'Error: Bank {self._bank_id} '
                              f'does not form a cuboid.')
@@ -351,7 +387,7 @@ class Bank:
                                f'The corner points are not in a plane.')
 
     def _get_detector_bank_orientation(self):
-        unit_vectors_xyz = {'x': np.array([1, 0, 0]), \
+        unit_vectors_xyz = {'x': np.array([1, 0, 0]),
                             'y': np.array([0, 1, 0]),
                             'z': np.array([0, 0, 1])}
 
@@ -369,6 +405,9 @@ class Bank:
 
     def compound_data_in_dict(self) -> Dict:
         return {self._bank_id: self._detector_tube.compound_data_in_dict()}
+
+    def compound_data_in_list(self) -> List:
+        return self._detector_tube.compound_data_in_list()
 
 
 if __name__ == '__main__':
@@ -405,9 +444,5 @@ if __name__ == '__main__':
     data = {}
     if generate_nexus_content:
         for bank in detector_banks:
-            data[bank.get_bank_id()] = bank.compound_data_in_dict()
-
-        with open('detector_geometry.json', 'w') as file:
-            json.dump(data, file)
-
-
+            data[bank.get_bank_id()] = bank.compound_data_in_list()
+        write_csv_file(data[0] + data[4])
