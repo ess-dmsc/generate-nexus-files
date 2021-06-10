@@ -27,7 +27,7 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
 
 
 def write_csv_file(csv_data):
-    column_names = ['bank id', 'tube id', 'straw id', 'local pixel id',
+    column_names = ['bank id', 'tube id', 'straw id', 'local straw position',
                     'pixel id']
     with open('detector_geometry.csv', 'w') as file:
         csv_writer = csv.writer(file)
@@ -137,7 +137,7 @@ class Pixel(Cylinder):
                               straw_id: int, offset: np.array) -> List:
         point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
         data_list: List = []
-        loc_pixel_id_iter = iter(IdIterator(1))
+        loc_pixel_id_iter = iter(IdIterator())
         for pixel_offset in self.pixel_xyz_offsets:
             data_list.append((bank_id,
                               tube_id,
@@ -453,3 +453,5 @@ if __name__ == '__main__':
         for bank in detector_banks:
             data[bank.get_bank_id()] = bank.compound_data_in_list()
         write_csv_file(data[0] + data[4])
+
+    # TODO: validate the pixel geometrical position in the future when we have a clear way to do this.
