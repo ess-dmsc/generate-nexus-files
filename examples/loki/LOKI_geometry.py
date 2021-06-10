@@ -37,8 +37,11 @@ def write_csv_file(csv_data):
 
 
 class IdIterator:
-    def __iter__(self, start=0):
-        self._id: int = start
+    def __init__(self, start=0):
+        self._start = start
+
+    def __iter__(self):
+        self._id: int = self._start
         return self
 
     def __next__(self):
@@ -51,7 +54,7 @@ class IdIterator:
         return IdIterator()
 
 
-pixel_id_iter = iter(IdIterator())
+pixel_id_iter = iter(IdIterator(1))
 straw_id_iter = iter(IdIterator())
 
 
@@ -134,7 +137,7 @@ class Pixel(Cylinder):
                               straw_id: int, offset: np.array) -> List:
         point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
         data_list: List = []
-        loc_pixel_id_iter = iter(IdIterator())
+        loc_pixel_id_iter = iter(IdIterator(1))
         for pixel_offset in self.pixel_xyz_offsets:
             data_list.append((bank_id,
                               tube_id,
