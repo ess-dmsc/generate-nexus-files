@@ -488,9 +488,10 @@ class NexusFileBuilder:
     definition and data content of the nexus that is supposed to be created.
     """
 
-    def __init__(self, data_struct: Dict, file_name: str = 'loki.h5'):
+    def __init__(self, data_struct: Dict, file_name: str = 'loki',
+                 file_format: str = 'nxs'):
         self.data_struct = data_struct[ENTRY]
-        self.hf5_file = h5py.File(file_name, 'w')
+        self.hf5_file = h5py.File('.'.join([file_name, file_format]), 'w')
         self.top_group = self.hf5_file.create_group(ENTRY)
 
     def construct_nxs_file(self):
