@@ -1,15 +1,18 @@
 import csv
+
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 from collections import OrderedDict
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
     TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
 
 N_VERTICES = 3
+ENTRY = "entry"
 
 
 def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
@@ -71,8 +74,8 @@ class Vertex:
         self._x, self._y, self._z = x, y, z
         self._id = vertex_id
 
-    def get_coordinates(self) -> tuple:
-        return self._x, self._y, self._z
+    def get_coordinates(self) -> np.array:
+        return np.array([self._x, self._y, self._z])
 
     def get_vertex_id(self) -> int:
         return self._id
@@ -105,10 +108,15 @@ class Cylinder:
                f'B: {self._vertices[1]} \n' \
                f'C: {self._vertices[2]}'
 
-    def get_vertices_coordinates(self):
+    def get_vertices_coordinates_as_dict(self):
         return {'Vertex A': self._vertices[0].get_coordinates(),
                 'Vertex B': self._vertices[1].get_coordinates(),
                 'Vertex C': self._vertices[2].get_coordinates()}
+
+    def get_vertices_coordinates_as_list(self):
+        return [self._vertices[0].get_coordinates(),
+                self._vertices[1].get_coordinates(),
+                self._vertices[2].get_coordinates()]
 
 
 class Pixel(Cylinder):
@@ -120,13 +128,13 @@ class Pixel(Cylinder):
         super().__init__(vertices_coordinates)
         self.pixel_xyz_offsets = []
         self.nominal_vertices_coordinates: Dict = \
-            self.get_vertices_coordinates()
+            self.get_vertices_coordinates_as_dict()
 
     def set_pixel_xyz_offsets(self, pixel_offsets: np.array):
         self.pixel_xyz_offsets = pixel_offsets
 
     def compound_data_in_dict(self, offset: np.array) -> Dict:
-        point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        point_a = self.nominal_vertices_coordinates['Vertex A']
         data_dict = {}
         for pixel_offset in self.pixel_xyz_offsets:
             data_dict[next(pixel_id_iter)] = \
@@ -135,18 +143,31 @@ class Pixel(Cylinder):
 
     def compound_data_in_list(self, bank_id: int, tube_id: int,
                               straw_id: int, offset: np.array) -> List:
-        point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        # point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
         data_list: List = []
         loc_pixel_id_iter = iter(IdIterator())
+        print(offset)
         for pixel_offset in self.pixel_xyz_offsets:
             data_list.append((bank_id,
                               tube_id,
                               straw_id,
                               next(loc_pixel_id_iter),
                               next(pixel_id_iter)))
+            print(pixel_offset)
         ret_val = data_list[:2] + data_list[-2:]
-        print(ret_val)
         return ret_val
+
+    def get_pixel_data(self, offset: np.array):
+        data_offsets: List = []
+        data_detector_num: List = []
+        for pixel_offset in self.pixel_xyz_offsets:
+            data_offsets.append(offset + pixel_offset)
+            data_detector_num.append(next(pixel_id_iter))
+        return data_offsets, data_detector_num
+
+    def get_cylinder_geo_data(self):
+        return {'cylinders': [0, 1, 2],
+                'vertices': self.get_vertices_coordinates_as_list()}
 
 
 class Straw:
@@ -237,6 +258,19 @@ class Straw:
                 next(straw_id_iter), straw_offset + offset)
         return data_list
 
+    def get_straw_data(self, offset: np.array):
+        data_offsets: List = []
+        data_detector_num: List = []
+        for straw_offset in self._straw_xyz_offsets:
+            tmp_offsets, tmp_data_detector_num = \
+                self._pixel.get_pixel_data(straw_offset + offset)
+            data_offsets += tmp_offsets
+            data_detector_num += tmp_data_detector_num
+        return data_offsets, data_detector_num
+
+    def get_straw_pixel_geometry(self):
+        return self._pixel.get_cylinder_geo_data()
+
 
 class Tube:
     """
@@ -255,7 +289,7 @@ class Tube:
         self._point_start = point_start
         self._point_end = point_end
         self._xyz_offsets: Dict = {}
-        self._straw: Straw = None
+        self._straw: Optional[Straw] = None
 
     def set_xyz_offsets(self, xyz_offsets: Dict):
         self._xyz_offsets = xyz_offsets
@@ -299,6 +333,30 @@ class Tube:
                 next(tube_id_iterator),
                 tube_offset)
         return data_list
+
+    def get_geometry_data(self, bank_offset: np.array = np.array([0, 0, 0])) \
+            -> Dict:
+        data_offsets: List = []
+        data_detector_num: List = []
+        if not self._straw:
+            return {"detector_number": [],
+                    "pixel_shape": [],
+                    "x_pixel_offset": [],
+                    "y_pixel_offset": [],
+                    "z_pixel_offset": []}
+        for tube_offset in self._xyz_offsets:
+            tmp_offsets, tmp_data_detector_num = \
+                self._straw.get_straw_data(tube_offset + bank_offset)
+            data_offsets += tmp_offsets
+            data_detector_num += tmp_data_detector_num
+
+        pixel_shape = self._straw.get_straw_pixel_geometry()
+
+        return {"detector_number": data_detector_num,
+                "pixel_shape": pixel_shape,
+                "x_pixel_offset": [x[0] for x in data_offsets],
+                "y_pixel_offset": [y[1] for y in data_offsets],
+                "z_pixel_offset": [z[2] for z in data_offsets]}
 
 
 class Bank:
@@ -411,15 +469,47 @@ class Bank:
                          f'unreasonable.')
 
     def compound_data_in_dict(self) -> Dict:
-        return {self._bank_id: self._detector_tube.compound_data_in_dict()}
+        return self._detector_tube.compound_data_in_dict()
 
     def compound_data_in_list(self) -> List:
         return self._detector_tube.compound_data_in_list()
 
+    def compound_detector_geometry(self):
+        """
+        Creates a dictionary of the LoKI detector geometry suitable for
+        the NexusFileBuilder class.
+        """
+        return self._detector_tube.get_geometry_data()
+
+
+class NexusFileBuilder:
+    """
+    Generates a nexus file based on data_struct which provides the overall
+    definition and data content of the nexus that is supposed to be created.
+    """
+
+    def __init__(self, data_struct: Dict, file_name: str = 'loki.h5'):
+        self.data_struct = data_struct[ENTRY]
+        self.hf5_file = h5py.File(file_name, 'w')
+        self.top_group = self.hf5_file.create_group(ENTRY)
+
+    def construct_nxs_file(self):
+        self._construct_nxs_file(self.data_struct, self.top_group)
+        self.hf5_file.close()
+
+    def _construct_nxs_file(self, nxs_data, group):
+        for element in nxs_data:
+            if isinstance(nxs_data[element], list):
+                group.create_dataset(element, data=nxs_data[element])
+            else:
+                new_group = group.create_group(element)
+                self._construct_nxs_file(nxs_data[element], new_group)
+
 
 if __name__ == '__main__':
-    plot_tube_locations = True
-    generate_nexus_content = True
+    plot_tube_locations = False
+    generate_nexus_content_into_csv = False
+    generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
@@ -446,12 +536,25 @@ if __name__ == '__main__':
                          end_point[2] + z_offset[idx]],
                         color=color)
         detector_banks.append(bank)
-    plt.show()
+    if plot_tube_locations:
+        plt.show()
 
     data = {}
-    if generate_nexus_content:
+    if generate_nexus_content_into_csv:
         for bank in detector_banks:
             data[bank.get_bank_id()] = bank.compound_data_in_list()
         write_csv_file(data[0] + data[4])
 
-    # TODO: validate the pixel geometrical position in the future when we have a clear way to do this.
+    data = {ENTRY: {}}
+    if generate_nexus_content_into_nxs:
+        for bank in detector_banks:
+            key_det = f'detector_{bank.get_bank_id()}'
+            data[ENTRY][key_det] = \
+                bank.compound_detector_geometry()
+            print(key_det + ' is done!')
+
+    nexus_file_builder = NexusFileBuilder(data)
+    nexus_file_builder.construct_nxs_file()
+
+    # TODO: validate the pixel geometrical position in
+    #  the future when we have a clear way to do this.
