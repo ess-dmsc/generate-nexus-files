@@ -334,8 +334,7 @@ class Tube:
                 tube_offset)
         return data_list
 
-    def get_geometry_data(self, bank_offset: np.array = np.array([0, 0, 0])) \
-            -> Dict:
+    def get_geometry_data(self) -> Dict:
         data_offsets: List = []
         data_detector_num: List = []
         if not self._straw:
@@ -346,7 +345,7 @@ class Tube:
                     "z_pixel_offset": []}
         for tube_offset in self._xyz_offsets:
             tmp_offsets, tmp_data_detector_num = \
-                self._straw.get_straw_data(tube_offset + bank_offset)
+                self._straw.get_straw_data(tube_offset)
             data_offsets += tmp_offsets
             data_detector_num += tmp_data_detector_num
 
@@ -366,7 +365,8 @@ class Bank:
 
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
-        self._bank_geometry = bank_geo
+        self._bank_offset = np.array(bank_geo['bank_offset'])
+        self._bank_geometry = self._set_bank_geometry(bank_geo)
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
 
@@ -390,6 +390,15 @@ class Bank:
         self._detector_tube = Tube(tuple(self._bank_geometry['A'][0]),
                                    tuple(self._bank_geometry['B'][0]),
                                    self._bank_alignment)
+
+    @staticmethod
+    def _set_bank_geometry(bank_geo: Dict) -> Dict:
+        bank_offset = np.array(bank_geo['bank_offset'])
+        for i in range(4):
+            bank_geo['A'][i] = tuple(np.array(bank_geo['A'][i]) - bank_offset)
+            bank_geo['B'][i] = tuple(np.array(bank_geo['B'][i]) - bank_offset)
+
+        return bank_geo
 
     def get_corners(self):
         return self._bank_geometry['A'] + self._bank_geometry['B']
@@ -508,7 +517,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -556,6 +565,3 @@ if __name__ == '__main__':
 
     nexus_file_builder = NexusFileBuilder(data)
     nexus_file_builder.construct_nxs_file()
-
-    # TODO: validate the pixel geometrical position in
-    #  the future when we have a clear way to do this.
