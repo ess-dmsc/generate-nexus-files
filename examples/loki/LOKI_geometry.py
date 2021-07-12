@@ -12,7 +12,10 @@ from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
 
 N_VERTICES = 3
-ENTRY = "entry"
+ATTR = 'attributes'
+ENTRY = 'entry'
+INSTRUMENT = 'instrument'
+VALUES = 'values'
 
 
 def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
@@ -37,6 +40,38 @@ def write_csv_file(csv_data):
         csv_writer.writerow(column_names)
         for row in csv_data:
             csv_writer.writerow(row)
+
+
+# Static class.
+class NexusInfo:
+
+    def __init__(self):
+        raise NotImplementedError
+
+    @staticmethod
+    def get_entry_class_attr():
+        return {'NX_Class': 'NXentry'}
+
+    @staticmethod
+    def get_instrument_class_attr():
+        return {'NX_Class': 'NXinstrument'}
+
+    @staticmethod
+    def get_detector_class_attr():
+        return {'NX_Class': 'NXdetector'}
+
+    @staticmethod
+    def get_cylindrical_geo_class_attr():
+        return {'NX_Class': 'NXcylindrical_geometry'}
+
+    @staticmethod
+    def get_units_attribute(units):
+        return {'units': units}
+
+    @staticmethod
+    def get_values_attrs_as_dict(values, attrs=None):
+        return {VALUES: values,
+                ATTR: attrs}
 
 
 class IdIterator:
@@ -166,8 +201,10 @@ class Pixel(Cylinder):
         return data_offsets, data_detector_num
 
     def get_cylinder_geo_data(self):
-        return {'cylinders': [0, 1, 2],
-                'vertices': self.get_vertices_coordinates_as_list()}
+        return {'cylinders': NexusInfo.get_values_attrs_as_dict([0, 1, 2]),
+                'vertices': NexusInfo.get_values_attrs_as_dict(
+                    self.get_vertices_coordinates_as_list(),
+                NexusInfo.get_units_attribute('m'))}
 
 
 class Straw:
@@ -338,11 +375,12 @@ class Tube:
         data_offsets: List = []
         data_detector_num: List = []
         if not self._straw:
-            return {"detector_number": [],
-                    "pixel_shape": [],
-                    "x_pixel_offset": [],
-                    "y_pixel_offset": [],
-                    "z_pixel_offset": []}
+            empty_nexus_field = NexusInfo.get_values_attrs_as_dict([])
+            return {"detector_number": empty_nexus_field,
+                    "pixel_shape": empty_nexus_field,
+                    "x_pixel_offset": empty_nexus_field,
+                    "y_pixel_offset": empty_nexus_field,
+                    "z_pixel_offset": empty_nexus_field}
         for tube_offset in self._xyz_offsets:
             tmp_offsets, tmp_data_detector_num = \
                 self._straw.get_straw_data(tube_offset)
@@ -350,12 +388,23 @@ class Tube:
             data_detector_num += tmp_data_detector_num
 
         pixel_shape = self._straw.get_straw_pixel_geometry()
-
-        return {"detector_number": data_detector_num,
-                "pixel_shape": pixel_shape,
-                "x_pixel_offset": [x[0] for x in data_offsets],
-                "y_pixel_offset": [y[1] for y in data_offsets],
-                "z_pixel_offset": [z[2] for z in data_offsets]}
+        unit_m = NexusInfo.get_units_attribute('m')
+        return {
+            "detector_number":
+                NexusInfo.get_values_attrs_as_dict(data_detector_num),
+            "pixel_shape":
+                NexusInfo.get_values_attrs_as_dict(
+                    pixel_shape,
+                    NexusInfo.get_cylindrical_geo_class_attr()),
+            "x_pixel_offset":
+                NexusInfo.get_values_attrs_as_dict(
+                    [x[0] for x in data_offsets], unit_m),
+            "y_pixel_offset":
+                NexusInfo.get_values_attrs_as_dict(
+                    [y[1] for y in data_offsets], unit_m),
+            "z_pixel_offset":
+                NexusInfo.get_values_attrs_as_dict(
+                    [z[2] for z in data_offsets], unit_m)}
 
 
 class Bank:
@@ -499,25 +548,33 @@ class NexusFileBuilder:
 
     def __init__(self, data_struct: Dict, file_name: str = 'loki',
                  file_format: str = 'nxs'):
-        self.data_struct = data_struct[ENTRY]
+        self.data_struct = data_struct
         self.hf5_file = h5py.File('.'.join([file_name, file_format]), 'w')
-        self.top_group = self.hf5_file.create_group(ENTRY)
 
     def construct_nxs_file(self):
-        self._construct_nxs_file(self.data_struct, self.top_group)
+        self._construct_nxs_file(self.data_struct, self.hf5_file)
         self.hf5_file.close()
 
     def _construct_nxs_file(self, nxs_data, group):
         for element in nxs_data:
-            if isinstance(nxs_data[element], list):
-                group.create_dataset(element, data=nxs_data[element])
+            if isinstance(nxs_data[element][VALUES], list):
+                d_set = group.create_dataset(element,
+                                             data=nxs_data[element][VALUES])
+                self._add_attributes(nxs_data[element], d_set)
             else:
                 new_group = group.create_group(element)
-                self._construct_nxs_file(nxs_data[element], new_group)
+                self._add_attributes(nxs_data[element], new_group)
+                self._construct_nxs_file(nxs_data[element][VALUES], new_group)
+
+    @staticmethod
+    def _add_attributes(data_, d_set):
+        if data_[ATTR]:
+            for attr in data_[ATTR]:
+                d_set.attrs[attr] = data_[ATTR][attr]
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -555,13 +612,19 @@ if __name__ == '__main__':
             data[bank.get_bank_id()] = bank.compound_data_in_list()
         write_csv_file(data[0] + data[4])
 
-    data = {ENTRY: {}}
+    data = {ENTRY: NexusInfo.get_values_attrs_as_dict(
+        {INSTRUMENT:
+             NexusInfo.get_values_attrs_as_dict(
+                 {}, NexusInfo.get_instrument_class_attr())
+         }, NexusInfo.get_entry_class_attr())}
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
-            data[ENTRY][key_det] = \
-                bank.compound_detector_geometry()
-            print(key_det + ' is done!')
-
+            item_det = NexusInfo.get_values_attrs_as_dict(
+                bank.compound_detector_geometry(),
+                NexusInfo.get_detector_class_attr()
+            )
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
+            print(f'Detector {key_det} is done!')
     nexus_file_builder = NexusFileBuilder(data)
     nexus_file_builder.construct_nxs_file()
