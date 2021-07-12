@@ -578,7 +578,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -591,7 +591,7 @@ if __name__ == '__main__':
             b = random.random()
             g = random.random()
             color = (r, g, b)
-            xyz_offs = detector_tube.get_xyz_offsets().values()
+            xyz_offs = detector_tube.get_xyz_offsets()
             x_offset = [item[0] for item in xyz_offs]
             y_offset = [item[1] for item in xyz_offs]
             z_offset = [item[2] for item in xyz_offs]
