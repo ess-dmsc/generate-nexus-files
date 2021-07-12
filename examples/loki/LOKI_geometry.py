@@ -330,7 +330,7 @@ class Tube:
         self._xyz_offsets: Dict = {}
         self._straw: Optional[Straw] = None
 
-    def set_xyz_offsets(self, xyz_offsets: Dict):
+    def set_xyz_offsets(self, xyz_offsets):
         self._xyz_offsets = xyz_offsets
 
     def get_xyz_offsets(self):
