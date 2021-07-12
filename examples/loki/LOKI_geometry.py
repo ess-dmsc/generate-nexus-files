@@ -9,12 +9,14 @@ from enum import Enum
 from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
-    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks
+    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks, SCALE_FACTOR, \
+    LENGTH_UNIT
 
 N_VERTICES = 3
 ATTR = 'attributes'
 ENTRY = 'entry'
 INSTRUMENT = 'instrument'
+NX_CLASS = 'NX_class'
 VALUES = 'values'
 
 
@@ -50,19 +52,19 @@ class NexusInfo:
 
     @staticmethod
     def get_entry_class_attr():
-        return {'NX_Class': 'NXentry'}
+        return {NX_CLASS: 'NXentry'}
 
     @staticmethod
     def get_instrument_class_attr():
-        return {'NX_Class': 'NXinstrument'}
+        return {NX_CLASS: 'NXinstrument'}
 
     @staticmethod
     def get_detector_class_attr():
-        return {'NX_Class': 'NXdetector'}
+        return {NX_CLASS: 'NXdetector'}
 
     @staticmethod
     def get_cylindrical_geo_class_attr():
-        return {'NX_Class': 'NXcylindrical_geometry'}
+        return {NX_CLASS: 'NXcylindrical_geometry'}
 
     @staticmethod
     def get_units_attribute(units):
@@ -204,7 +206,7 @@ class Pixel(Cylinder):
         return {'cylinders': NexusInfo.get_values_attrs_as_dict([0, 1, 2]),
                 'vertices': NexusInfo.get_values_attrs_as_dict(
                     self.get_vertices_coordinates_as_list(),
-                NexusInfo.get_units_attribute('m'))}
+                NexusInfo.get_units_attribute(LENGTH_UNIT))}
 
 
 class Straw:
@@ -388,7 +390,7 @@ class Tube:
             data_detector_num += tmp_data_detector_num
 
         pixel_shape = self._straw.get_straw_pixel_geometry()
-        unit_m = NexusInfo.get_units_attribute('m')
+        unit_m = NexusInfo.get_units_attribute(LENGTH_UNIT)
         return {
             "detector_number":
                 NexusInfo.get_values_attrs_as_dict(data_detector_num),
@@ -414,7 +416,7 @@ class Bank:
 
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
-        self._bank_offset = np.array(bank_geo['bank_offset'])
+        self._bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
         self._bank_geometry = self._set_bank_geometry(bank_geo)
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
@@ -444,8 +446,10 @@ class Bank:
     def _set_bank_geometry(bank_geo: Dict) -> Dict:
         bank_offset = np.array(bank_geo['bank_offset'])
         for i in range(4):
-            bank_geo['A'][i] = tuple(np.array(bank_geo['A'][i]) - bank_offset)
-            bank_geo['B'][i] = tuple(np.array(bank_geo['B'][i]) - bank_offset)
+            bank_geo['A'][i] = np.array(bank_geo['A'][i]) - bank_offset
+            bank_geo['B'][i] = np.array(bank_geo['B'][i]) - bank_offset
+            bank_geo['A'][i] = tuple(bank_geo['A'][i] * SCALE_FACTOR)
+            bank_geo['B'][i] = tuple(bank_geo['B'][i] * SCALE_FACTOR)
 
         return bank_geo
 
@@ -468,7 +472,7 @@ class Bank:
         return xyz_offsets
 
     def build_detector_bank(self):
-        tube_point_offsets = self._get_tube_point_offsets()
+        tube_point_offsets = self._get_tube_point_offsets().values()
         self._detector_tube.set_xyz_offsets(tube_point_offsets)
         self._detector_tube.populate_with_uniform_straws(self._bank_id,
                                                          self._base_vec_1,
