@@ -574,7 +574,7 @@ class NexusFileBuilder:
     def _add_attributes(data_, d_set):
         if data_[ATTR]:
             for attr in data_[ATTR]:
-                d_set.attrs[attr] = data_[ATTR][attr]
+                d_set.attrs[attr] = np.string_(data_[ATTR][attr])
 
 
 if __name__ == '__main__':
