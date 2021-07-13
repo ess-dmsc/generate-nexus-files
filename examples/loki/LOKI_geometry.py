@@ -4,7 +4,6 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-from collections import OrderedDict
 from enum import Enum
 from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
@@ -327,7 +326,7 @@ class Tube:
         self._diameter = IMAGING_TUBE_D
         self._point_start = point_start
         self._point_end = point_end
-        self._xyz_offsets: Dict = {}
+        self._xyz_offsets: List = []
         self._straw: Optional[Straw] = None
 
     def set_xyz_offsets(self, xyz_offsets):
@@ -383,6 +382,7 @@ class Tube:
                     "x_pixel_offset": empty_nexus_field,
                     "y_pixel_offset": empty_nexus_field,
                     "z_pixel_offset": empty_nexus_field}
+
         for tube_offset in self._xyz_offsets:
             tmp_offsets, tmp_data_detector_num = \
                 self._straw.get_straw_data(tube_offset)
@@ -391,6 +391,7 @@ class Tube:
 
         pixel_shape = self._straw.get_straw_pixel_geometry()
         unit_m = NexusInfo.get_units_attribute(LENGTH_UNIT)
+
         return {
             "detector_number":
                 NexusInfo.get_values_attrs_as_dict(data_detector_num),
@@ -459,20 +460,20 @@ class Bank:
     def get_bank_id(self):
         return self._bank_id
 
-    def _get_tube_point_offsets(self) -> OrderedDict:
+    def _get_tube_point_offsets(self) -> List:
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
-        xyz_offsets = OrderedDict()
+        xyz_offsets = []
         tube_id = 1
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
                 xyz_offset = self._base_vec_1 * x_i + self._base_vec_2 * y_i
-                xyz_offsets[tube_id] = tuple(xyz_offset)
+                xyz_offsets.append(tuple(xyz_offset))
                 tube_id += 1
         return xyz_offsets
 
     def build_detector_bank(self):
-        tube_point_offsets = self._get_tube_point_offsets().values()
+        tube_point_offsets = self._get_tube_point_offsets()
         self._detector_tube.set_xyz_offsets(tube_point_offsets)
         self._detector_tube.populate_with_uniform_straws(self._bank_id,
                                                          self._base_vec_1,
