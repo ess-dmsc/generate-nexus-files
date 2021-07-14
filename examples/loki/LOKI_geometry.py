@@ -202,7 +202,7 @@ class Pixel(Cylinder):
         return data_offsets, data_detector_num
 
     def get_cylinder_geo_data(self):
-        return {'cylinders': NexusInfo.get_values_attrs_as_dict([0, 1, 2]),
+        return {'cylinders': NexusInfo.get_values_attrs_as_dict([(0, 1, 2)]),
                 'vertices': NexusInfo.get_values_attrs_as_dict(
                     self.get_vertices_coordinates_as_list(),
                 NexusInfo.get_units_attribute(LENGTH_UNIT))}
@@ -579,7 +579,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
