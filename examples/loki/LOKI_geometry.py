@@ -43,6 +43,29 @@ def write_csv_file(csv_data):
             csv_writer.writerow(row)
 
 
+class IdIterator:
+    def __init__(self, start=0):
+        self._start = start
+
+    def __iter__(self):
+        self._id: int = self._start
+        return self
+
+    def __next__(self):
+        current_id = self._id
+        self._id += 1
+        return current_id
+
+    @staticmethod
+    def reset():
+        return IdIterator()
+
+
+pixel_id_iter = iter(IdIterator(1))
+straw_id_iter = iter(IdIterator())
+transform_id_iter = iter(IdIterator(1))
+
+
 # Static class.
 class NexusInfo:
 
@@ -66,6 +89,42 @@ class NexusInfo:
         return {NX_CLASS: 'NXcylindrical_geometry'}
 
     @staticmethod
+    def _get_transformation_class_attr():
+        return {NX_CLASS: 'NXtransformations'}
+
+    @staticmethod
+    def get_transform_translation(value, vector, unit, depend_path='.'):
+        return NexusInfo._get_transformation(value, vector, unit, 'translation',
+                                             depend_path)
+
+    @staticmethod
+    def get_transform_rotation(value, vector, unit, depend_path='.'):
+        return NexusInfo._get_transformation(value, vector, unit, 'rotation',
+                                             depend_path)
+
+    @staticmethod
+    def _get_transformation(value, vector, unit, transform_type, depend_path):
+        location_dataset = NexusInfo._get_location_dataset(value, vector, unit,
+                                                           transform_type,
+                                                           depend_path)
+        return {VALUES:
+                    {'trans_' + str(next(transform_id_iter)): location_dataset},
+                ATTR: NexusInfo._get_transformation_class_attr()
+                }
+
+    @staticmethod
+    def _get_location_dataset(value, vector, unit, transform_type, depend_path):
+        return {
+            VALUES: value,
+            ATTR: {
+                'units': unit,
+                'transformation_type': transform_type,
+                'depends_on': depend_path,
+                'vector': vector
+            }
+        }
+
+    @staticmethod
     def get_units_attribute(units):
         return {'units': units}
 
@@ -73,28 +132,6 @@ class NexusInfo:
     def get_values_attrs_as_dict(values, attrs=None):
         return {VALUES: values,
                 ATTR: attrs}
-
-
-class IdIterator:
-    def __init__(self, start=0):
-        self._start = start
-
-    def __iter__(self):
-        self._id: int = self._start
-        return self
-
-    def __next__(self):
-        current_id = self._id
-        self._id += 1
-        return current_id
-
-    @staticmethod
-    def reset():
-        return IdIterator()
-
-
-pixel_id_iter = iter(IdIterator(1))
-straw_id_iter = iter(IdIterator())
 
 
 class DetectorAlignment(Enum):
@@ -205,7 +242,7 @@ class Pixel(Cylinder):
         return {'cylinders': NexusInfo.get_values_attrs_as_dict([(0, 1, 2)]),
                 'vertices': NexusInfo.get_values_attrs_as_dict(
                     self.get_vertices_coordinates_as_list(),
-                NexusInfo.get_units_attribute(LENGTH_UNIT))}
+                    NexusInfo.get_units_attribute(LENGTH_UNIT))}
 
 
 class Straw:
@@ -418,6 +455,7 @@ class Bank:
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
         self._bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
+        self._bank_translation = np.array([])
         self._bank_geometry = self._set_bank_geometry(bank_geo)
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
@@ -443,14 +481,18 @@ class Bank:
                                    tuple(self._bank_geometry['B'][0]),
                                    self._bank_alignment)
 
-    @staticmethod
-    def _set_bank_geometry(bank_geo: Dict) -> Dict:
-        bank_offset = np.array(bank_geo['bank_offset'])
+    def _set_bank_geometry(self, bank_geo: Dict) -> Dict:
+        bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
+        self._bank_translation = np.array(bank_geo['A'][0]) * SCALE_FACTOR
         for i in range(4):
-            bank_geo['A'][i] = np.array(bank_geo['A'][i]) - bank_offset
-            bank_geo['B'][i] = np.array(bank_geo['B'][i]) - bank_offset
-            bank_geo['A'][i] = tuple(bank_geo['A'][i] * SCALE_FACTOR)
-            bank_geo['B'][i] = tuple(bank_geo['B'][i] * SCALE_FACTOR)
+            bank_geo['A'][i] = np.array(bank_geo['A'][i]) + bank_offset \
+                               - self._bank_translation
+            bank_geo['B'][i] = np.array(bank_geo['B'][i]) + bank_offset \
+                               - self._bank_translation
+            bank_geo['A'][i] = tuple(bank_geo['A'][i] * SCALE_FACTOR) \
+                               - self._bank_translation
+            bank_geo['B'][i] = tuple(bank_geo['B'][i] * SCALE_FACTOR)\
+                               - self._bank_translation
 
         return bank_geo
 
@@ -531,6 +573,9 @@ class Bank:
         raise ValueError(f'The alignment of bank detector {self._bank_id} is'
                          f'unreasonable.')
 
+    def get_bank_translation(self):
+        return self._bank_translation
+
     def compound_data_in_dict(self) -> Dict:
         return self._detector_tube.compound_data_in_dict()
 
@@ -542,7 +587,12 @@ class Bank:
         Creates a dictionary of the LoKI detector geometry suitable for
         the NexusFileBuilder class.
         """
-        return self._detector_tube.get_geometry_data()
+        geo_data = self._detector_tube.get_geometry_data()
+        geo_data['transformations'] = \
+            NexusInfo.get_transform_translation([0],
+                                                tuple(self._bank_translation),
+                                                LENGTH_UNIT)
+        return geo_data
 
 
 class NexusFileBuilder:
@@ -579,7 +629,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -587,15 +637,16 @@ if __name__ == '__main__':
     for loki_bank_id in loki_banks:
         bank = Bank(loki_banks[loki_bank_id], loki_bank_id)
         detector_tube = bank.build_detector_bank()
+        bank_translation = bank.get_bank_translation()
         if plot_tube_locations:
             r = random.random()
             b = random.random()
             g = random.random()
             color = (r, g, b)
             xyz_offs = detector_tube.get_xyz_offsets()
-            x_offset = [item[0] for item in xyz_offs]
-            y_offset = [item[1] for item in xyz_offs]
-            z_offset = [item[2] for item in xyz_offs]
+            x_offset = [item[0] + bank_translation[0] for item in xyz_offs]
+            y_offset = [item[1] + bank_translation[1] for item in xyz_offs]
+            z_offset = [item[2] + bank_translation[2] for item in xyz_offs]
             start_point, end_point = detector_tube.get_endpoints()
             for idx in range(len(x_offset)):
                 x_start = start_point[0] + x_offset[idx]
@@ -618,10 +669,11 @@ if __name__ == '__main__':
         write_csv_file(data[0] + data[4])
 
     data = {ENTRY: NexusInfo.get_values_attrs_as_dict(
-        {INSTRUMENT:
-             NexusInfo.get_values_attrs_as_dict(
-                 {}, NexusInfo.get_instrument_class_attr())
-         }, NexusInfo.get_entry_class_attr())}
+        {
+            INSTRUMENT:
+            NexusInfo.get_values_attrs_as_dict(
+                {}, NexusInfo.get_instrument_class_attr())
+        }, NexusInfo.get_entry_class_attr())}
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
