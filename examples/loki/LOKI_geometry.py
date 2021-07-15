@@ -582,16 +582,24 @@ class Bank:
     def compound_data_in_list(self) -> List:
         return self._detector_tube.compound_data_in_list()
 
-    def compound_detector_geometry(self):
+    def compound_detector_geometry(self, transform_path=''):
         """
         Creates a dictionary of the LoKI detector geometry suitable for
         the NexusFileBuilder class.
         """
         geo_data = self._detector_tube.get_geometry_data()
+        norm = np.linalg.norm(self._bank_translation)
+        norm_vector = self._bank_translation / norm
         geo_data['transformations'] = \
-            NexusInfo.get_transform_translation([0],
-                                                tuple(self._bank_translation),
+            NexusInfo.get_transform_translation([norm],
+                                                tuple(norm_vector),
                                                 LENGTH_UNIT)
+        if transform_path:
+            transform_path_list = []
+            for key in geo_data['transformations'][VALUES].keys():
+                transform_path_list.append(transform_path + str(key))
+            geo_data['depends_on'] = {VALUES: transform_path_list,
+                                      ATTR: None}
         return geo_data
 
 
@@ -629,7 +637,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -677,8 +685,10 @@ if __name__ == '__main__':
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
+            transformation_path = \
+                f'/{ENTRY}/{INSTRUMENT}/{key_det}/transformations/'
             item_det = NexusInfo.get_values_attrs_as_dict(
-                bank.compound_detector_geometry(),
+                bank.compound_detector_geometry(transformation_path),
                 NexusInfo.get_detector_class_attr()
             )
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
