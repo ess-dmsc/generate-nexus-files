@@ -455,7 +455,7 @@ class Bank:
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
         self._bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
-        self._bank_translation = np.array([])
+        self._bank_translation = np.array(bank_geo['A'][0]) * SCALE_FACTOR
         self._bank_geometry = self._set_bank_geometry(bank_geo)
         self._tube_depth = TUBE_DEPTH
         self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
@@ -482,17 +482,14 @@ class Bank:
                                    self._bank_alignment)
 
     def _set_bank_geometry(self, bank_geo: Dict) -> Dict:
-        bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
-        self._bank_translation = np.array(bank_geo['A'][0]) * SCALE_FACTOR
         for i in range(4):
-            bank_geo['A'][i] = np.array(bank_geo['A'][i]) + bank_offset \
+            bank_geo['A'][i] = np.array(bank_geo['A'][i]) * SCALE_FACTOR \
                                - self._bank_translation
-            bank_geo['B'][i] = np.array(bank_geo['B'][i]) + bank_offset \
+            bank_geo['B'][i] = np.array(bank_geo['B'][i]) * SCALE_FACTOR \
                                - self._bank_translation
-            bank_geo['A'][i] = tuple(bank_geo['A'][i] * SCALE_FACTOR) \
-                               - self._bank_translation
-            bank_geo['B'][i] = tuple(bank_geo['B'][i] * SCALE_FACTOR)\
-                               - self._bank_translation
+            bank_geo['A'][i] = tuple(bank_geo['A'][i])
+            bank_geo['B'][i] = tuple(bank_geo['B'][i])
+        self._bank_translation += self._bank_offset
 
         return bank_geo
 
@@ -637,7 +634,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
