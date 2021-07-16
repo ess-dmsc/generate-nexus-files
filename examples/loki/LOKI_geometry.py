@@ -8,15 +8,18 @@ from enum import Enum
 from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
-    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, loki_banks, SCALE_FACTOR, \
-    LENGTH_UNIT
+    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, SCALE_FACTOR, \
+    LENGTH_UNIT, loki_banks, loki_source, loki_sample
 
 N_VERTICES = 3
 ATTR = 'attributes'
 ENTRY = 'entry'
 INSTRUMENT = 'instrument'
 NX_CLASS = 'NX_class'
+SAMPLE = 'sample'
+SOURCE = 'source'
 VALUES = 'values'
+TRANSFORMATIONS = 'transformations'
 
 
 def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
@@ -77,12 +80,20 @@ class NexusInfo:
         return {NX_CLASS: 'NXentry'}
 
     @staticmethod
+    def get_sample_class_attr():
+        return {NX_CLASS: 'NXsample'}
+
+    @staticmethod
     def get_instrument_class_attr():
         return {NX_CLASS: 'NXinstrument'}
 
     @staticmethod
     def get_detector_class_attr():
         return {NX_CLASS: 'NXdetector'}
+
+    @staticmethod
+    def get_source_class_attr():
+        return {NX_CLASS: 'NXsource'}
 
     @staticmethod
     def get_cylindrical_geo_class_attr():
@@ -132,6 +143,26 @@ class NexusInfo:
     def get_values_attrs_as_dict(values, attrs=None):
         return {VALUES: values,
                 ATTR: attrs}
+
+    @staticmethod
+    def get_transformations_as_dict(geo_data, position, transform_path,
+                                    name=''):
+        norm = np.linalg.norm(position)
+        if norm:
+            position = position / norm
+        geo_data[TRANSFORMATIONS] = \
+            NexusInfo.get_transform_translation([norm], tuple(position),
+                                                LENGTH_UNIT)
+        if transform_path:
+            transform_path_list = []
+            for key in geo_data[TRANSFORMATIONS][VALUES].keys():
+                transform_path_list.append(transform_path + str(key))
+            geo_data['depends_on'] = {VALUES: transform_path_list,
+                                      ATTR: None}
+        if name:
+            geo_data['name'] = {VALUES: [name],
+                                ATTR: None}
+        return geo_data
 
 
 class DetectorAlignment(Enum):
@@ -584,20 +615,60 @@ class Bank:
         Creates a dictionary of the LoKI detector geometry suitable for
         the NexusFileBuilder class.
         """
-        geo_data = self._detector_tube.get_geometry_data()
-        norm = np.linalg.norm(self._bank_translation)
-        norm_vector = self._bank_translation / norm
-        geo_data['transformations'] = \
-            NexusInfo.get_transform_translation([norm],
-                                                tuple(norm_vector),
-                                                LENGTH_UNIT)
-        if transform_path:
-            transform_path_list = []
-            for key in geo_data['transformations'][VALUES].keys():
-                transform_path_list.append(transform_path + str(key))
-            geo_data['depends_on'] = {VALUES: transform_path_list,
-                                      ATTR: None}
-        return geo_data
+        detector_geo = self._detector_tube.get_geometry_data()
+        geo_data = \
+            NexusInfo.get_transformations_as_dict(detector_geo,
+                                                  self._bank_translation,
+                                                  transform_path)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_detector_class_attr())
+
+
+class Source:
+    """
+    Abstraction of an instrument source.
+    """
+
+    def __init__(self, position: tuple, name: str = ''):
+        self._position = np.array(position) * SCALE_FACTOR
+        self._name: str = name
+
+    def compound_source_geometry(self, transform_path):
+        """
+        Creates a dictionary of the source geometry suitable for
+        the NexusFileBuilder class.
+        """
+        geo_data = NexusInfo.get_transformations_as_dict({},
+                                                         self._position,
+                                                         transform_path,
+                                                         self._name)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_source_class_attr())
+
+
+class Sample:
+    """
+        Abstraction of an instrument source.
+    """
+
+    def __init__(self, position: tuple, name: str = ''):
+        self._position = np.array(position) * SCALE_FACTOR
+        self._name = name
+
+    def compound_sample_geometry(self, transform_path):
+        """
+        Creates a dictionary of the sample geometry suitable for
+        the NexusFileBuilder class.
+        """
+        geo_data = NexusInfo.get_transformations_as_dict({},
+                                                         self._position,
+                                                         transform_path,
+                                                         self._name)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_sample_class_attr())
 
 
 class NexusFileBuilder:
@@ -634,7 +705,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
@@ -676,19 +747,27 @@ if __name__ == '__main__':
     data = {ENTRY: NexusInfo.get_values_attrs_as_dict(
         {
             INSTRUMENT:
-            NexusInfo.get_values_attrs_as_dict(
-                {}, NexusInfo.get_instrument_class_attr())
+                NexusInfo.get_values_attrs_as_dict(
+                    {}, NexusInfo.get_instrument_class_attr())
         }, NexusInfo.get_entry_class_attr())}
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
-            transformation_path = \
-                f'/{ENTRY}/{INSTRUMENT}/{key_det}/transformations/'
-            item_det = NexusInfo.get_values_attrs_as_dict(
-                bank.compound_detector_geometry(transformation_path),
-                NexusInfo.get_detector_class_attr()
-            )
+            trans_path = f'/{ENTRY}/{INSTRUMENT}/{key_det}/{TRANSFORMATIONS}/'
+            item_det = bank.compound_detector_geometry(trans_path)
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
+        # Create source geometry.
+        loki_source = Source(loki_source['location'], loki_source['name'])
+        trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
+        data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
+            loki_source.compound_source_geometry(trans_path)
+        print(f'Source {SOURCE} is done!')
+        # Create sample geometry.
+        loki_sample = Sample(loki_sample['location'], loki_sample['name'])
+        transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
+        data[ENTRY][VALUES][SAMPLE] = \
+            loki_sample.compound_sample_geometry(transformation_path)
+        print(f'Sample {SAMPLE} is done!')
     nexus_file_builder = NexusFileBuilder(data)
     nexus_file_builder.construct_nxs_file()

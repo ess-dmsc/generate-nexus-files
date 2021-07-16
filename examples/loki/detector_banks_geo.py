@@ -16,6 +16,16 @@ STRAW_Z_LOC = 7.67 * SCALE_FACTOR
 STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_OUTER_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC**2 + STRAW_Z_LOC**2)
 
+loki_sample = {
+    'location': (0, 0, 1),
+    'name': 'LOKI_sample'
+}
+
+loki_source = {
+    'location': (0, 0, -8640),
+    'name': 'moderator'
+}
+
 loki_banks = {0: {'A': [(-500, -781, 5012.5),
                         (-500, -799.84, 5091.28),
                         (-500, 781, 5012.5),
