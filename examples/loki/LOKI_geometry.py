@@ -237,20 +237,20 @@ class Pixel(Cylinder):
     def set_pixel_xyz_offsets(self, pixel_offsets: np.array):
         self.pixel_xyz_offsets = pixel_offsets
 
-    def compound_data_in_dict(self, offset: np.array) -> Dict:
+    def compound_data_in_dict(self, straw_offset: np.array) -> Dict:
         point_a = self.nominal_vertices_coordinates['Vertex A']
         data_dict = {}
         for pixel_offset in self.pixel_xyz_offsets:
             data_dict[next(pixel_id_iter)] = \
-                tuple(point_a + pixel_offset + offset)
+                tuple(point_a + pixel_offset + straw_offset)
         return data_dict
 
     def compound_data_in_list(self, bank_id: int, tube_id: int,
-                              straw_id: int, offset: np.array) -> List:
+                              straw_id: int, straw_offset: np.array) -> List:
         # point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
         data_list: List = []
         loc_pixel_id_iter = iter(IdIterator())
-        print(offset)
+        print(straw_offset)
         for pixel_offset in self.pixel_xyz_offsets:
             data_list.append((bank_id,
                               tube_id,
@@ -261,11 +261,11 @@ class Pixel(Cylinder):
         ret_val = data_list[:2] + data_list[-2:]
         return ret_val
 
-    def get_pixel_data(self, offset: np.array):
+    def get_pixel_data(self, straw_offset: np.array):
         data_offsets: List = []
         data_detector_num: List = []
         for pixel_offset in self.pixel_xyz_offsets:
-            data_offsets.append(offset + pixel_offset)
+            data_offsets.append(straw_offset + pixel_offset)
             data_detector_num.append(next(pixel_id_iter))
         return data_offsets, data_detector_num
 
@@ -349,27 +349,28 @@ class Straw:
             plt.show()
         self._pixel.set_pixel_xyz_offsets(offsets_pixel)
 
-    def compound_data_in_dict(self, offset: np.array) -> Dict:
+    def compound_data_in_dict(self, tube_offset: np.array) -> Dict:
         data_dict = {}
         for straw_offset in self._straw_xyz_offsets:
             data_dict[next(straw_id_iter)] = \
-                self._pixel.compound_data_in_dict(straw_offset + offset)
+                self._pixel.compound_data_in_dict(straw_offset + tube_offset)
         return data_dict
 
-    def compound_data_in_list(self, tube_id: int, offset: np.array) -> List:
+    def compound_data_in_list(self, tube_id: int,
+                              tube_offset: np.array) -> List:
         data_list: List = []
         for straw_offset in self._straw_xyz_offsets:
             data_list += self._pixel.compound_data_in_list(
                 self._detector_bank_id, tube_id,
-                next(straw_id_iter), straw_offset + offset)
+                next(straw_id_iter), straw_offset + tube_offset)
         return data_list
 
-    def get_straw_data(self, offset: np.array):
+    def get_straw_data(self, tube_offset: np.array):
         data_offsets: List = []
         data_detector_num: List = []
         for straw_offset in self._straw_xyz_offsets:
             tmp_offsets, tmp_data_detector_num = \
-                self._pixel.get_pixel_data(straw_offset + offset)
+                self._pixel.get_pixel_data(straw_offset + tube_offset)
             data_offsets += tmp_offsets
             data_detector_num += tmp_data_detector_num
         return data_offsets, data_detector_num
@@ -502,10 +503,10 @@ class Bank:
         # The base vectors (in a plane) of the local coordinate system
         # are non-orthogonal and not normalized. This makes it easy to find the
         # global coordinates of the tube center points in the detector bank.
-        local_origin = np.array(self._bank_geometry['A'][0])
+        local_origin = np.array([0, 0, 0])
         self._base_vec_1 = np.array(self._bank_geometry['A'][1]) - local_origin
         self._base_vec_1 /= self._tube_depth - 1
-        self._base_vec_2 = np.array(self._bank_geometry['A'][3]) - local_origin
+        self._base_vec_2 = np.array(self._bank_geometry['A'][2]) - local_origin
         self._base_vec_2 /= self._tube_width - 1
         self._bank_alignment = self._get_detector_bank_orientation()
         self._detector_tube = Tube(tuple(self._bank_geometry['A'][0]),
@@ -534,12 +535,10 @@ class Bank:
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
         xyz_offsets = []
-        tube_id = 1
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
                 xyz_offset = self._base_vec_1 * x_i + self._base_vec_2 * y_i
                 xyz_offsets.append(tuple(xyz_offset))
-                tube_id += 1
         return xyz_offsets
 
     def build_detector_bank(self):
@@ -706,19 +705,30 @@ class NexusFileBuilder:
 
 if __name__ == '__main__':
     plot_tube_locations = False
+    plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
+        if plot_endpoint_locations:
+            for idx in range(4):
+                start_point = loki_banks[loki_bank_id]['A'][idx]
+                end_point = loki_banks[loki_bank_id]['B'][idx]
+                color = (random.random(), random.random(), random.random())
+                offset = 0.001
+                ax.plot([start_point[0] * SCALE_FACTOR,
+                         end_point[0] * SCALE_FACTOR],
+                        [start_point[1] * SCALE_FACTOR,
+                         end_point[1] * SCALE_FACTOR],
+                        [start_point[2] * SCALE_FACTOR + offset,
+                         end_point[2] * SCALE_FACTOR + offset],
+                        color=color)
         bank = Bank(loki_banks[loki_bank_id], loki_bank_id)
         detector_tube = bank.build_detector_bank()
         bank_translation = bank.get_bank_translation()
         if plot_tube_locations:
-            r = random.random()
-            b = random.random()
-            g = random.random()
-            color = (r, g, b)
+            color = (random.random(), random.random(), random.random())
             xyz_offs = detector_tube.get_xyz_offsets()
             x_offset = [item[0] + bank_translation[0] for item in xyz_offs]
             y_offset = [item[1] + bank_translation[1] for item in xyz_offs]
@@ -735,7 +745,7 @@ if __name__ == '__main__':
                          end_point[2] + z_offset[idx]],
                         color=color)
         detector_banks.append(bank)
-    if plot_tube_locations:
+    if plot_tube_locations or plot_endpoint_locations:
         plt.show()
 
     data = {}
@@ -769,5 +779,5 @@ if __name__ == '__main__':
         data[ENTRY][VALUES][SAMPLE] = \
             loki_sample.compound_sample_geometry(transformation_path)
         print(f'Sample {SAMPLE} is done!')
-    nexus_file_builder = NexusFileBuilder(data)
-    nexus_file_builder.construct_nxs_file()
+        nexus_file_builder = NexusFileBuilder(data)
+        nexus_file_builder.construct_nxs_file()
