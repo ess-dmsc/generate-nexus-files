@@ -333,7 +333,7 @@ class Straw:
         pixel_end_point = tuple(np.array(self._point_a) + vector_along_straw)
         vertices_first_pixel = [self._point_a, self._point_b, pixel_end_point]
         self._pixel = Pixel(vertices_first_pixel)
-        offsets_pixel = [tuple(vector_along_straw * j)
+        offsets_pixel = [vector_along_straw * j
                          for j in range(STRAW_RESOLUTION)]
         if plot_all:
             ax_tmp = plt.axes(projection='3d')
@@ -538,7 +538,7 @@ class Bank:
         for x_i in range(self._tube_depth):
             for y_i in range(self._tube_width):
                 xyz_offset = self._base_vec_1 * x_i + self._base_vec_2 * y_i
-                xyz_offsets.append(tuple(xyz_offset))
+                xyz_offsets.append(xyz_offset)
         return xyz_offsets
 
     def build_detector_bank(self):
@@ -704,7 +704,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
