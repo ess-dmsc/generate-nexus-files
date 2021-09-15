@@ -23,11 +23,13 @@ TYPE = 'type'
 VALUES = 'values'
 VALUE_UNITS = 'value_units'
 WRITER_MODULE = 'module'
+ARRAY_SIZE = 'array_size'
 
 
 class DeviceConfigurationFromXLS:
 
-    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE, DATA_TYPE, VALUE_UNITS]
+    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE,
+                       DATA_TYPE, VALUE_UNITS, ARRAY_SIZE]
 
     def __init__(self, file_path):
         self._load_configuration_file(file_path)
@@ -182,7 +184,7 @@ class FileWriterNexusConfigCreator:
                 SOURCE: '',
                 TOPIC: '',
                 DATA_TYPE: '',
-                VALUE_UNITS: '',
+                # VALUE_UNITS: '',
             },
         }]
 
@@ -198,6 +200,11 @@ class FileWriterNexusConfigCreator:
                 stream_info[0][CONFIG][DATA_TYPE] = self.configuration[name][DATA_TYPE]
             if self._item_is_string(name, VALUE_UNITS):
                 stream_info[0][CONFIG][VALUE_UNITS] = self.configuration[name][VALUE_UNITS]
+            if self._item_is_string(name, ARRAY_SIZE):
+                str_values = self.configuration[name][ARRAY_SIZE].split(',')
+                int_vals = [int(val) for val in str_values]
+                stream_info[0][CONFIG][ARRAY_SIZE] = int_vals
+
 
 
         return stream_info

@@ -1,0 +1,60 @@
+{
+  "children": [
+    {
+      "name": "entry",
+      "type": "group",
+      "attributes": [
+        {
+          "name": "NX_class",
+          "dtype": "string",
+          "values": "NXentry"
+        }
+      ],
+      "children": [
+        {
+          "name": "Detector",
+          "type": "group",
+          "attributes": [
+            {
+              "name": "NX_class",
+              "dtype": "string",
+              "values": "NXdetector"
+            }
+          ],
+          "children": [
+            {
+              "module": "dataset",
+              "config": {
+                "name": "description",
+                "dtype": "string",
+                "values": ""
+              }
+            },
+            {
+              "name": "frontend",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "units",
+                  "dtype": "string",
+                  "values": "mm"
+                }
+              ],
+              "children": [
+                {
+                  "module": "ADAr",
+                  "config": {
+                    "source": "image_source",
+                    "topic": "odin_topic",
+                    "dtype": "uint32",
+                    "array_size": [480, 290, 3]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
