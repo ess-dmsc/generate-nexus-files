@@ -132,6 +132,58 @@
                             "values": "NXdata"
                         }
                     ]
+                },
+                {
+                    "type": "group",
+                    "name": "data_dark",
+                    "children": [
+                        {
+                            "module": "ADAr",
+                            "config": {
+                                "source": "image_dark",
+                                "topic": "odin_topic",
+                                "dtype": "uint32",
+                                "array_size": [
+                                    480,
+                                    290,
+                                    3
+                                ]
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "data_flat",
+                    "children": [
+                        {
+                            "module": "ADAr",
+                            "config": {
+                                "source": "image_flat",
+                                "topic": "odin_topic",
+                                "dtype": "uint32",
+                                "array_size": [
+                                    480,
+                                    290,
+                                    3
+                                ]
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ]
                 }
             ],
             "attributes": [
