@@ -18,7 +18,10 @@ INSTRUMENT = 'instrument'
 NX_CLASS = 'NX_class'
 SAMPLE = 'sample'
 SOURCE = 'source'
+NXLOG_VALUE = 'value'
 VALUES = 'values'
+NX_LOG_NAME = 'nx_log'
+TIME = 'time'
 TRANSFORMATIONS = 'transformations'
 
 
@@ -108,6 +111,10 @@ class NexusInfo:
         return {NX_CLASS: 'NXdisk_chopper'}
 
     @staticmethod
+    def get_nx_log():
+        return {NX_CLASS: 'NXlog'}
+
+    @staticmethod
     def get_monitor():
         return {NX_CLASS: 'NXmonitor'}
 
@@ -124,6 +131,45 @@ class NexusInfo:
     def get_transform_rotation(value, vector, unit, depend_path='.'):
         return NexusInfo._get_transformation(value, vector, unit, 'rotation',
                                              depend_path)
+
+    @staticmethod
+    def get_nxlog_transform_translation(value, vector, unit, depend_path='.'):
+        return NexusInfo._get_nxlog_transformation(value, vector,
+                                                   unit, 'translation',
+                                                   depend_path)
+
+    @staticmethod
+    def get_nxlog_transform_rotation(value, vector, unit, depend_path='.'):
+        return NexusInfo._get_nxlog_transformation(value, vector,
+                                                   unit, 'rotation',
+                                                   depend_path)
+
+    @staticmethod
+    def _get_nxlog_transformation(value, vector, unit, transform_type,
+                                  depend_path):
+        location_dataset = NexusInfo._get_location_dataset(value, vector,
+                                                           unit, transform_type,
+                                                           depend_path)
+        return {
+            VALUES:
+                {
+                    'trans_' + str(next(transform_id_iter)):
+                    {
+                        VALUES:
+                            {
+                                NXLOG_VALUE:
+                                    location_dataset,
+                                TIME:
+                                    {
+                                        VALUES: [0],
+                                        ATTR: {'units': 'ns'}
+                                    }
+                            },
+                        ATTR: NexusInfo.get_nx_log()
+                    }
+                },
+            ATTR: NexusInfo._get_transformation_class_attr()
+        }
 
     @staticmethod
     def _get_transformation(value, vector, unit, transform_type, depend_path):
@@ -158,23 +204,33 @@ class NexusInfo:
 
     @staticmethod
     def get_transformations_as_dict(geo_data, position, transform_path,
-                                    name=''):
+                                    name='', as_nx_log=False):
         norm = np.linalg.norm(position)
         if norm:
             position = position / norm
-        geo_data[TRANSFORMATIONS] = \
-            NexusInfo.get_transform_translation([norm], tuple(position),
-                                                LENGTH_UNIT)
+        if as_nx_log:
+            geo_data[TRANSFORMATIONS] = \
+                NexusInfo.get_nxlog_transform_translation([norm],
+                                                          tuple(position),
+                                                          LENGTH_UNIT)
+        else:
+            geo_data[TRANSFORMATIONS] = \
+                NexusInfo.get_transform_translation([norm], tuple(position),
+                                                    LENGTH_UNIT)
         if transform_path:
-
             abs_path = transform_path
-            transform_name = list(geo_data[TRANSFORMATIONS][VALUES].keys())
+            if as_nx_log:
+                transform_name = \
+                    list(geo_data[TRANSFORMATIONS][VALUES].keys())
+                abs_path = abs_path + transform_name[0] + '/' + NXLOG_VALUE
+            else:
+                transform_name = list(geo_data[TRANSFORMATIONS][VALUES].keys())
+                abs_path += transform_name[0]
             if len(transform_name) > 1:
                 print("Warning! Only supply one "
-                      "dependency for a transformation."
-                      "Only the first element in the supplied list of"
+                      "dependency for a transformation. "
+                      "Only the first element in the supplied list of "
                       "dependencies will be used.")
-            abs_path += transform_name[0]
             geo_data['depends_on'] = {VALUES: abs_path,
                                       ATTR: None}
         if name:
@@ -627,7 +683,8 @@ class Bank:
     def compound_data_in_list(self) -> List:
         return self._detector_tube.compound_data_in_list()
 
-    def compound_detector_geometry(self, transform_path=''):
+    def compound_detector_geometry(self, transform_path='',
+                                   transform_as_nxlog=False):
         """
         Creates a dictionary of the LoKI detector geometry suitable for
         the NexusFileBuilder class.
@@ -636,7 +693,8 @@ class Bank:
         geo_data = \
             NexusInfo.get_transformations_as_dict(detector_geo,
                                                   self._bank_translation,
-                                                  transform_path)
+                                                  transform_path,
+                                                  as_nx_log=transform_as_nxlog)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_detector_class_attr())
@@ -651,15 +709,18 @@ class Source:
         self._position = np.array(position) * SCALE_FACTOR
         self._name: str = name
 
-    def compound_source_geometry(self, transform_path):
+    def compound_source_geometry(self, transform_path,
+                                 transform_as_nxlog=False):
         """
         Creates a dictionary of the source geometry suitable for
         the NexusFileBuilder class.
         """
-        geo_data = NexusInfo.get_transformations_as_dict({},
-                                                         self._position,
-                                                         transform_path,
-                                                         self._name)
+        geo_data = \
+            NexusInfo.get_transformations_as_dict({},
+                                                  self._position,
+                                                  transform_path,
+                                                  self._name,
+                                                  as_nx_log=transform_as_nxlog)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_source_class_attr())
@@ -674,15 +735,18 @@ class Sample:
         self._position = np.array(position) * SCALE_FACTOR
         self._name = name
 
-    def compound_sample_geometry(self, transform_path):
+    def compound_sample_geometry(self, transform_path,
+                                 transform_as_nxlog=False):
         """
         Creates a dictionary of the sample geometry suitable for
         the NexusFileBuilder class.
         """
-        geo_data = NexusInfo.get_transformations_as_dict({},
-                                                         self._position,
-                                                         transform_path,
-                                                         self._name)
+        geo_data = \
+            NexusInfo.get_transformations_as_dict({},
+                                                  self._position,
+                                                  transform_path,
+                                                  self._name,
+                                                  as_nx_log=transform_as_nxlog)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_sample_class_attr())
@@ -726,7 +790,7 @@ class NexusFileBuilder:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
@@ -786,7 +850,9 @@ if __name__ == '__main__':
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{key_det}/{TRANSFORMATIONS}/'
-            item_det = bank.compound_detector_geometry(trans_path)
+            transform_nxlog = True if bank.get_bank_id() == 0 else False
+            item_det = bank.compound_detector_geometry(trans_path,
+                                                       transform_nxlog)
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
         # Create source geometry.
