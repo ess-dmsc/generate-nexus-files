@@ -104,6 +104,18 @@ class NexusInfo:
         return {NX_CLASS: 'NXtransformations'}
 
     @staticmethod
+    def get_disk_chopper():
+        return {NX_CLASS: 'NXdisk_chopper'}
+
+    @staticmethod
+    def get_monitor():
+        return {NX_CLASS: 'NXmonitor'}
+
+    @staticmethod
+    def get_slit():
+        return {NX_CLASS: 'NXslit'}
+
+    @staticmethod
     def get_transform_translation(value, vector, unit, depend_path='.'):
         return NexusInfo._get_transformation(value, vector, unit, 'translation',
                                              depend_path)
@@ -154,10 +166,16 @@ class NexusInfo:
             NexusInfo.get_transform_translation([norm], tuple(position),
                                                 LENGTH_UNIT)
         if transform_path:
-            transform_path_list = []
-            for key in geo_data[TRANSFORMATIONS][VALUES].keys():
-                transform_path_list.append(transform_path + str(key))
-            geo_data['depends_on'] = {VALUES: transform_path_list,
+
+            abs_path = transform_path
+            transform_name = list(geo_data[TRANSFORMATIONS][VALUES].keys())
+            if len(transform_name) > 1:
+                print("Warning! Only supply one "
+                      "dependency for a transformation."
+                      "Only the first element in the supplied list of"
+                      "dependencies will be used.")
+            abs_path += transform_name[0]
+            geo_data['depends_on'] = {VALUES: abs_path,
                                       ATTR: None}
         if name:
             geo_data['name'] = {VALUES: [name],
@@ -688,6 +706,10 @@ class NexusFileBuilder:
     def _construct_nxs_file(self, nxs_data, group):
         for element in nxs_data:
             if isinstance(nxs_data[element][VALUES], list):
+                d_set = group.create_dataset(element,
+                                             data=nxs_data[element][VALUES])
+                self._add_attributes(nxs_data[element], d_set)
+            elif isinstance(nxs_data[element][VALUES], str):
                 d_set = group.create_dataset(element,
                                              data=nxs_data[element][VALUES])
                 self._add_attributes(nxs_data[element], d_set)
