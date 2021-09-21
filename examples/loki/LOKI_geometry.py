@@ -794,6 +794,7 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
+    bank_ids_transform_as_nxlog = [0]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
@@ -850,7 +851,8 @@ if __name__ == '__main__':
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{key_det}/{TRANSFORMATIONS}/'
-            transform_nxlog = True if bank.get_bank_id() == 0 else False
+            transform_nxlog = True if bank.get_bank_id() \
+                                      in bank_ids_transform_as_nxlog else False
             item_det = bank.compound_detector_geometry(trans_path,
                                                        transform_nxlog)
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
