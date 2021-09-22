@@ -1,4 +1,5 @@
 import csv
+from abc import ABC
 
 import h5py
 import matplotlib.pyplot as plt
@@ -9,7 +10,8 @@ from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
     TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, SCALE_FACTOR, \
-    LENGTH_UNIT, loki_banks, loki_source, loki_sample
+    LENGTH_UNIT, loki_banks, loki_disk_choppers, loki_monitors, \
+    loki_slits, loki_source, loki_sample
 
 N_VERTICES = 3
 ATTR = 'attributes'
@@ -115,19 +117,19 @@ class NexusInfo:
         return {NX_CLASS: 'NXtransformations'}
 
     @staticmethod
-    def get_disk_chopper():
+    def get_disk_chopper_class_attr():
         return {NX_CLASS: 'NXdisk_chopper'}
 
     @staticmethod
-    def get_nx_log():
+    def get_nx_log_class_attr():
         return {NX_CLASS: 'NXlog'}
 
     @staticmethod
-    def get_monitor():
+    def get_monitor_class_attr():
         return {NX_CLASS: 'NXmonitor'}
 
     @staticmethod
-    def get_slit():
+    def get_slit_class_attr():
         return {NX_CLASS: 'NXslit'}
 
     @staticmethod
@@ -184,7 +186,7 @@ class NexusInfo:
                             ATTR: {UNITS: unit}
                         }
                 },
-            ATTR: NexusInfo.get_nx_log()
+            ATTR: NexusInfo.get_nx_log_class_attr()
         }
 
     @staticmethod
@@ -248,10 +250,10 @@ class NexusInfo:
                       "Only the first element in the supplied list of "
                       "dependencies will be used.")
             geo_data[DEPENDS_ON] = {VALUES: abs_path,
-                                      ATTR: None}
+                                    ATTR: None}
         if name:
             geo_data[NAME] = {VALUES: [name],
-                                ATTR: None}
+                              ATTR: None}
         return geo_data
 
 
@@ -716,56 +718,108 @@ class Bank:
             NexusInfo.get_detector_class_attr())
 
 
-class Source:
+class SimpleNexusClass(ABC):
     """
-    Abstraction of an instrument source.
+    Abstraction of a simple nexus class.
     """
 
     def __init__(self, position: tuple, name: str = ''):
         self._position = np.array(position) * SCALE_FACTOR
         self._name: str = name
 
-    def compound_source_geometry(self, transform_path,
-                                 transform_as_nxlog=False):
+    def _get_transformation(self, transform_path, transform_nx_log):
+        return NexusInfo.get_transformations_as_dict({},
+                                                     self._position,
+                                                     transform_path,
+                                                     self._name,
+                                                     as_nx_log=transform_nx_log)
+
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        """
+            Creates a dictionary of the simple nexus class geometry suitable for
+            the NexusFileBuilder class.
+        """
+        raise NotImplementedError
+
+
+class Source(SimpleNexusClass):
+    """
+    Abstraction of an instrument source.
+    """
+
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
         """
         Creates a dictionary of the source geometry suitable for
         the NexusFileBuilder class.
         """
-        geo_data = \
-            NexusInfo.get_transformations_as_dict({},
-                                                  self._position,
-                                                  transform_path,
-                                                  self._name,
-                                                  as_nx_log=transform_as_nxlog)
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_source_class_attr())
 
 
-class Sample:
+class Sample(SimpleNexusClass):
     """
-        Abstraction of an instrument source.
+        Abstraction of an instrument sample.
     """
 
-    def __init__(self, position: tuple, name: str = ''):
-        self._position = np.array(position) * SCALE_FACTOR
-        self._name = name
-
-    def compound_sample_geometry(self, transform_path,
-                                 transform_as_nxlog=False):
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
         """
         Creates a dictionary of the sample geometry suitable for
         the NexusFileBuilder class.
         """
-        geo_data = \
-            NexusInfo.get_transformations_as_dict({},
-                                                  self._position,
-                                                  transform_path,
-                                                  self._name,
-                                                  as_nx_log=transform_as_nxlog)
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_sample_class_attr())
+
+
+class DiskChopper(SimpleNexusClass):
+    """
+        Abstraction of an instrument disk chopper.
+    """
+
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        """
+            Creates a dictionary of the disk chopper geometry suitable for
+            the NexusFileBuilder class.
+        """
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_disk_chopper_class_attr())
+
+
+class Monitor(SimpleNexusClass):
+    """
+        Abstraction of an instrument monitor.
+    """
+
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        """
+            Creates a dictionary of the monitor geometry suitable for
+            the NexusFileBuilder class.
+        """
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_monitor_class_attr())
+
+
+class Slit(SimpleNexusClass):
+    """
+        Abstraction of an instrument slit.
+    """
+
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        """
+            Creates a dictionary of the slit geometry suitable for
+            the NexusFileBuilder class.
+        """
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_slit_class_attr())
 
 
 class NexusFileBuilder:
@@ -810,7 +864,7 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    bank_ids_transform_as_nxlog = [0]
+    bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
     for loki_bank_id in loki_banks:
@@ -863,6 +917,7 @@ if __name__ == '__main__':
                 NexusInfo.get_values_attrs_as_dict(
                     {}, NexusInfo.get_instrument_class_attr())
         }, NexusInfo.get_entry_class_attr())}
+
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
             key_det = f'detector_{bank.get_bank_id()}'
@@ -873,17 +928,49 @@ if __name__ == '__main__':
                                                        transform_nxlog)
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
-        # Create source geometry.
+
+        # Create source.
         loki_source = Source(loki_source[LOCATION], loki_source[NAME])
         trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
-            loki_source.compound_source_geometry(trans_path)
+            loki_source.compound_geometry(trans_path)
         print(f'Source {SOURCE} is done!')
-        # Create sample geometry.
+
+        # Create sample.
         loki_sample = Sample(loki_sample[LOCATION], loki_sample[NAME])
         transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][SAMPLE] = \
-            loki_sample.compound_sample_geometry(transformation_path)
+            loki_sample.compound_geometry(transformation_path)
         print(f'Sample {SAMPLE} is done!')
+
+        # Create choppers.
+        for loki_chopper in loki_disk_choppers:
+            disk_chopper = DiskChopper(loki_chopper[LOCATION],
+                                       loki_chopper[NAME])
+            trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_chopper[NAME]}' \
+                         f'/{TRANSFORMATIONS}/'
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_chopper[NAME]] = \
+                disk_chopper.compound_geometry(trans_path)
+            print(f'Chopper {loki_chopper[NAME]} is done!')
+
+        # Create monitors.
+        for loki_monitor in loki_monitors:
+            monitor = Monitor(loki_monitor[LOCATION], loki_monitor[NAME])
+            trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_monitor[NAME]}' \
+                         f'/{TRANSFORMATIONS}/'
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
+                monitor.compound_geometry(trans_path)
+            print(f'Monitor {loki_monitor[NAME]} is done!')
+
+        # Create slits.
+        for loki_slit in loki_slits:
+            monitor = Slit(loki_slit[LOCATION], loki_slit[NAME])
+            trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_slit[NAME]}' \
+                         f'/{TRANSFORMATIONS}/'
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_slit[NAME]] = \
+                monitor.compound_geometry(trans_path)
+            print(f'Slit {loki_slit[NAME]} is done!')
+
+        # Write data to nexus file.
         nexus_file_builder = NexusFileBuilder(data)
         nexus_file_builder.construct_nxs_file()
