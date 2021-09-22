@@ -13,16 +13,24 @@ from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
 
 N_VERTICES = 3
 ATTR = 'attributes'
+DEPENDS_ON = 'depends_on'
 ENTRY = 'entry'
 INSTRUMENT = 'instrument'
+LOCATION = 'location'
+NAME = 'name'
 NX_CLASS = 'NX_class'
+NXLOG_VALUE = 'value'
+NXLOG_NAME = 'nx_log'
+ROTATION = 'rotation'
 SAMPLE = 'sample'
 SOURCE = 'source'
-NXLOG_VALUE = 'value'
-VALUES = 'values'
-NX_LOG_NAME = 'nx_log'
 TIME = 'time'
+TRANSFORMATION_TYPE = 'transformation_type'
 TRANSFORMATIONS = 'transformations'
+TRANSLATION = 'translation'
+UNITS = 'units'
+VALUES = 'values'
+VECTOR = 'vector'
 
 
 def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
@@ -124,24 +132,24 @@ class NexusInfo:
 
     @staticmethod
     def get_transform_translation(value, vector, unit, depend_path='.'):
-        return NexusInfo._get_transformation(value, vector, unit, 'translation',
+        return NexusInfo._get_transformation(value, vector, unit, TRANSLATION,
                                              depend_path)
 
     @staticmethod
     def get_transform_rotation(value, vector, unit, depend_path='.'):
-        return NexusInfo._get_transformation(value, vector, unit, 'rotation',
+        return NexusInfo._get_transformation(value, vector, unit, ROTATION,
                                              depend_path)
 
     @staticmethod
     def get_nxlog_transform_translation(value, vector, unit, depend_path='.'):
         return NexusInfo._get_nxlog_transformation(value, vector,
-                                                   unit, 'translation',
+                                                   unit, TRANSLATION,
                                                    depend_path)
 
     @staticmethod
     def get_nxlog_transform_rotation(value, vector, unit, depend_path='.'):
         return NexusInfo._get_nxlog_transformation(value, vector,
-                                                   unit, 'rotation',
+                                                   unit, ROTATION,
                                                    depend_path)
 
     @staticmethod
@@ -154,21 +162,29 @@ class NexusInfo:
             VALUES:
                 {
                     'trans_' + str(next(transform_id_iter)):
-                    {
-                        VALUES:
-                            {
-                                NXLOG_VALUE:
-                                    location_dataset,
-                                TIME:
-                                    {
-                                        VALUES: [0],
-                                        ATTR: {'units': 'ns'}
-                                    }
-                            },
-                        ATTR: NexusInfo.get_nx_log()
-                    }
+                        NexusInfo._get_nx_log_group(value=location_dataset)
                 },
             ATTR: NexusInfo._get_transformation_class_attr()
+        }
+
+    @staticmethod
+    def _get_nx_log_group(value=None, time=None, unit='ns'):
+        if time is None:
+            time = [0]
+        if value is None:
+            value = [0]
+        return {
+            VALUES:
+                {
+                    NXLOG_VALUE:
+                        value,
+                    TIME:
+                        {
+                            VALUES: time,
+                            ATTR: {UNITS: unit}
+                        }
+                },
+            ATTR: NexusInfo.get_nx_log()
         }
 
     @staticmethod
@@ -186,16 +202,16 @@ class NexusInfo:
         return {
             VALUES: value,
             ATTR: {
-                'units': unit,
-                'transformation_type': transform_type,
-                'depends_on': depend_path,
-                'vector': vector
+                UNITS: unit,
+                TRANSFORMATION_TYPE: transform_type,
+                DEPENDS_ON: depend_path,
+                VECTOR: vector
             }
         }
 
     @staticmethod
     def get_units_attribute(units):
-        return {'units': units}
+        return {UNITS: units}
 
     @staticmethod
     def get_values_attrs_as_dict(values, attrs=None):
@@ -231,10 +247,10 @@ class NexusInfo:
                       "dependency for a transformation. "
                       "Only the first element in the supplied list of "
                       "dependencies will be used.")
-            geo_data['depends_on'] = {VALUES: abs_path,
+            geo_data[DEPENDS_ON] = {VALUES: abs_path,
                                       ATTR: None}
         if name:
-            geo_data['name'] = {VALUES: [name],
+            geo_data[NAME] = {VALUES: [name],
                                 ATTR: None}
         return geo_data
 
@@ -520,11 +536,11 @@ class Tube:
         data_detector_num: List = []
         if not self._straw:
             empty_nexus_field = NexusInfo.get_values_attrs_as_dict([])
-            return {"detector_number": empty_nexus_field,
-                    "pixel_shape": empty_nexus_field,
-                    "x_pixel_offset": empty_nexus_field,
-                    "y_pixel_offset": empty_nexus_field,
-                    "z_pixel_offset": empty_nexus_field}
+            return {'detector_number': empty_nexus_field,
+                    'pixel_shape': empty_nexus_field,
+                    'x_pixel_offset': empty_nexus_field,
+                    'y_pixel_offset': empty_nexus_field,
+                    'z_pixel_offset': empty_nexus_field}
 
         for tube_offset in self._xyz_offsets:
             tmp_offsets, tmp_data_detector_num = \
@@ -536,19 +552,19 @@ class Tube:
         unit_m = NexusInfo.get_units_attribute(LENGTH_UNIT)
 
         return {
-            "detector_number":
+            'detector_number':
                 NexusInfo.get_values_attrs_as_dict(data_detector_num),
-            "pixel_shape":
+            'pixel_shape':
                 NexusInfo.get_values_attrs_as_dict(
                     pixel_shape,
                     NexusInfo.get_cylindrical_geo_class_attr()),
-            "x_pixel_offset":
+            'x_pixel_offset':
                 NexusInfo.get_values_attrs_as_dict(
                     [x[0] for x in data_offsets], unit_m),
-            "y_pixel_offset":
+            'y_pixel_offset':
                 NexusInfo.get_values_attrs_as_dict(
                     [y[1] for y in data_offsets], unit_m),
-            "z_pixel_offset":
+            'z_pixel_offset':
                 NexusInfo.get_values_attrs_as_dict(
                     [z[2] for z in data_offsets], unit_m)}
 
@@ -858,13 +874,13 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
         # Create source geometry.
-        loki_source = Source(loki_source['location'], loki_source['name'])
+        loki_source = Source(loki_source[LOCATION], loki_source[NAME])
         trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
             loki_source.compound_source_geometry(trans_path)
         print(f'Source {SOURCE} is done!')
         # Create sample geometry.
-        loki_sample = Sample(loki_sample['location'], loki_sample['name'])
+        loki_sample = Sample(loki_sample[LOCATION], loki_sample[NAME])
         transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][SAMPLE] = \
             loki_sample.compound_sample_geometry(transformation_path)
