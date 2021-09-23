@@ -73,8 +73,8 @@ class IdIterator:
         return current_id
 
     @staticmethod
-    def reset():
-        return IdIterator()
+    def reset(start=0):
+        return IdIterator(start)
 
 
 pixel_id_iter = iter(IdIterator(1))
