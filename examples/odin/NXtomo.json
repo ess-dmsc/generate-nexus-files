@@ -16,8 +16,7 @@
                                     "config": {
                                         "source": "",
                                         "topic": "",
-                                        "dtype": "",
-                                        "value_units": ""
+                                        "dtype": ""
                                     }
                                 }
                             ]
@@ -27,12 +26,11 @@
                             "name": "detector",
                             "children": [
                                 {
-                                    "module": "f142",
+                                    "module": "",
                                     "config": {
-                                        "source": "d1",
-                                        "topic": "Topic_1",
-                                        "dtype": "string",
-                                        "value_units": "mm"
+                                        "source": "",
+                                        "topic": "",
+                                        "dtype": ""
                                     }
                                 }
                             ],
@@ -58,12 +56,11 @@
                     "name": "sample",
                     "children": [
                         {
-                            "module": "f142",
+                            "module": "",
                             "config": {
-                                "source": "PV:my_pv2",
-                                "topic": "Topic_2",
-                                "dtype": "string",
-                                "value_units": "mm"
+                                "source": "",
+                                "topic": "",
+                                "dtype": ""
                             }
                         }
                     ],
@@ -80,12 +77,11 @@
                     "name": "control",
                     "children": [
                         {
-                            "module": "f142",
+                            "module": "",
                             "config": {
-                                "source": "mon1",
-                                "topic": "Topic_3",
-                                "dtype": "string",
-                                "value_units": "mm"
+                                "source": "",
+                                "topic": "",
+                                "dtype": ""
                             }
                         }
                     ],
@@ -116,12 +112,68 @@
                     ],
                     "children": [
                         {
-                            "module": "",
+                            "module": "ADAr",
                             "config": {
-                                "source": "",
-                                "topic": "",
-                                "dtype": "",
-                                "value_units": ""
+                                "source": "image_source",
+                                "topic": "odin_topic",
+                                "dtype": "uint32",
+                                "array_size": [
+                                    480,
+                                    290,
+                                    3
+                                ]
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "data_dark",
+                    "children": [
+                        {
+                            "module": "ADAr",
+                            "config": {
+                                "source": "image_dark",
+                                "topic": "odin_topic",
+                                "dtype": "uint32",
+                                "array_size": [
+                                    480,
+                                    290,
+                                    3
+                                ]
+                            }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ]
+                },
+                {
+                    "type": "group",
+                    "name": "data_flat",
+                    "children": [
+                        {
+                            "module": "ADAr",
+                            "config": {
+                                "source": "image_flat",
+                                "topic": "odin_topic",
+                                "dtype": "uint32",
+                                "array_size": [
+                                    480,
+                                    290,
+                                    3
+                                ]
                             }
                         }
                     ],
