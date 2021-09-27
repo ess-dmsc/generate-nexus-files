@@ -7,14 +7,17 @@ from os import path
 from lxml import etree
 from xml.parsers.expat import ExpatError
 
+ARRAY_SIZE = 'array_size'
 ATTRIBUTES = 'attributes'
 CHILDREN = 'children'
+CUSTOM_FIELD = 'custom_field'
 CONFIG = 'config'
 DATA_TYPE = 'dtype'
 GROUP = 'group'
 LINK = 'link'
 NAME = 'name'
 NX_CLASS = 'NX_class'
+NX_DATA = 'NXdata'
 SOURCE = 'source'
 STREAM = 'stream'
 TARGET = 'target'
@@ -27,7 +30,8 @@ WRITER_MODULE = 'module'
 
 class DeviceConfigurationFromXLS:
 
-    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE, DATA_TYPE, VALUE_UNITS]
+    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE,
+                       DATA_TYPE, VALUE_UNITS, ARRAY_SIZE, CUSTOM_FIELD]
 
     def __init__(self, file_path):
         self._load_configuration_file(file_path)
@@ -99,7 +103,8 @@ class FileWriterNexusConfigCreator:
     def __init__(self, nxs_definition_xml, xls_path):
         self._nxs_definition_xml = nxs_definition_xml
         self.translator = self.get_translation()
-        self.configuration = DeviceConfigurationFromXLS(xls_path).get_configuration_as_dict()
+        self.configuration = DeviceConfigurationFromXLS(xls_path).\
+            get_configuration_as_dict()
 
     def get_translation(self):
         """
@@ -136,6 +141,7 @@ class FileWriterNexusConfigCreator:
             consistent with nexus config json file used by the file writer.
         """
         data = self.edit_dict_key_value_pair(self._nxs_definition_xml)
+        data = self._add_custom_fields(data)
         return {CHILDREN: [data]}
 
     def edit_dict_key_value_pair(self, sub_dict, parent=None):
@@ -168,8 +174,30 @@ class FileWriterNexusConfigCreator:
                                  DATA_TYPE: 'string',
                                  VALUES: data[TYPE]}]
             data[TYPE] = GROUP
-
         return data
+
+    def _add_custom_fields(self, data):
+
+        for key in self.configuration:
+            if self.configuration[key][CUSTOM_FIELD] == 'yes':
+                custom_field = \
+                    self._get_json_config_skeleton(key,
+                                                     self.configuration[key])
+                custom_field[ATTRIBUTES] = [
+                            {
+                                NAME: NX_CLASS,
+                                DATA_TYPE: 'string',
+                                VALUES: self.configuration[key][TYPE]
+                            }
+                        ]
+                data[CHILDREN].append(custom_field)
+        return data
+
+    def _get_json_config_skeleton(self, name, content):
+        if content[TYPE] == NX_DATA:
+            return {TYPE: GROUP,
+                    NAME: name,
+                    CHILDREN: self.get_stream_information(name)}
 
     def get_stream_information(self, name):
         """
@@ -182,23 +210,28 @@ class FileWriterNexusConfigCreator:
                 SOURCE: '',
                 TOPIC: '',
                 DATA_TYPE: '',
-                VALUE_UNITS: '',
             },
         }]
 
         if name in self.configuration:
             if self._item_is_string(name, WRITER_MODULE):
-                stream_info[0][WRITER_MODULE] = self.configuration[name][
-                    WRITER_MODULE]
+                stream_info[0][WRITER_MODULE] = \
+                    self.configuration[name][WRITER_MODULE]
             if self._item_is_string(name, SOURCE):
-                stream_info[0][CONFIG][SOURCE] = self.configuration[name][SOURCE]
+                stream_info[0][CONFIG][SOURCE] = \
+                    self.configuration[name][SOURCE]
             if self._item_is_string(name, TOPIC):
                 stream_info[0][CONFIG][TOPIC] = self.configuration[name][TOPIC]
             if self._item_is_string(name, DATA_TYPE):
-                stream_info[0][CONFIG][DATA_TYPE] = self.configuration[name][DATA_TYPE]
+                stream_info[0][CONFIG][DATA_TYPE] = \
+                    self.configuration[name][DATA_TYPE]
             if self._item_is_string(name, VALUE_UNITS):
-                stream_info[0][CONFIG][VALUE_UNITS] = self.configuration[name][VALUE_UNITS]
-
+                stream_info[0][CONFIG][VALUE_UNITS] = \
+                    self.configuration[name][VALUE_UNITS]
+            if self._item_is_string(name, ARRAY_SIZE):
+                str_values = self.configuration[name][ARRAY_SIZE].split(',')
+                int_values = [int(val) for val in str_values]
+                stream_info[0][CONFIG][ARRAY_SIZE] = int_values
 
         return stream_info
 
@@ -218,7 +251,8 @@ class NxApplicationXMLToJson:
 
     def load_template_from_xml(self):
         """
-        Load nexus template file from xml file and dump the content into a dictionary.
+        Load nexus template file from xml file and dump the content
+        into a dictionary.
         Templates are found on: https://github.com/nexusformat/definitions
         """
         try:
@@ -232,7 +266,7 @@ class NxApplicationXMLToJson:
             print(e)
             return False
 
-    def xml_to_json(self, save_path):
+    def xml_to_json(self):
         """
         Save nexus template from xml format to json format.
         """
@@ -241,11 +275,15 @@ class NxApplicationXMLToJson:
             status = self.load_template_from_xml()
         if status:
             dict_cont = self.nx_tomo_dict['definition']['group']
-            nxs_config_creator = FileWriterNexusConfigCreator(dict_cont, self._config_xls_path)
-            data = nxs_config_creator.generate_nexus_file_writer_config()
-            with open(save_path, 'w') as json_file:
-                json.dump(data, json_file, indent=4)
+            nxs_config_creator = \
+                FileWriterNexusConfigCreator(dict_cont, self._config_xls_path)
+            self.json_template = \
+                nxs_config_creator.generate_nexus_file_writer_config()
         return status
+
+    def save_json_file(self, save_path):
+        with open(save_path, 'w') as json_file:
+            json.dump(self.json_template, json_file, indent=4)
 
     def _remove_nodes_from_tree(self, tree):
         """
@@ -270,4 +308,5 @@ if __name__ == '__main__':
     nx_tomo_xml_path = path.join(file_dir, 'NXtomo.xml')
     config_xls_file = path.join(file_dir, 'config.xlsx')
     tomo_xml = NxApplicationXMLToJson(nx_tomo_xml_path, config_xls_file)
-    tomo_xml.xml_to_json(path.join(file_dir, 'NXtomo.json'))
+    tomo_xml.xml_to_json()
+    tomo_xml.save_json_file(path.join(file_dir, 'NXtomo.json'))
