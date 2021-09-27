@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import pandas as pd
 import xmltodict
@@ -12,6 +13,7 @@ ATTRIBUTES = 'attributes'
 CHILDREN = 'children'
 CUSTOM_FIELD = 'custom_field'
 CONFIG = 'config'
+DATA_NAME = 'data_name'
 DATA_TYPE = 'dtype'
 GROUP = 'group'
 LINK = 'link'
@@ -27,10 +29,17 @@ VALUES = 'values'
 VALUE_UNITS = 'value_units'
 WRITER_MODULE = 'module'
 
+nexus_instance_name = {'NXentry': 'entry',
+                       'NXdetector': 'detector',
+                       'NXinstrument': 'instrument',
+                       'NXsample': 'sample',
+                       'NXmonitor': 'control',
+                       'NXdata': 'data'}
+
 
 class DeviceConfigurationFromXLS:
 
-    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE,
+    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE, DATA_NAME,
                        DATA_TYPE, VALUE_UNITS, ARRAY_SIZE, CUSTOM_FIELD]
 
     def __init__(self, file_path):
@@ -63,7 +72,6 @@ class DeviceConfigurationFromXLS:
                 data_in_dict = self._construct_config_dict()
             else:
                 raise KeyError('Missing columns in excel configuration file.')
-
         return data_in_dict
 
     def _construct_config_dict(self):
@@ -79,7 +87,10 @@ class DeviceConfigurationFromXLS:
             tmp_dict = {}
             for key in self.list_excel_cols:
                 tmp_dict[key] = data[key][idx]
-            config_dict.update({name: tmp_dict})
+            if name in config_dict:
+                config_dict[name].append(tmp_dict)
+            else:
+                config_dict.update({name: [tmp_dict]})
         return config_dict
 
     def _replace_nans(self):
@@ -105,6 +116,8 @@ class FileWriterNexusConfigCreator:
         self.translator = self.get_translation()
         self.configuration = DeviceConfigurationFromXLS(xls_path).\
             get_configuration_as_dict()
+        self._data = {}
+        self._data_fields = None
 
     def get_translation(self):
         """
@@ -140,9 +153,8 @@ class FileWriterNexusConfigCreator:
             Translate dictionary generated from xml file to a format that is
             consistent with nexus config json file used by the file writer.
         """
-        data = self.edit_dict_key_value_pair(self._nxs_definition_xml)
-        data = self._add_custom_fields(data)
-        return {CHILDREN: [data]}
+        self._data = self.edit_dict_key_value_pair(self._nxs_definition_xml)
+        return {CHILDREN: [self._data]}
 
     def edit_dict_key_value_pair(self, sub_dict, parent=None):
         """
@@ -204,39 +216,49 @@ class FileWriterNexusConfigCreator:
         Get the stream information for the file writer to add in the
         file writer config json file.
         """
-        stream_info = [{
-            WRITER_MODULE: '',
-            CONFIG: {
-                SOURCE: '',
-                TOPIC: '',
-                DATA_TYPE: '',
-            },
-        }]
-
+        stream_info_aggr = []
         if name in self.configuration:
-            if self._item_is_string(name, WRITER_MODULE):
-                stream_info[0][WRITER_MODULE] = \
-                    self.configuration[name][WRITER_MODULE]
-            if self._item_is_string(name, SOURCE):
-                stream_info[0][CONFIG][SOURCE] = \
-                    self.configuration[name][SOURCE]
-            if self._item_is_string(name, TOPIC):
-                stream_info[0][CONFIG][TOPIC] = self.configuration[name][TOPIC]
-            if self._item_is_string(name, DATA_TYPE):
-                stream_info[0][CONFIG][DATA_TYPE] = \
-                    self.configuration[name][DATA_TYPE]
-            if self._item_is_string(name, VALUE_UNITS):
-                stream_info[0][CONFIG][VALUE_UNITS] = \
-                    self.configuration[name][VALUE_UNITS]
-            if self._item_is_string(name, ARRAY_SIZE):
-                str_values = self.configuration[name][ARRAY_SIZE].split(',')
-                int_values = [int(val) for val in str_values]
-                stream_info[0][CONFIG][ARRAY_SIZE] = int_values
+            for item in self.configuration[name]:
+                stream_info = {
+                    WRITER_MODULE: '',
+                    CONFIG: {
+                        SOURCE: '',
+                        TOPIC: '',
+                        DATA_TYPE: '',
+                    },
+                }
+                if self._item_is_string(WRITER_MODULE, item):
+                    stream_info[WRITER_MODULE] = \
+                        item[WRITER_MODULE]
+                if self._item_is_string(SOURCE, item):
+                    stream_info[CONFIG][SOURCE] = \
+                        item[SOURCE]
+                if self._item_is_string(TOPIC, item):
+                    stream_info[CONFIG][TOPIC] = \
+                        item[TOPIC]
+                if self._item_is_string(DATA_TYPE, item):
+                    stream_info[CONFIG][DATA_TYPE] = \
+                        item[DATA_TYPE]
+                if self._item_is_string(VALUE_UNITS, item):
+                    stream_info[CONFIG][VALUE_UNITS] = \
+                        item[VALUE_UNITS]
+                if self._item_is_string(ARRAY_SIZE, item):
+                    str_values = item[ARRAY_SIZE].split(',')
+                    int_values = [int(val) for val in str_values]
+                    stream_info[CONFIG][ARRAY_SIZE] = int_values
+                if 'nan' not in str(item[DATA_NAME]) and \
+                        'NaN' not in str(item[DATA_NAME]):
+                    stream_info = {
+                        TYPE: GROUP,
+                        NAME: item[DATA_NAME],
+                        CHILDREN: [stream_info],
+                    }
+                stream_info_aggr.append(stream_info)
+        return stream_info_aggr
 
-        return stream_info
-
-    def _item_is_string(self, name, kind):
-        return isinstance(self.configuration[name][kind], str)
+    @staticmethod
+    def _item_is_string(kind, item):
+        return isinstance(item[kind], str)
 
 
 class NxApplicationXMLToJson:
