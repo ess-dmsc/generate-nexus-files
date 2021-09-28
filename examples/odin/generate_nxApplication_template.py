@@ -31,14 +31,6 @@ VALUES = 'values'
 VALUE_UNITS = 'value_units'
 WRITER_MODULE = 'module'
 
-nexus_instance_name = {'NXentry': 'entry',
-                       'NXdetector': 'detector',
-                       'NXinstrument': 'instrument',
-                       'NXsample': 'sample',
-                       'NXmonitor': 'control',
-                       'NXdata': 'data',
-                       'NXsource': 'source'}
-
 
 class DeviceConfigurationFromXLS:
 
@@ -115,6 +107,14 @@ class FileWriterNexusConfigCreator:
     XML_GROUP = 'group'
     XML_LINK = 'link'
 
+    nexus_instance_name = {'NXentry': 'entry',
+                           'NXdetector': 'detector',
+                           'NXinstrument': 'instrument',
+                           'NXsample': 'sample',
+                           'NXmonitor': 'control',
+                           'NXdata': 'data',
+                           'NXsource': 'source'}
+
     def __init__(self, nxs_definition_xml, xls_path):
         self._nxs_definition_xml = nxs_definition_xml
         self.translator = self.get_translation()
@@ -174,14 +174,27 @@ class FileWriterNexusConfigCreator:
                 class_type = self.translator[key][1]
                 data[new_key] = self.nxs_config_object_factory(class_type,
                                                                sub_dict[key])
-                if new_key == CHILDREN or new_key == LINK:
+
+                # TODO: fix this. Should be added in children of data.
+                # {
+                #     'type': 'link',
+                #     'name': name,
+                #     'target': self.target
+                # }
+                if new_key == CHILDREN:
                     tmp_list = []
                     for item in sub_dict[key]:
                         tmp_list.append(self.edit_dict_key_value_pair(item,
                                                                       new_key))
                     data[new_key] = tmp_list
-        if TYPE in data and data[TYPE] in nexus_instance_name:
-            data[NAME] = nexus_instance_name[data[TYPE]]
+                elif new_key == LINK:
+                    tmp_list = []
+                    for item in sub_dict[key]:
+                        tmp_list.append(self.get_link(item))
+                    data[CHILDREN] = tmp_list
+                    del data[LINK]
+        if TYPE in data and data[TYPE] in self.nexus_instance_name:
+            data[NAME] = self.nexus_instance_name[data[TYPE]]
             data[ATTRIBUTES] = [{NAME: NX_CLASS,
                                  DATA_TYPE: 'string',
                                  VALUES: data[TYPE]}]
@@ -192,6 +205,34 @@ class FileWriterNexusConfigCreator:
             for item in self.get_stream_information(data[NAME]):
                 data[CHILDREN].append(item)
         return data
+
+    def get_link(self, data):
+        """
+        Returns a nexus link dictionary.
+        """
+        return {
+            TYPE: LINK,
+            NAME: data[self.XML_NAME],
+            TARGET:
+                self._translate_link(data[self.XML_TARGET])
+        }
+
+    def _translate_link(self, link):
+        """
+        Translates target link to something the file-writer will understand.
+        """
+        nexus_instances = link.split('/')[1:]
+        translated_nexus_list = []
+        for nexus_instance in nexus_instances:
+            nxs_item = nexus_instance.split(':')[-1]
+            if nxs_item in self.nexus_instance_name:
+                translated_nexus_list.append(
+                    self.nexus_instance_name[nxs_item])
+            else:
+                translated_nexus_list.append(nexus_instance)
+        # TODO: Fix linking in file-writer. Until then this is turned off.
+        # return '/' + '/'.join(translated_nexus_list)
+        return link
 
     def get_stream_information(self, name):
         """

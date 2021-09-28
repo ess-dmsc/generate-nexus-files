@@ -149,28 +149,22 @@
                 {
                     "type": "group",
                     "name": "data",
-                    "link": [
+                    "children": [
                         {
+                            "type": "link",
                             "name": "data",
                             "target": "/NXentry/NXinstrument/detector:NXdetector/data"
                         },
                         {
+                            "type": "link",
                             "name": "rotation_angle",
                             "target": "/NXentry/NXsample/rotation_angle"
                         },
                         {
+                            "type": "link",
                             "name": "image_key",
                             "target": "/NXentry/NXinstrument/detector:NXdetector/image_key"
-                        }
-                    ],
-                    "attributes": [
-                        {
-                            "name": "NX_class",
-                            "dtype": "string",
-                            "values": "NXdata"
-                        }
-                    ],
-                    "children": [
+                        },
                         {
                             "module": "",
                             "config": {
@@ -178,6 +172,13 @@
                                 "topic": "",
                                 "dtype": ""
                             }
+                        }
+                    ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
                         }
                     ]
                 },
