@@ -1,6 +1,4 @@
 import json
-from copy import deepcopy
-
 import pandas as pd
 import xmltodict
 from enum import Enum
@@ -14,13 +12,17 @@ CHILDREN = 'children'
 CUSTOM_FIELD = 'custom_field'
 CONFIG = 'config'
 DATA_NAME = 'data_name'
+DATASET = 'dataset'
 DATA_TYPE = 'dtype'
 GROUP = 'group'
+KIND = 'kind'
 LINK = 'link'
 NAME = 'name'
 NX_CLASS = 'NX_class'
 NX_DATA = 'NXdata'
 SOURCE = 'source'
+STATIC_DATA = 'static_data'
+STATIC_VALUE = 'static_value'
 STREAM = 'stream'
 TARGET = 'target'
 TOPIC = 'topic'
@@ -34,13 +36,15 @@ nexus_instance_name = {'NXentry': 'entry',
                        'NXinstrument': 'instrument',
                        'NXsample': 'sample',
                        'NXmonitor': 'control',
-                       'NXdata': 'data'}
+                       'NXdata': 'data',
+                       'NXsource': 'source'}
 
 
 class DeviceConfigurationFromXLS:
 
-    list_excel_cols = [NAME, TYPE, TOPIC, SOURCE, WRITER_MODULE, DATA_NAME,
-                       DATA_TYPE, VALUE_UNITS, ARRAY_SIZE, CUSTOM_FIELD]
+    list_excel_cols = [NAME, TOPIC, SOURCE, WRITER_MODULE, DATA_NAME, KIND,
+                       DATA_TYPE, VALUE_UNITS, ARRAY_SIZE, CUSTOM_FIELD,
+                       STATIC_VALUE]
 
     def __init__(self, file_path):
         self._load_configuration_file(file_path)
@@ -164,10 +168,7 @@ class FileWriterNexusConfigCreator:
         ::return:: returns modified sub dictionary.
         """
         data = {}
-        name = NAME
         for key in sub_dict:
-            if key == self.XML_NAME:
-                name = sub_dict[self.XML_NAME]
             if key in self.translator:
                 new_key = self.translator[key][0]
                 class_type = self.translator[key][1]
@@ -179,37 +180,18 @@ class FileWriterNexusConfigCreator:
                         tmp_list.append(self.edit_dict_key_value_pair(item,
                                                                       new_key))
                     data[new_key] = tmp_list
-        if CHILDREN not in data and parent is not LINK:
-            data[CHILDREN] = self.get_stream_information(name)
-        if TYPE in data and NAME in data:
+        if TYPE in data and data[TYPE] in nexus_instance_name:
+            data[NAME] = nexus_instance_name[data[TYPE]]
             data[ATTRIBUTES] = [{NAME: NX_CLASS,
                                  DATA_TYPE: 'string',
                                  VALUES: data[TYPE]}]
             data[TYPE] = GROUP
+        if CHILDREN not in data and parent is not LINK:
+            data[CHILDREN] = self.get_stream_information(data[NAME])
+        elif parent is not LINK:
+            for item in self.get_stream_information(data[NAME]):
+                data[CHILDREN].append(item)
         return data
-
-    def _add_custom_fields(self, data):
-
-        for key in self.configuration:
-            if self.configuration[key][CUSTOM_FIELD] == 'yes':
-                custom_field = \
-                    self._get_json_config_skeleton(key,
-                                                     self.configuration[key])
-                custom_field[ATTRIBUTES] = [
-                            {
-                                NAME: NX_CLASS,
-                                DATA_TYPE: 'string',
-                                VALUES: self.configuration[key][TYPE]
-                            }
-                        ]
-                data[CHILDREN].append(custom_field)
-        return data
-
-    def _get_json_config_skeleton(self, name, content):
-        if content[TYPE] == NX_DATA:
-            return {TYPE: GROUP,
-                    NAME: name,
-                    CHILDREN: self.get_stream_information(name)}
 
     def get_stream_information(self, name):
         """
@@ -219,41 +201,55 @@ class FileWriterNexusConfigCreator:
         stream_info_aggr = []
         if name in self.configuration:
             for item in self.configuration[name]:
-                stream_info = {
-                    WRITER_MODULE: '',
-                    CONFIG: {
-                        SOURCE: '',
-                        TOPIC: '',
-                        DATA_TYPE: '',
-                    },
-                }
-                if self._item_is_string(WRITER_MODULE, item):
-                    stream_info[WRITER_MODULE] = \
-                        item[WRITER_MODULE]
-                if self._item_is_string(SOURCE, item):
-                    stream_info[CONFIG][SOURCE] = \
-                        item[SOURCE]
-                if self._item_is_string(TOPIC, item):
-                    stream_info[CONFIG][TOPIC] = \
-                        item[TOPIC]
-                if self._item_is_string(DATA_TYPE, item):
-                    stream_info[CONFIG][DATA_TYPE] = \
-                        item[DATA_TYPE]
-                if self._item_is_string(VALUE_UNITS, item):
-                    stream_info[CONFIG][VALUE_UNITS] = \
-                        item[VALUE_UNITS]
-                if self._item_is_string(ARRAY_SIZE, item):
-                    str_values = item[ARRAY_SIZE].split(',')
-                    int_values = [int(val) for val in str_values]
-                    stream_info[CONFIG][ARRAY_SIZE] = int_values
-                if 'nan' not in str(item[DATA_NAME]) and \
-                        'NaN' not in str(item[DATA_NAME]):
+                stream_info = {}
+                if item[KIND] == GROUP:
                     stream_info = {
-                        TYPE: GROUP,
-                        NAME: item[DATA_NAME],
-                        CHILDREN: [stream_info],
+                        WRITER_MODULE: '',
+                        CONFIG: {
+                            SOURCE: '',
+                            TOPIC: '',
+                            DATA_TYPE: '',
+                        },
                     }
-                stream_info_aggr.append(stream_info)
+                    if self._item_is_string(WRITER_MODULE, item):
+                        stream_info[WRITER_MODULE] = \
+                            item[WRITER_MODULE]
+                    if self._item_is_string(SOURCE, item):
+                        stream_info[CONFIG][SOURCE] = \
+                            item[SOURCE]
+                    if self._item_is_string(TOPIC, item):
+                        stream_info[CONFIG][TOPIC] = \
+                            item[TOPIC]
+                    if self._item_is_string(DATA_TYPE, item):
+                        stream_info[CONFIG][DATA_TYPE] = \
+                            item[DATA_TYPE]
+                    if self._item_is_string(VALUE_UNITS, item):
+                        stream_info[CONFIG][VALUE_UNITS] = \
+                            item[VALUE_UNITS]
+                    if self._item_is_string(ARRAY_SIZE, item):
+                        str_values = item[ARRAY_SIZE].split(',')
+                        int_values = [int(val) for val in str_values]
+                        stream_info[CONFIG][ARRAY_SIZE] = int_values
+                    if self._item_is_string(DATA_NAME, item):
+                        stream_info = {
+                            TYPE: GROUP,
+                            NAME: item[DATA_NAME],
+                            CHILDREN: [stream_info],
+                        }
+                elif item[KIND] == STATIC_DATA:
+                    config = {}
+                    if self._item_is_string(DATA_TYPE, item):
+                        config[DATA_TYPE] = item[DATA_TYPE]
+                    if self._item_is_string(STATIC_VALUE, item):
+                        config[VALUES] = item[STATIC_VALUE]
+                    if self._item_is_string(DATA_NAME, item):
+                        config[NAME] = item[DATA_NAME]
+                        stream_info = {
+                            WRITER_MODULE: DATASET,
+                            CONFIG: config
+                        }
+                if stream_info:
+                    stream_info_aggr.append(stream_info)
         return stream_info_aggr
 
     @staticmethod
@@ -264,7 +260,9 @@ class FileWriterNexusConfigCreator:
 class NxApplicationXMLToJson:
     NAMESPACE = '{http://definition.nexusformat.org/nxdl/3.1}'
 
-    def __init__(self, xml_path, xls_path, nodes_to_remove=['field']):
+    def __init__(self, xml_path, xls_path, nodes_to_remove=None):
+        if nodes_to_remove is None:
+            nodes_to_remove = ['field']
         self._xml_path = xml_path
         self._config_xls_path = xls_path
         self.nx_tomo_dict = {}

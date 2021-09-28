@@ -9,12 +9,36 @@
                     "name": "instrument",
                     "children": [
                         {
-                            "type": "NXsource",
-                            "children": []
+                            "type": "group",
+                            "name": "source",
+                            "attributes": [
+                                {
+                                    "name": "NX_class",
+                                    "dtype": "string",
+                                    "values": "NXsource"
+                                }
+                            ],
+                            "children": [
+                                {
+                                    "module": "dataset",
+                                    "config": {
+                                        "dtype": "string",
+                                        "values": "x-ray",
+                                        "name": "probe"
+                                    }
+                                }
+                            ]
                         },
                         {
                             "type": "group",
                             "name": "detector",
+                            "attributes": [
+                                {
+                                    "name": "NX_class",
+                                    "dtype": "string",
+                                    "values": "NXdetector"
+                                }
+                            ],
                             "children": [
                                 {
                                     "type": "group",
@@ -49,13 +73,6 @@
                                         }
                                     ]
                                 }
-                            ],
-                            "attributes": [
-                                {
-                                    "name": "NX_class",
-                                    "dtype": "string",
-                                    "values": "NXdetector"
-                                }
                             ]
                         }
                     ],
@@ -70,6 +87,13 @@
                 {
                     "type": "group",
                     "name": "sample",
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXsample"
+                        }
+                    ],
                     "children": [
                         {
                             "type": "group",
@@ -84,34 +108,41 @@
                                     }
                                 }
                             ]
-                        }
-                    ],
-                    "attributes": [
+                        },
                         {
-                            "name": "NX_class",
-                            "dtype": "string",
-                            "values": "NXsample"
+                            "module": "dataset",
+                            "config": {
+                                "dtype": "string",
+                                "values": "lego",
+                                "name": "name"
+                            }
                         }
                     ]
                 },
                 {
                     "type": "group",
                     "name": "control",
-                    "children": [
-                        {
-                            "module": "",
-                            "config": {
-                                "source": "",
-                                "topic": "",
-                                "dtype": ""
-                            }
-                        }
-                    ],
                     "attributes": [
                         {
                             "name": "NX_class",
                             "dtype": "string",
                             "values": "NXmonitor"
+                        }
+                    ],
+                    "children": [
+                        {
+                            "type": "group",
+                            "name": "data",
+                            "children": [
+                                {
+                                    "module": "f142",
+                                    "config": {
+                                        "source": "",
+                                        "topic": "odin_topic",
+                                        "dtype": "uint32"
+                                    }
+                                }
+                            ]
                         }
                     ]
                 },
@@ -132,6 +163,13 @@
                             "target": "/NXentry/NXinstrument/detector:NXdetector/image_key"
                         }
                     ],
+                    "attributes": [
+                        {
+                            "name": "NX_class",
+                            "dtype": "string",
+                            "values": "NXdata"
+                        }
+                    ],
                     "children": [
                         {
                             "module": "",
@@ -141,14 +179,15 @@
                                 "dtype": ""
                             }
                         }
-                    ],
-                    "attributes": [
-                        {
-                            "name": "NX_class",
-                            "dtype": "string",
-                            "values": "NXdata"
-                        }
                     ]
+                },
+                {
+                    "module": "dataset",
+                    "config": {
+                        "dtype": "string",
+                        "values": "NXtomo",
+                        "name": "definition"
+                    }
                 }
             ],
             "attributes": [
