@@ -221,7 +221,7 @@ class FileWriterNexusConfigCreator:
         """
         Translates target link to something the file-writer will understand.
         """
-        nexus_instances = link.split('/')[1:]
+        nexus_instances = link.split('/')[:]
         translated_nexus_list = []
         for nexus_instance in nexus_instances:
             nxs_item = nexus_instance.split(':')[-1]
@@ -231,7 +231,7 @@ class FileWriterNexusConfigCreator:
             else:
                 translated_nexus_list.append(nexus_instance)
         # TODO: Fix linking in file-writer. Until then this is turned off.
-        # return '/' + '/'.join(translated_nexus_list)
+        # return '/'.join(translated_nexus_list)
         return link
 
     def get_stream_information(self, name):
