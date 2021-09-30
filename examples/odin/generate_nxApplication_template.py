@@ -221,7 +221,7 @@ class FileWriterNexusConfigCreator:
         """
         Translates target link to something the file-writer will understand.
         """
-        nexus_instances = link.split('/')[:]
+        nexus_instances = link.split('/')
         translated_nexus_list = []
         for nexus_instance in nexus_instances:
             nxs_item = nexus_instance.split(':')[-1]
