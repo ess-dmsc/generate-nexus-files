@@ -44,8 +44,7 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
     straw_offs_sorted = [0] * len(straw_offs_unsorted)
     straw_offs_sorted[mid_point] = straw_offs_unsorted[0]
     straw_offs_sorted[:mid_point] = straw_offs_unsorted[mid_point:]
-    straw_offs_sorted[mid_point:] = reversed(
-        straw_offs_unsorted[1:mid_point])
+    straw_offs_sorted[mid_point:] = reversed(straw_offs_unsorted[1:mid_point])
     return straw_offs_sorted
 
 
@@ -207,7 +206,7 @@ class NexusInfo:
                 UNITS: unit,
                 TRANSFORMATION_TYPE: transform_type,
                 DEPENDS_ON: depend_path,
-                VECTOR: vector
+                VECTOR: [x for x in vector]
             }
         }
 
@@ -856,7 +855,7 @@ class NexusFileBuilder:
     def _add_attributes(data_, d_set):
         if data_[ATTR]:
             for attr in data_[ATTR]:
-                d_set.attrs[attr] = np.string_(data_[ATTR][attr])
+                d_set.attrs[attr] = data_[ATTR][attr]
 
 
 if __name__ == '__main__':
