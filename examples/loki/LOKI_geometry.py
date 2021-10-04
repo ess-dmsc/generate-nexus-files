@@ -163,29 +163,32 @@ class NexusInfo:
             VALUES:
                 {
                     'trans_' + str(next(transform_id_iter)):
-                        NexusInfo._get_nx_log_group(value=location_dataset)
+                        NexusInfo._get_nx_log_group(location_dset=
+                                                    location_dataset)
                 },
             ATTR: NexusInfo._get_transformation_class_attr()
         }
 
     @staticmethod
-    def _get_nx_log_group(value=None, time=None, unit='ns'):
+    def _get_nx_log_group(location_dset=None, time=None, unit='ns'):
         if time is None:
             time = [0]
-        if value is None:
-            value = [0]
+        if location_dset is None:
+            location_dset = {VALUES: {}, ATTR: {}}
+        attributes = location_dset[ATTR]
+        location_dset[ATTR] = {}
         return {
             VALUES:
                 {
                     NXLOG_VALUE:
-                        value,
+                        location_dset,
                     TIME:
                         {
                             VALUES: time,
                             ATTR: {UNITS: unit}
                         }
                 },
-            ATTR: NexusInfo.get_nx_log_class_attr()
+            ATTR: {**NexusInfo.get_nx_log_class_attr(), **attributes}
         }
 
     @staticmethod
