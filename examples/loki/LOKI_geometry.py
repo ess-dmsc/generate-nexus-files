@@ -1,6 +1,7 @@
 import csv
 from abc import ABC
 
+from datetime import datetime
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,8 @@ from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
     LENGTH_UNIT, loki_banks, loki_disk_choppers, loki_monitors, \
     loki_slits, loki_source, loki_sample
 
+
+VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 N_VERTICES = 3
 ATTR = 'attributes'
 DEPENDS_ON = 'depends_on'
@@ -132,6 +135,10 @@ class NexusInfo:
         return {NX_CLASS: 'NXslit'}
 
     @staticmethod
+    def get_char_metadata(char_metadata):
+        pass
+
+    @staticmethod
     def get_transform_translation(value, vector, unit, depend_path='.'):
         return NexusInfo._get_transformation(value, vector, unit, TRANSLATION,
                                              depend_path)
@@ -163,25 +170,25 @@ class NexusInfo:
             VALUES:
                 {
                     'trans_' + str(next(transform_id_iter)):
-                        NexusInfo._get_nx_log_group(location_dset=
+                        NexusInfo.get_nx_log_group(nx_log_data=
                                                     location_dataset)
                 },
             ATTR: NexusInfo._get_transformation_class_attr()
         }
 
     @staticmethod
-    def _get_nx_log_group(location_dset=None, time=None, unit='ns'):
+    def get_nx_log_group(nx_log_data=None, time=None, unit='ns'):
         if time is None:
             time = [0]
-        if location_dset is None:
-            location_dset = {VALUES: {}, ATTR: {}}
-        attributes = location_dset[ATTR]
-        location_dset[ATTR] = {}
+        if nx_log_data is None:
+            nx_log_data = {VALUES: {}, ATTR: {}}
+        attributes = nx_log_data[ATTR]
+        nx_log_data[ATTR] = {}
         return {
             VALUES:
                 {
                     NXLOG_VALUE:
-                        location_dset,
+                        nx_log_data,
                     TIME:
                         {
                             VALUES: time,
@@ -720,6 +727,32 @@ class Bank:
             NexusInfo.get_detector_class_attr())
 
 
+class Entry:
+    """
+    Simple representation of a NeXus Entry.
+    """
+
+    def __init__(self, proposal_id: int, title: str, experiment_desc: str = ''):
+        self._proposal_id = proposal_id
+        self._title = title
+        self._experiment_desc = experiment_desc
+
+    def get_nx_entry(self, start_time):
+        return {ENTRY: NexusInfo.get_values_attrs_as_dict(
+            {
+                INSTRUMENT:
+                    NexusInfo.get_values_attrs_as_dict(
+                        {}, NexusInfo.get_instrument_class_attr()),
+                'title': NexusInfo.get_values_attrs_as_dict(self._title),
+                'proposal_id': NexusInfo.get_values_attrs_as_dict(
+                    self._proposal_id),
+                'experiment_description': NexusInfo.get_values_attrs_as_dict(
+                    self._experiment_desc),
+                'start_time': NexusInfo.get_values_attrs_as_dict(start_time)
+            },
+            NexusInfo.get_entry_class_attr())}
+
+
 class SimpleNexusClass(ABC):
     """
     Abstraction of a simple nexus class.
@@ -813,12 +846,17 @@ class Slit(SimpleNexusClass):
         Abstraction of an instrument slit.
     """
 
-    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+    def compound_geometry(self, transform_path, x_gap, y_gap, gap_unit='m',
+                          transform_as_nxlog=False):
         """
             Creates a dictionary of the slit geometry suitable for
             the NexusFileBuilder class.
         """
+        x_gap_nexus = {VALUES: x_gap * SCALE_FACTOR, ATTR: {UNITS: gap_unit}}
+        y_gap_nexus = {VALUES: y_gap, ATTR: {UNITS: gap_unit}}
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        geo_data['x_gap'] = NexusInfo.get_nx_log_group(nx_log_data=x_gap_nexus)
+        geo_data['y_gap'] = NexusInfo.get_nx_log_group(nx_log_data=y_gap_nexus)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_slit_class_attr())
@@ -845,7 +883,7 @@ class NexusFileBuilder:
                 d_set = group.create_dataset(element,
                                              data=nxs_data[element][VALUES])
                 self._add_attributes(nxs_data[element], d_set)
-            elif isinstance(nxs_data[element][VALUES], str):
+            elif isinstance(nxs_data[element][VALUES], VALID_DATA_TYPES_NXS):
                 d_set = group.create_dataset(element,
                                              data=nxs_data[element][VALUES])
                 self._add_attributes(nxs_data[element], d_set)
@@ -913,12 +951,9 @@ if __name__ == '__main__':
             data[bank.get_bank_id()] = bank.compound_data_in_list()
         write_csv_file(data[0] + data[4])
 
-    data = {ENTRY: NexusInfo.get_values_attrs_as_dict(
-        {
-            INSTRUMENT:
-                NexusInfo.get_values_attrs_as_dict(
-                    {}, NexusInfo.get_instrument_class_attr())
-        }, NexusInfo.get_entry_class_attr())}
+    nx_entry = Entry(proposal_id=1234, title="My experiment",
+                     experiment_desc="this is an experiment")
+    data = nx_entry.get_nx_entry(start_time=datetime.now().isoformat())
 
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
@@ -970,7 +1005,10 @@ if __name__ == '__main__':
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_slit[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_slit[NAME]] = \
-                monitor.compound_geometry(trans_path)
+                monitor.compound_geometry(trans_path,
+                                          loki_slit['x_gap'] * SCALE_FACTOR,
+                                          loki_slit['y_gap'] * SCALE_FACTOR,
+                                          gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
 
         # Write data to nexus file.

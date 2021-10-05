@@ -35,9 +35,12 @@ loki_monitors = [{'location': (0, 0, -2140), 'name': 'monitor_0'},
                  {'location': (0, 0, -1040), 'name': 'monitor_3'},
                  {'location': (0, 0, -1040), 'name': 'monitor_4'}]
 
-loki_slits = [{'location': (0, 0, -2140), 'name': 'slit_1'},
-              {'location': (0, 0, -1040), 'name': 'slit_2'},
-              {'location': (0, 0, -2140), 'name': 'slit_3'}]
+loki_slits = [{'location': (0, 0, -2140), 'name': 'slit_1'
+                  , 'x_gap': 35, 'y_gap': 30},
+              {'location': (0, 0, -1040), 'name': 'slit_2'
+                  , 'x_gap': 35, 'y_gap': 30},
+              {'location': (0, 0, -2140), 'name': 'slit_3',
+               'x_gap': 35, 'y_gap': 30}]
 
 loki_banks = {0: {'A': [(-500, -781, 5012.5),
                         (-500, -799.84, 5091.28),

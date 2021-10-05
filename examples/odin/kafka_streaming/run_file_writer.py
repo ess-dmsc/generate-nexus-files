@@ -27,7 +27,7 @@ if __name__ == '__main__':
     start_handler = job_handler.start_job(write_job)
     while not start_handler.is_done():
         time.sleep(1)
-    stop_time = start_time + timedelta(seconds=60)
+    stop_time = start_time + timedelta(seconds=30)
     stop_handler = job_handler.set_stop_time(stop_time)
     while not stop_handler.is_done():
         time.sleep(1)
