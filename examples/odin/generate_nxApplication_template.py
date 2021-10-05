@@ -174,13 +174,6 @@ class FileWriterNexusConfigCreator:
                 class_type = self.translator[key][1]
                 data[new_key] = self.nxs_config_object_factory(class_type,
                                                                sub_dict[key])
-
-                # TODO: fix this. Should be added in children of data.
-                # {
-                #     'type': 'link',
-                #     'name': name,
-                #     'target': self.target
-                # }
                 if new_key == CHILDREN:
                     tmp_list = []
                     for item in sub_dict[key]:
