@@ -26,8 +26,10 @@ loki_source = {
     'name': 'moderator'
 }
 
-loki_disk_choppers = [{'location': (0, 0, -2140), 'name': 'chopper_1'},
-                      {'location': (0, 0, -1040), 'name': 'chopper_2'}]
+loki_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, -2140),
+                       'rotation_speed': 14.0, 'slits': 2, 'disk_rad': 700.0/2},
+                      {'name': 'chopper_2', 'location': (0, 0, -1040),
+                       'rotation_speed': 14.0, 'slits': 2, 'disk_rad': 700.0/2}]
 
 loki_monitors = [{'location': (0, 0, -2140), 'name': 'monitor_0'},
                  {'location': (0, 0, -1040), 'name': 'monitor_1'},

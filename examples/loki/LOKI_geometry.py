@@ -170,19 +170,20 @@ class NexusInfo:
             VALUES:
                 {
                     'trans_' + str(next(transform_id_iter)):
-                        NexusInfo.get_nx_log_group(nx_log_data=
-                                                    location_dataset)
+                        NexusInfo.get_nx_log_group(nx_log_data=location_dataset)
                 },
             ATTR: NexusInfo._get_transformation_class_attr()
         }
 
     @staticmethod
-    def get_nx_log_group(nx_log_data=None, time=None, unit='ns'):
+    def get_nx_log_group(nx_log_data=None, time=None, time_unit='ns'):
         if time is None:
             time = [0]
         if nx_log_data is None:
             nx_log_data = {VALUES: {}, ATTR: {}}
         attributes = nx_log_data[ATTR]
+        if attributes is None:
+            attributes = {}
         nx_log_data[ATTR] = {}
         return {
             VALUES:
@@ -192,7 +193,7 @@ class NexusInfo:
                     TIME:
                         {
                             VALUES: time,
-                            ATTR: {UNITS: unit}
+                            ATTR: {UNITS: time_unit}
                         }
                 },
             ATTR: {**NexusInfo.get_nx_log_class_attr(), **attributes}
@@ -813,13 +814,27 @@ class DiskChopper(SimpleNexusClass):
     """
         Abstraction of an instrument disk chopper.
     """
-
     def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data,
+            NexusInfo.get_disk_chopper_class_attr())
+
+    def compound_geometry_extended(self, transform_path, rot_speed,
+                                   disk_radius, slits,
+                                   transform_as_nxlog=False):
         """
             Creates a dictionary of the disk chopper geometry suitable for
             the NexusFileBuilder class.
         """
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        rotation_speed_nexus = NexusInfo.get_values_attrs_as_dict(
+            rot_speed, {UNITS: 'Hz'})
+        geo_data['rotation_speed'] = \
+            NexusInfo.get_nx_log_group(rotation_speed_nexus)
+        geo_data['radius'] = NexusInfo.get_values_attrs_as_dict(
+            disk_radius, {UNITS: LENGTH_UNIT})
+        geo_data['slits'] = NexusInfo.get_values_attrs_as_dict(slits)
         return NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_disk_chopper_class_attr())
@@ -846,20 +861,27 @@ class Slit(SimpleNexusClass):
         Abstraction of an instrument slit.
     """
 
-    def compound_geometry(self, transform_path, x_gap, y_gap, gap_unit='m',
-                          transform_as_nxlog=False):
+    def compound_geometry(self, transform_path, transform_as_nxlog=False):
+        geo_data = self._get_transformation(transform_path, transform_as_nxlog)
+        return NexusInfo.get_values_attrs_as_dict(
+            geo_data, NexusInfo.get_slit_class_attr())
+
+    def compound_geometry_extended(self, transform_path, x_gap, y_gap,
+                                   gap_unit='m',
+                                   transform_as_nxlog=False):
         """
             Creates a dictionary of the slit geometry suitable for
             the NexusFileBuilder class.
         """
-        x_gap_nexus = {VALUES: x_gap * SCALE_FACTOR, ATTR: {UNITS: gap_unit}}
-        y_gap_nexus = {VALUES: y_gap, ATTR: {UNITS: gap_unit}}
+        x_gap_nexus = NexusInfo.get_values_attrs_as_dict(x_gap,
+                                                         {UNITS: gap_unit})
+        y_gap_nexus = NexusInfo.get_values_attrs_as_dict(y_gap,
+                                                         {UNITS: gap_unit})
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
         geo_data['x_gap'] = NexusInfo.get_nx_log_group(nx_log_data=x_gap_nexus)
         geo_data['y_gap'] = NexusInfo.get_nx_log_group(nx_log_data=y_gap_nexus)
         return NexusInfo.get_values_attrs_as_dict(
-            geo_data,
-            NexusInfo.get_slit_class_attr())
+            geo_data, NexusInfo.get_slit_class_attr())
 
 
 class NexusFileBuilder:
@@ -987,7 +1009,10 @@ if __name__ == '__main__':
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_chopper[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_chopper[NAME]] = \
-                disk_chopper.compound_geometry(trans_path)
+                disk_chopper.compound_geometry_extended(
+                    trans_path, loki_chopper['rotation_speed'],
+                    loki_chopper['disk_rad'] * SCALE_FACTOR,
+                    loki_chopper['slits'])
             print(f'Chopper {loki_chopper[NAME]} is done!')
 
         # Create monitors.
@@ -1005,10 +1030,9 @@ if __name__ == '__main__':
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_slit[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_slit[NAME]] = \
-                monitor.compound_geometry(trans_path,
-                                          loki_slit['x_gap'] * SCALE_FACTOR,
-                                          loki_slit['y_gap'] * SCALE_FACTOR,
-                                          gap_unit=LENGTH_UNIT)
+                monitor.compound_geometry_extended(
+                    trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
+                    loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
 
         # Write data to nexus file.
