@@ -79,7 +79,7 @@ class IdIterator:
         return IdIterator(start)
 
 
-pixel_id_iter = iter(IdIterator(1))
+pixel_id_iter = iter(IdIterator(11))
 straw_id_iter = iter(IdIterator())
 transform_id_iter = iter(IdIterator(1))
 
@@ -921,14 +921,50 @@ class NexusFileBuilder:
                 d_set.attrs[attr] = data_[ATTR][attr]
 
 
+class NexusFileLoader:
+    """
+    Loads a nexus file.
+    """
+
+    def __init__(self, file_path):
+        self._file_path = file_path
+        self._nexus_content = None
+
+    def load_file(self):
+        self._nexus_content = h5py.File(self._file_path, 'r')
+
+    def get_data(self, dot_path):
+        dot_path_list = dot_path.split('.')
+        return self._get_data(dot_path_list, self._nexus_content)
+
+    def _get_data(self, dot_path_list, nexus_data):
+        if len(dot_path_list) > 1:
+            return self._get_data(dot_path_list[1:],
+                                  nexus_data[dot_path_list[0]])
+        else:
+            return nexus_data[dot_path_list[0]]
+
+
 if __name__ == '__main__':
-    plot_tube_locations = False
+    loki_detector_data_filepath = 'loki_detector_data.nxs'
+    plot_tube_locations = True
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
+
+    nexus_loader = NexusFileLoader(loki_detector_data_filepath)
+    try:
+        nexus_loader.load_file()
+        detector_data = \
+            nexus_loader.get_data('mantid_workspace_1.instrument.detector.'
+                                              'detector_count')
+    except Exception:
+        detector_data = None
+        print(f'No such nexus file: {loki_detector_data_filepath}')
+
     for loki_bank_id in loki_banks:
         if plot_endpoint_locations:
             for idx in range(4):
