@@ -16,6 +16,7 @@ from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
 
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
+VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
 N_VERTICES = 3
 ATTR = 'attributes'
 DEPENDS_ON = 'depends_on'
@@ -178,7 +179,10 @@ class NexusInfo:
     @staticmethod
     def get_nx_log_group(nx_log_data=None, time=None, time_unit='ns'):
         if time is None:
-            time = [0]
+            if isinstance(nx_log_data[VALUES], VALID_ARRAY_TYPES_NXS):
+                time = list(range(0, len(nx_log_data[VALUES])))
+            else:
+                time = [0]
         if nx_log_data is None:
             nx_log_data = {VALUES: {}, ATTR: {}}
         attributes = nx_log_data[ATTR]
@@ -588,11 +592,12 @@ class Bank:
 
     def __init__(self, bank_geo: Dict, bank_id: int):
         self._bank_id = bank_id
+        self._nbr_of_tubes = bank_geo['num_tubes']
         self._bank_offset = np.array(bank_geo['bank_offset']) * SCALE_FACTOR
         self._bank_translation = np.array(bank_geo['A'][0]) * SCALE_FACTOR
         self._bank_geometry = self._set_bank_geometry(bank_geo)
         self._tube_depth = TUBE_DEPTH
-        self._tube_width = int(bank_geo['num_tubes'] / TUBE_DEPTH)
+        self._tube_width = int(self._nbr_of_tubes / TUBE_DEPTH)
 
         # Check that provided geometry seems feasible.
         self._is_bank_cuboid()
@@ -614,6 +619,7 @@ class Bank:
         self._detector_tube = Tube(tuple(self._bank_geometry['A'][0]),
                                    tuple(self._bank_geometry['B'][0]),
                                    self._bank_alignment)
+        self._nexus_dict = {}
 
     def _set_bank_geometry(self, bank_geo: Dict) -> Dict:
         for i in range(4):
@@ -723,9 +729,22 @@ class Bank:
                                                   self._bank_translation,
                                                   transform_path,
                                                   as_nx_log=transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_detector_class_attr())
+        return self._nexus_dict
+
+    def add_data(self, det_data):
+        data_nexus = \
+            NexusInfo.get_nx_log_group(
+                nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data))
+        self._nexus_dict[VALUES].update({'data': data_nexus})
+
+    def get_nexus_dict(self):
+        return self._nexus_dict
+
+    def get_number_of_pixels(self):
+        return self._nbr_of_tubes * STRAW_RESOLUTION * NUM_STRAWS_PER_TUBE
 
 
 class Entry:
@@ -762,6 +781,7 @@ class SimpleNexusClass(ABC):
     def __init__(self, position: tuple, name: str = ''):
         self._position = np.array(position) * SCALE_FACTOR
         self._name: str = name
+        self._nexus_dict = {}
 
     def _get_transformation(self, transform_path, transform_nx_log):
         return NexusInfo.get_transformations_as_dict({},
@@ -777,6 +797,9 @@ class SimpleNexusClass(ABC):
         """
         raise NotImplementedError
 
+    def get_nexus_dict(self):
+        return self._nexus_dict
+
 
 class Source(SimpleNexusClass):
     """
@@ -789,9 +812,10 @@ class Source(SimpleNexusClass):
         the NexusFileBuilder class.
         """
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_source_class_attr())
+        return self._nexus_dict
 
 
 class Sample(SimpleNexusClass):
@@ -805,9 +829,10 @@ class Sample(SimpleNexusClass):
         the NexusFileBuilder class.
         """
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_sample_class_attr())
+        return self._nexus_dict
 
 
 class DiskChopper(SimpleNexusClass):
@@ -816,9 +841,10 @@ class DiskChopper(SimpleNexusClass):
     """
     def compound_geometry(self, transform_path, transform_as_nxlog=False):
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_disk_chopper_class_attr())
+        return self._nexus_dict
 
     def compound_geometry_extended(self, transform_path, rot_speed,
                                    disk_radius, slits,
@@ -835,9 +861,10 @@ class DiskChopper(SimpleNexusClass):
         geo_data['radius'] = NexusInfo.get_values_attrs_as_dict(
             disk_radius, {UNITS: LENGTH_UNIT})
         geo_data['slits'] = NexusInfo.get_values_attrs_as_dict(slits)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_disk_chopper_class_attr())
+        return self._nexus_dict
 
 
 class Monitor(SimpleNexusClass):
@@ -851,9 +878,16 @@ class Monitor(SimpleNexusClass):
             the NexusFileBuilder class.
         """
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_monitor_class_attr())
+        return self._nexus_dict
+
+    def add_data(self, mon_data):
+        data_nexus = \
+            NexusInfo.get_nx_log_group(
+                nx_log_data=NexusInfo.get_values_attrs_as_dict(mon_data))
+        self._nexus_dict[VALUES].update({'data': data_nexus})
 
 
 class Slit(SimpleNexusClass):
@@ -863,8 +897,9 @@ class Slit(SimpleNexusClass):
 
     def compound_geometry(self, transform_path, transform_as_nxlog=False):
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data, NexusInfo.get_slit_class_attr())
+        return self._nexus_dict
 
     def compound_geometry_extended(self, transform_path, x_gap, y_gap,
                                    gap_unit='m',
@@ -880,8 +915,9 @@ class Slit(SimpleNexusClass):
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
         geo_data['x_gap'] = NexusInfo.get_nx_log_group(nx_log_data=x_gap_nexus)
         geo_data['y_gap'] = NexusInfo.get_nx_log_group(nx_log_data=y_gap_nexus)
-        return NexusInfo.get_values_attrs_as_dict(
+        self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data, NexusInfo.get_slit_class_attr())
+        return self._nexus_dict
 
 
 class NexusFileBuilder:
@@ -901,7 +937,7 @@ class NexusFileBuilder:
 
     def _construct_nxs_file(self, nxs_data, group):
         for element in nxs_data:
-            if isinstance(nxs_data[element][VALUES], list):
+            if isinstance(nxs_data[element][VALUES], VALID_ARRAY_TYPES_NXS):
                 d_set = group.create_dataset(element,
                                              data=nxs_data[element][VALUES])
                 self._add_attributes(nxs_data[element], d_set)
@@ -946,8 +982,8 @@ class NexusFileLoader:
 
 
 if __name__ == '__main__':
-    loki_detector_data_filepath = 'loki_detector_data.nxs'
-    plot_tube_locations = True
+    loki_detector_data_filepath = 'loki_data.nxs'
+    plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
@@ -961,8 +997,16 @@ if __name__ == '__main__':
         detector_data = \
             nexus_loader.get_data('mantid_workspace_1.instrument.detector.'
                                               'detector_count')
+        monitor_data = \
+            nexus_loader.get_data('mantid_workspace_1.instrument.'
+                                             'detector.'
+                                             'detector_count')
+        arr = np.zeros((1605642,), dtype='int32')
+        detector_data.read_direct(arr)
+        detector_data = arr
     except Exception:
-        detector_data = None
+        detector_data = []
+        monitor_data = []
         print(f'No such nexus file: {loki_detector_data_filepath}')
 
     for loki_bank_id in loki_banks:
@@ -1013,16 +1057,21 @@ if __name__ == '__main__':
                      experiment_desc="this is an experiment")
     data = nx_entry.get_nx_entry(start_time=datetime.now().isoformat())
 
+    start_index = 0
+    end_index = start_index
     if generate_nexus_content_into_nxs:
         for bank in detector_banks:
+            end_index += bank.get_number_of_pixels()
             key_det = f'detector_{bank.get_bank_id()}'
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{key_det}/{TRANSFORMATIONS}/'
             transform_nxlog = True if bank.get_bank_id() \
                                       in bank_ids_transform_as_nxlog else False
-            item_det = bank.compound_detector_geometry(trans_path,
-                                                       transform_nxlog)
+            bank.compound_detector_geometry(trans_path, transform_nxlog)
+            bank.add_data(detector_data[start_index:end_index])
+            item_det = bank.get_nexus_dict()
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
+            start_index = end_index
 
         # Create source.
         loki_source = Source(loki_source[LOCATION], loki_source[NAME])
@@ -1062,11 +1111,11 @@ if __name__ == '__main__':
 
         # Create slits.
         for loki_slit in loki_slits:
-            monitor = Slit(loki_slit[LOCATION], loki_slit[NAME])
+            slit = Slit(loki_slit[LOCATION], loki_slit[NAME])
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_slit[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_slit[NAME]] = \
-                monitor.compound_geometry_extended(
+                slit.compound_geometry_extended(
                     trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
                     loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
