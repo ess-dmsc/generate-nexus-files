@@ -8,11 +8,11 @@ import numpy as np
 import random
 from enum import Enum
 from typing import Dict, List, Optional
-from detector_banks_geo import FRACTIONAL_PRECISION, NUM_STRAWS_PER_TUBE, \
-    IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, STRAW_ALIGNMENT_OFFSET_ANGLE, \
-    TUBE_OUTER_STRAW_DIST_FROM_CP, STRAW_RESOLUTION, SCALE_FACTOR, \
-    LENGTH_UNIT, loki_banks, loki_disk_choppers, loki_monitors, \
-    loki_slits, loki_source, loki_sample
+from examples.loki.detector_banks_geo import FRACTIONAL_PRECISION, \
+    NUM_STRAWS_PER_TUBE,  IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
+    STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
+    STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, loki_banks, \
+    loki_disk_choppers, loki_monitors, loki_slits, loki_source, loki_sample
 
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
@@ -734,11 +734,16 @@ class Bank:
             NexusInfo.get_detector_class_attr())
         return self._nexus_dict
 
-    def add_data(self, det_data):
+    def add_data(self, det_data, time_of_flight, time_unit='s'):
         data_nexus = \
             NexusInfo.get_nx_log_group(
                 nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data))
         self._nexus_dict[VALUES].update({'data': data_nexus})
+        tof_nexus = NexusInfo.get_nx_log_group(
+            nx_log_data=NexusInfo.get_values_attrs_as_dict(time_of_flight,
+                                                           attrs=
+                                                           {UNITS: time_unit}))
+        self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
 
     def get_nexus_dict(self):
         return self._nexus_dict
@@ -995,19 +1000,37 @@ if __name__ == '__main__':
     try:
         nexus_loader.load_file()
         detector_data = \
-            nexus_loader.get_data('mantid_workspace_1.instrument.detector.'
-                                              'detector_count')
+            nexus_loader.get_data('mantid_workspace_1.workspace.'
+                                              'values')
         monitor_data = \
             nexus_loader.get_data('mantid_workspace_1.instrument.'
                                              'detector.'
                                              'detector_count')
-        arr = np.zeros((1605642,), dtype='int32')
+
+        # detector count data
+        arr = np.zeros((1605642, 300), dtype='float')
         detector_data.read_direct(arr)
         detector_data = arr
-    except Exception:
+
+        # time of flight data
+        tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
+                                              'axis1')
+        arr = np.zeros((301,), dtype='int32')
+        tof_data.read_direct(arr)
+        tof_data = arr
+
+        # pixel id data
+        pixel_id_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
+                                              'axis2')
+        arr = np.zeros((1605642,), dtype='int32')
+        pixel_id_data.read_direct(arr)
+        pixel_id_data = arr
+    except TypeError as e:
         detector_data = []
         monitor_data = []
-        print(f'No such nexus file: {loki_detector_data_filepath}')
+        tof_data = []
+        pixel_id_data = []
+        print(e)
 
     for loki_bank_id in loki_banks:
         if plot_endpoint_locations:
@@ -1067,7 +1090,8 @@ if __name__ == '__main__':
             transform_nxlog = True if bank.get_bank_id() \
                                       in bank_ids_transform_as_nxlog else False
             bank.compound_detector_geometry(trans_path, transform_nxlog)
-            bank.add_data(detector_data[start_index:end_index])
+            bank.add_data(detector_data[start_index:end_index],
+                          tof_data)
             item_det = bank.get_nexus_dict()
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
