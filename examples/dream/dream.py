@@ -1,3 +1,5 @@
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
 from typing import Dict, Tuple
 
 import numpy as np
@@ -44,60 +46,28 @@ def find_voxel_vertices(
     talpha2 = np.tan(alp2)
 
     pt_0 = np.array(
-        (
-            -dz * ttheta_cphi - dy1 * talpha1 - dx1,
-            -dz * ttheta_sphi - dy1,
-            -dz,
-        )
+        (-dz * ttheta_cphi - dy1 * talpha1 - dx1, -dz * ttheta_sphi - dy1, -dz,)
     )
     pt_1 = np.array(
-        (
-            -dz * ttheta_cphi - dy1 * talpha1 + dx1,
-            -dz * ttheta_sphi - dy1,
-            -dz,
-        )
+        (-dz * ttheta_cphi - dy1 * talpha1 + dx1, -dz * ttheta_sphi - dy1, -dz,)
     )
     pt_2 = np.array(
-        (
-            -dz * ttheta_cphi + dy1 * talpha1 - dx2,
-            -dz * ttheta_sphi + dy1,
-            -dz,
-        )
+        (-dz * ttheta_cphi + dy1 * talpha1 - dx2, -dz * ttheta_sphi + dy1, -dz,)
     )
     pt_3 = np.array(
-        (
-            -dz * ttheta_cphi + dy1 * talpha1 + dx2,
-            -dz * ttheta_sphi + dy1,
-            -dz,
-        )
+        (-dz * ttheta_cphi + dy1 * talpha1 + dx2, -dz * ttheta_sphi + dy1, -dz,)
     )
     pt_4 = np.array(
-        (
-            +dz * ttheta_cphi - dy2 * talpha2 - dx3,
-            +dz * ttheta_sphi - dy2,
-            +dz,
-        )
+        (+dz * ttheta_cphi - dy2 * talpha2 - dx3, +dz * ttheta_sphi - dy2, +dz,)
     )
     pt_5 = np.array(
-        (
-            +dz * ttheta_cphi - dy2 * talpha2 + dx3,
-            +dz * ttheta_sphi - dy2,
-            +dz,
-        )
+        (+dz * ttheta_cphi - dy2 * talpha2 + dx3, +dz * ttheta_sphi - dy2, +dz,)
     )
     pt_6 = np.array(
-        (
-            +dz * ttheta_cphi + dy2 * talpha2 - dx4,
-            +dz * ttheta_sphi + dy2,
-            +dz,
-        )
+        (+dz * ttheta_cphi + dy2 * talpha2 - dx4, +dz * ttheta_sphi + dy2, +dz,)
     )
     pt_7 = np.array(
-        (
-            +dz * ttheta_cphi + dy2 * talpha2 + dx4,
-            +dz * ttheta_sphi + dy2,
-            +dz,
-        )
+        (+dz * ttheta_cphi + dy2 * talpha2 + dx4, +dz * ttheta_sphi + dy2, +dz,)
     )
     return pt_0, pt_1, pt_2, pt_3, pt_4, pt_5, pt_6, pt_7
 
@@ -156,13 +126,7 @@ def create_winding_order(
         )
 
     data = np.column_stack(
-        (
-            vertices_in_each_face,
-            index_0,
-            index_1,
-            index_2,
-            index_3,
-        )
+        (vertices_in_each_face, index_0, index_1, index_2, index_3,)
     ).astype(np.int32)
     return data
 
@@ -213,28 +177,13 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 }
 
 
-def create_sector(
-    geant_df: pd.DataFrame,
-    z_rotation_angle: float,
-    max_vertex_index: int,
-    max_face_index: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    number_of_voxels = len(df.index)
+def create_voxelids_and_faces(geant_df: pd.DataFrame, max_face_index: int, max_vertex_index: int):
+    number_of_voxels = len(geant_df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
-    number_of_vertices = vertices_in_voxel * number_of_voxels
     number_of_faces = faces_in_voxel * number_of_voxels
 
-    x_coords = np.zeros(number_of_vertices)
-    y_coords = np.zeros(number_of_vertices)
-    z_coords = np.zeros(number_of_vertices)
-
-    x_centre_coords = np.zeros(number_of_voxels)
-    y_centre_coords = np.zeros(number_of_voxels)
-    z_centre_coords = np.zeros(number_of_voxels)
-
     voxel_ids = np.zeros((number_of_faces, 2))
-
     max_voxel_index = max_face_index / faces_in_voxel
 
     for voxel in range(number_of_voxels):
@@ -246,6 +195,29 @@ def create_sector(
                 voxel + max_voxel_index
             )
 
+    # Vertices making up each face of each voxel
+    vertices_in_each_face = 4 * np.ones(number_of_faces)
+
+    faces = create_winding_order(
+        number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
+    )
+    return faces, voxel_ids
+
+
+def create_sector(geant_df: pd.DataFrame, z_rotation_angle: float):
+    number_of_voxels = len(geant_df.index)
+    vertices_in_voxel = 8
+    number_of_vertices = vertices_in_voxel * number_of_voxels
+
+    x_coords = np.zeros(number_of_vertices)
+    y_coords = np.zeros(number_of_vertices)
+    z_coords = np.zeros(number_of_vertices)
+
+    x_centre_coords = np.zeros(number_of_voxels)
+    y_centre_coords = np.zeros(number_of_voxels)
+    z_centre_coords = np.zeros(number_of_voxels)
+
+    for voxel in range(number_of_voxels):
         voxel_vertices = find_voxel_vertices(
             geant_df["z"][voxel] / 2,
             0.0,
@@ -309,17 +281,8 @@ def create_sector(
 
     vertex_coords = np.column_stack((x_coords, y_coords, z_coords))
 
-    # Vertices making up each face of each voxel
-
-    vertices_in_each_face = 4 * np.ones(number_of_faces)
-
-    faces = create_winding_order(
-        number_of_voxels, vertices_in_voxel, vertices_in_each_face, max_vertex_index
-    )
     return (
         vertex_coords,
-        faces,
-        voxel_ids,
         x_centre_coords,
         y_centre_coords,
         z_centre_coords,
@@ -356,44 +319,43 @@ if __name__ == "__main__":
     z_offsets_total = None
     max_vertex_index = 0
     max_face_index = 0
+
     # TODO start and stop angle are inferred from diagrams, need to check
     n_sectors = 23
     z_rotation_angles_degrees = np.linspace(-138.0, 138.0, num=n_sectors)
 
-    with alive_bar(
-        len(z_rotation_angles_degrees), bar="blocks", spinner="triangles"
-    ) as bar:
-        for z_rotation_angle in z_rotation_angles_degrees:
-            (
-                sector_vertices,
-                sector_faces,
-                sector_ids,
-                x_offsets,
-                y_offsets,
-                z_offsets,
-            ) = create_sector(
-                df,
-                z_rotation_angle,
-                max_vertex_index,
-                max_face_index,
-            )
-            if total_vertices is None:
-                total_vertices = sector_vertices
-                total_faces = sector_faces
-                total_ids = sector_ids
-                x_offsets_total = x_offsets
-                y_offsets_total = y_offsets
-                z_offsets_total = z_offsets
-            else:
-                total_vertices = np.vstack((total_vertices, sector_vertices))
-                total_faces = np.vstack((total_faces, sector_faces))
-                total_ids = np.vstack((total_ids, sector_ids))
-                x_offsets_total = np.vstack((x_offsets_total, x_offsets))
-                y_offsets_total = np.vstack((y_offsets_total, y_offsets))
-                z_offsets_total = np.vstack((z_offsets_total, z_offsets))
-            max_vertex_index = total_vertices.shape[0]
-            max_face_index = total_ids.shape[0]
-            bar()
+    _create_sector = partial(create_sector, df)
+    _create_voxelids_and_faces = partial(create_voxelids_and_faces, df)
+
+    with ProcessPoolExecutor(max_workers=12) as executor:
+        with alive_bar(
+            len(z_rotation_angles_degrees), bar="blocks", spinner="triangles"
+        ) as bar:
+            for sector_vertices, x_offsets, y_offsets, z_offsets in executor.map(
+                _create_sector, z_rotation_angles_degrees
+            ):
+
+                sector_faces, sector_ids = _create_voxelids_and_faces(
+                    max_face_index, max_vertex_index
+                )
+                if total_vertices is None:
+                    total_vertices = sector_vertices
+                    total_faces = sector_faces
+                    total_ids = sector_ids
+                    x_offsets_total = x_offsets
+                    y_offsets_total = y_offsets
+                    z_offsets_total = z_offsets
+                else:
+                    total_vertices = np.vstack((total_vertices, sector_vertices))
+                    total_faces = np.vstack((total_faces, sector_faces))
+                    total_ids = np.vstack((total_ids, sector_ids))
+                    x_offsets_total = np.vstack((x_offsets_total, x_offsets))
+                    y_offsets_total = np.vstack((y_offsets_total, y_offsets))
+                    z_offsets_total = np.vstack((z_offsets_total, z_offsets))
+
+                max_vertex_index = total_vertices.shape[0]
+                max_face_index = total_ids.shape[0]
+                bar()
 
     write_to_off_file(
         f"DREAM_endcap_{n_sectors}_sectors.off",
