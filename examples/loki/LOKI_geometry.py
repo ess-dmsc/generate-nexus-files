@@ -1025,7 +1025,7 @@ if __name__ == '__main__':
         arr = np.zeros((1605642,), dtype='int32')
         pixel_id_data.read_direct(arr)
         pixel_id_data = arr
-    except TypeError as e:
+    except (TypeError, FileNotFoundError) as e:
         detector_data = []
         monitor_data = []
         tof_data = []
