@@ -177,7 +177,7 @@ sumo_number_to_translation: Dict[int, np.ndarray] = {
 }
 
 
-def create_voxelids_and_faces(geant_df, max_face_index, max_vertex_index):
+def create_voxelids_and_faces(geant_df: pd.DataFrame, max_face_index: int, max_vertex_index: int):
     number_of_voxels = len(geant_df.index)
     vertices_in_voxel = 8
     faces_in_voxel = 6
@@ -204,7 +204,7 @@ def create_voxelids_and_faces(geant_df, max_face_index, max_vertex_index):
     return faces, voxel_ids
 
 
-def create_sector(geant_df, z_rotation_angle):
+def create_sector(geant_df: pd.DataFrame, z_rotation_angle: float):
     number_of_voxels = len(geant_df.index)
     vertices_in_voxel = 8
     number_of_vertices = vertices_in_voxel * number_of_voxels
