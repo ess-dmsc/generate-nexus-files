@@ -153,17 +153,17 @@
                         {
                             "type": "link",
                             "name": "data",
-                            "target": "/NXentry/NXinstrument/detector:NXdetector/data"
+                            "target": "/entry/instrument/detector/data"
                         },
                         {
                             "type": "link",
                             "name": "rotation_angle",
-                            "target": "/NXentry/NXsample/rotation_angle"
+                            "target": "/entry/sample/rotation_angle"
                         },
                         {
                             "type": "link",
                             "name": "image_key",
-                            "target": "/NXentry/NXinstrument/detector:NXdetector/image_key"
+                            "target": "/entry/instrument/detector/image_key"
                         },
                         {
                             "module": "",

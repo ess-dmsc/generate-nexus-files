@@ -223,9 +223,7 @@ class FileWriterNexusConfigCreator:
                     self.nexus_instance_name[nxs_item])
             else:
                 translated_nexus_list.append(nexus_instance)
-        # TODO: Fix linking in file-writer. Until then this is turned off.
-        # return '/'.join(translated_nexus_list)
-        return link
+        return '/'.join(translated_nexus_list)
 
     def get_stream_information(self, name):
         """
