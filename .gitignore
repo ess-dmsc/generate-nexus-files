@@ -1,3 +1,4 @@
+*.off
 *.nxs
 .DS_Store
 .idea
