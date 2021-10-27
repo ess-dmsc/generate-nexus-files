@@ -5,8 +5,8 @@ from examples.common.nxloghelper import add_example_nxlog
 
 
 if __name__ == '__main__':
-    output_filename = 'LOKI_example_gzip.nxs'
-    with NexusBuilder(output_filename, idf_file='LOKI_Tube_Definition.xml',
+    output_filename = '../LOKI_example_gzip.nxs'
+    with NexusBuilder(output_filename, idf_file='../LOKI_Tube_Definition.xml',
                       compress_type='gzip', compress_opts=1) as builder:
         builder.add_instrument_geometry_from_idf()
 

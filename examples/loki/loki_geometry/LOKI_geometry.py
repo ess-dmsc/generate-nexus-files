@@ -8,7 +8,7 @@ import numpy as np
 import random
 from enum import Enum
 from typing import Dict, List, Optional
-from examples.loki.detector_banks_geo import FRACTIONAL_PRECISION, \
+from detector_banks_geo import FRACTIONAL_PRECISION, \
     NUM_STRAWS_PER_TUBE,  IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
     STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
     STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, loki_banks, \
@@ -987,7 +987,7 @@ class NexusFileLoader:
 
 
 if __name__ == '__main__':
-    loki_detector_data_filepath = 'loki_data.nxs'
+    loki_detector_data_filepath = '../loki_data.nxs'
     plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
@@ -1143,6 +1143,10 @@ if __name__ == '__main__':
                     trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
                     loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
+
+        #TODO: write NURF to file.
+
+
 
         # Write data to nexus file.
         nexus_file_builder = NexusFileBuilder(data)
