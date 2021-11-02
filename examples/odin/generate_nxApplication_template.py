@@ -204,10 +204,11 @@ class FileWriterNexusConfigCreator:
         Returns a nexus link dictionary.
         """
         return {
-            TYPE: LINK,
-            NAME: data[self.XML_NAME],
-            TARGET:
-                self._translate_link(data[self.XML_TARGET])
+            WRITER_MODULE: LINK,
+            CONFIG: {
+                NAME: data[self.XML_NAME],
+                SOURCE: self._translate_link(data[self.XML_TARGET])
+            }
         }
 
     def _translate_link(self, link):

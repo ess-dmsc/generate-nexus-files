@@ -151,19 +151,25 @@
                     "name": "data",
                     "children": [
                         {
-                            "type": "link",
-                            "name": "data",
-                            "target": "/entry/instrument/detector/data"
+                            "module": "link",
+                            "config": {
+                                "name": "data",
+                                "source": "/entry/instrument/detector/data"
+                            }
                         },
                         {
-                            "type": "link",
-                            "name": "rotation_angle",
-                            "target": "/entry/sample/rotation_angle"
+                            "module": "link",
+                            "config": {
+                                "name": "rotation_angle",
+                                "source": "/entry/sample/rotation_angle"
+                            }
                         },
                         {
-                            "type": "link",
-                            "name": "image_key",
-                            "target": "/entry/instrument/detector/image_key"
+                            "module": "link",
+                            "config": {
+                                "name": "image_key",
+                                "source": "/entry/instrument/detector/image_key"
+                            }
                         },
                         {
                             "module": "",
