@@ -2,16 +2,16 @@ import time
 from datetime import datetime, timedelta
 
 from file_writer_control import JobHandler
-from file_writer_control import WorkerCommandChannel
+from file_writer_control import WorkerJobPool
 from file_writer_control import WriteJob
 from os import path
 
 if __name__ == '__main__':
     kafka_host = 'localhost:9092'
-    command_channel = WorkerCommandChannel(f'{kafka_host}/Loki_writerCommand')
-    job_handler = JobHandler(worker_finder=command_channel)
+    worker_job_pool = WorkerJobPool(f'{kafka_host}/Loki_jobPool',
+                                    f'{kafka_host}/Loki_writerCommand')
+    job_handler = JobHandler(worker_finder=worker_job_pool)
     nexus_structure_file = path.join('..', 'NXtomo.json')
-    # nexus_structure_file = path.join('..', 'nexus_config.json')
     start_time = datetime.now()
     with open(nexus_structure_file, 'r') as f:
         nexus_structure = f.read()
@@ -21,7 +21,6 @@ if __name__ == '__main__':
         kafka_host,
         start_time,
     )
-    # print(nexus_structure)
 
     print('Starting write job')
     start_handler = job_handler.start_job(write_job)
