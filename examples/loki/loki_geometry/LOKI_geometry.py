@@ -974,9 +974,14 @@ class NexusFileLoader:
     def load_file(self):
         self._nexus_content = h5py.File(self._file_path, 'r')
 
-    def get_data(self, dot_path):
+    def get_data(self, dot_path, get_attrs=False):
         dot_path_list = dot_path.split('.')
-        return self._get_data(dot_path_list, self._nexus_content)
+        nx_data = self._get_data(dot_path_list, self._nexus_content)
+        if get_attrs:
+            nx_attributes = \
+                self._get_attributes(dot_path_list, self._nexus_content)
+            return nx_data, nx_attributes
+        return nx_data
 
     def _get_data(self, dot_path_list, nexus_data):
         if len(dot_path_list) > 1:
@@ -985,6 +990,13 @@ class NexusFileLoader:
         else:
             return nexus_data[dot_path_list[0]]
 
+    def _get_attributes(self, dot_path_list, nexus_data):
+        if len(dot_path_list) > 1:
+            return self._get_attributes(dot_path_list[1:],
+                                        nexus_data[dot_path_list[0]])
+        else:
+            return nexus_data[dot_path_list[0]].attrs
+
 
 if __name__ == '__main__':
     loki_detector_data_filepath = '../loki_data.nxs'
@@ -992,7 +1004,8 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
+    # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
+    bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
 
