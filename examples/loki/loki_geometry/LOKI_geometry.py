@@ -1157,10 +1157,6 @@ if __name__ == '__main__':
                     loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
 
-        #TODO: write NURF to file.
-
-
-
-        # Write data to nexus file.
+        # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data)
         nexus_file_builder.construct_nxs_file()

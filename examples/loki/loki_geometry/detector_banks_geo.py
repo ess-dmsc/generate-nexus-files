@@ -17,31 +17,31 @@ STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_OUTER_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC**2 + STRAW_Z_LOC**2)
 
 loki_sample = {
-    'location': (0, 0, 1),
+    'location': (0, 0, 0.1),
     'name': 'LOKI_sample'
 }
 
 loki_source = {
-    'location': (0, 0, -8640),
+    'location': (0, 0, -23600),
     'name': 'moderator'
 }
 
-loki_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, -2140),
+loki_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, -17100),
                        'rotation_speed': 14.0, 'slits': 2, 'disk_rad': 700.0/2},
-                      {'name': 'chopper_2', 'location': (0, 0, -1040),
+                      {'name': 'chopper_2', 'location': (0, 0, -8570),
                        'rotation_speed': 14.0, 'slits': 2, 'disk_rad': 700.0/2}]
 
-loki_monitors = [{'location': (0, 0, -2140), 'name': 'monitor_0'},
-                 {'location': (0, 0, -1040), 'name': 'monitor_1'},
-                 {'location': (0, 0, -2140), 'name': 'monitor_2'},
-                 {'location': (0, 0, -1040), 'name': 'monitor_3'},
-                 {'location': (0, 0, -1040), 'name': 'monitor_4'}]
+loki_monitors = [{'location': (0, 0, -16800), 'name': 'monitor_0'},
+                 {'location': (0, 0, -8400), 'name': 'monitor_1'},
+                 {'location': (0, 0, -2040), 'name': 'monitor_2'},
+                 {'location': (0, 0, 200), 'name': 'monitor_3'},
+                 {'location': (0, 0, 5091.28 + 10), 'name': 'monitor_4'}]
 
-loki_slits = [{'location': (0, 0, -2140), 'name': 'slit_1'
+loki_slits = [{'location': (0, 0, -8000), 'name': 'slit_1'
                   , 'x_gap': 30, 'y_gap': 25},
-              {'location': (0, 0, -1040), 'name': 'slit_2'
+              {'location': (0, 0, -5000), 'name': 'slit_2'
                   , 'x_gap': 30, 'y_gap': 25},
-              {'location': (0, 0, -2140), 'name': 'slit_3',
+              {'location': (0, 0, -3000), 'name': 'slit_3',
                'x_gap': 30, 'y_gap': 25}]
 
 loki_banks = {0: {'A': [(-500, -781, 5012.5),
