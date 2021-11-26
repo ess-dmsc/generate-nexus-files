@@ -1138,12 +1138,14 @@ if __name__ == '__main__':
             print(f'Chopper {loki_chopper[NAME]} is done!')
 
         # Create monitors.
-        for loki_monitor in loki_monitors:
+        nx_log_transform_monitor = [False, False, False, False, True]
+        for c, loki_monitor in enumerate(loki_monitors):
             monitor = Monitor(loki_monitor[LOCATION], loki_monitor[NAME])
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_monitor[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
-                monitor.compound_geometry(trans_path)
+                monitor.compound_geometry(trans_path,
+                                          nx_log_transform_monitor[c])
             print(f'Monitor {loki_monitor[NAME]} is done!')
 
         # Create slits.
