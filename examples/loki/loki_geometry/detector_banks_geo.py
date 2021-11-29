@@ -16,6 +16,22 @@ STRAW_Z_LOC = 7.67 * SCALE_FACTOR
 STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_OUTER_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC**2 + STRAW_Z_LOC**2)
 
+user_1 = {
+    "name": "John Doe",
+    "email": "john.doe@ess.eu",
+    "facility_user_id": "jdoe1",
+    "affiliation": "ESS",
+}
+
+user_2 = {
+    "name": "Jane Doe",
+    "email": "jane.doe@ess.eu",
+    "facility_user_id": "jdoe2",
+    "affiliation": "ESS",
+}
+
+loki_users = [user_1, user_2]
+
 loki_sample = {
     'location': (0, 0, 0),
     'name': 'LOKI_sample'

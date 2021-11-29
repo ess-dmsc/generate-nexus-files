@@ -9,11 +9,11 @@ import random
 from enum import Enum
 from typing import Dict, List, Optional
 from detector_banks_geo import FRACTIONAL_PRECISION, \
-    NUM_STRAWS_PER_TUBE,  IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
+    NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
     STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
     STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, loki_banks, \
-    loki_disk_choppers, loki_monitors, loki_slits, loki_source, loki_sample
-
+    loki_disk_choppers, loki_monitors, loki_slits, loki_source, loki_sample, \
+    loki_users
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -134,6 +134,16 @@ class NexusInfo:
     @staticmethod
     def get_slit_class_attr():
         return {NX_CLASS: 'NXslit'}
+
+    @staticmethod
+    def get_nx_user(new_user):
+        user_values = {
+            key: {VALUES: val, ATTR: None} for key, val in new_user.items()
+        }
+        return {
+            VALUES: user_values,
+            ATTR: {NX_CLASS: 'NXuser'}
+        }
 
     @staticmethod
     def get_char_metadata(char_metadata):
@@ -740,9 +750,8 @@ class Bank:
                 nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data))
         self._nexus_dict[VALUES].update({'data': data_nexus})
         tof_nexus = NexusInfo.get_nx_log_group(
-            nx_log_data=NexusInfo.get_values_attrs_as_dict(time_of_flight,
-                                                           attrs=
-                                                           {UNITS: time_unit}))
+            nx_log_data=NexusInfo.get_values_attrs_as_dict(
+                time_of_flight, attrs={UNITS: time_unit}))
         self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
 
     def get_nexus_dict(self):
@@ -1158,6 +1167,12 @@ if __name__ == '__main__':
                     trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
                     loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
+
+        # Create users.
+        for c, user in enumerate(loki_users):
+            user_var = 'user_' + str(c)
+            data[ENTRY][VALUES][user_var] = NexusInfo.get_nx_user(user)
+            print(f'NXuser {user_var} is done!')
 
         # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data)
