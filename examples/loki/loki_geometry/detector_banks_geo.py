@@ -17,7 +17,7 @@ STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_OUTER_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC**2 + STRAW_Z_LOC**2)
 
 loki_sample = {
-    'location': (0, 0, 0.1),
+    'location': (0, 0, 0),
     'name': 'LOKI_sample'
 }
 
