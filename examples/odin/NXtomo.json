@@ -23,7 +23,7 @@
                                     "module": "dataset",
                                     "config": {
                                         "dtype": "string",
-                                        "values": "x-ray",
+                                        "values": "visible light",
                                         "name": "probe"
                                     }
                                 }
@@ -68,7 +68,7 @@
                                             "config": {
                                                 "source": "image_key",
                                                 "topic": "odin_topic",
-                                                "dtype": "uint32"
+                                                "dtype": "int"
                                             }
                                         }
                                     ]
@@ -139,7 +139,7 @@
                                     "config": {
                                         "source": "",
                                         "topic": "odin_topic",
-                                        "dtype": "uint32"
+                                        "dtype": "int"
                                     }
                                 }
                             ]
