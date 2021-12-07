@@ -14,6 +14,7 @@ from detector_banks_geo import FRACTIONAL_PRECISION, \
     STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, loki_banks, \
     loki_disk_choppers, loki_monitors, loki_slits, loki_source, loki_sample, \
     loki_users
+from nurf_data import load_one_spectro_file, nurf_file_creator
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -1177,3 +1178,15 @@ if __name__ == '__main__':
         # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data)
         nexus_file_builder.construct_nxs_file()
+
+        # Add NURF Data.
+        dummy_file = '103418'
+        path_to_dummy_nxs_file = '..'
+
+        # get dummy data
+        dummy_data = load_one_spectro_file(dummy_file, path_to_dummy_nxs_file)
+
+        # append to data to Loki Nurf
+        nurf_file_creator('loki.nxs', '.', dummy_data)
+
+
