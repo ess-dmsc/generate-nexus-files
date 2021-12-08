@@ -8,13 +8,22 @@ import numpy as np
 import random
 from enum import Enum
 from typing import Dict, List, Optional
-from detector_banks_geo import FRACTIONAL_PRECISION, \
-    NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
-    STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
-    STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, loki_banks, \
-    loki_disk_choppers, loki_monitors, loki_slits, loki_source, loki_sample, \
-    loki_users
 from nurf_data import load_one_spectro_file, nurf_file_creator
+IMPORT_LAMOR = False  # Change depending on what data set should be used.
+if IMPORT_LAMOR:
+    from lamor_data import FRACTIONAL_PRECISION, \
+        NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
+        STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
+        STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
+        data_disk_choppers, data_monitors, data_slits, \
+        data_source, data_sample, data_users
+else:
+    from detector_banks_geo import FRACTIONAL_PRECISION, \
+        NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
+        STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
+        STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
+        data_disk_choppers, data_monitors, data_slits, \
+        data_source, data_sample, data_users
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -699,7 +708,7 @@ class Bank:
         else:
             print(grid_corners)
             raise RuntimeError(f'Something is wrong with the corner points'
-                               f' in bank {self._bank_id}.'
+                               f' in bank {self._bank_id}. '
                                f'The corner points are not in a plane.')
 
     def _get_detector_bank_orientation(self):
@@ -1014,52 +1023,59 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
+    add_data_to_nxs = False
+    add_nurf_to_nxs = False
     # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
 
-    nexus_loader = NexusFileLoader(loki_detector_data_filepath)
-    try:
-        nexus_loader.load_file()
-        detector_data = \
-            nexus_loader.get_data('mantid_workspace_1.workspace.'
-                                              'values')
-        monitor_data = \
-            nexus_loader.get_data('mantid_workspace_1.instrument.'
-                                             'detector.'
-                                             'detector_count')
+    detector_data = []
+    monitor_data = []
+    tof_data = []
+    pixel_id_data = []
+    if add_data_to_nxs:
+        nexus_loader = NexusFileLoader(loki_detector_data_filepath)
+        try:
+            nexus_loader.load_file()
+            detector_data = \
+                nexus_loader.get_data('mantid_workspace_1.workspace.'
+                                                  'values')
+            monitor_data = \
+                nexus_loader.get_data('mantid_workspace_1.instrument.'
+                                                 'detector.'
+                                                 'detector_count')
 
-        # detector count data
-        arr = np.zeros((1605642, 300), dtype='float')
-        detector_data.read_direct(arr)
-        detector_data = arr
+            # detector count data
+            arr = np.zeros((1605642, 300), dtype='float')
+            detector_data.read_direct(arr)
+            detector_data = arr
 
-        # time of flight data
-        tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
-                                              'axis1')
-        arr = np.zeros((301,), dtype='int32')
-        tof_data.read_direct(arr)
-        tof_data = arr
+            # time of flight data
+            tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
+                                                  'axis1')
+            arr = np.zeros((301,), dtype='int32')
+            tof_data.read_direct(arr)
+            tof_data = arr
 
-        # pixel id data
-        pixel_id_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
-                                              'axis2')
-        arr = np.zeros((1605642,), dtype='int32')
-        pixel_id_data.read_direct(arr)
-        pixel_id_data = arr
-    except (TypeError, FileNotFoundError) as e:
-        detector_data = []
-        monitor_data = []
-        tof_data = []
-        pixel_id_data = []
-        print(e)
+            # pixel id data
+            pixel_id_data = nexus_loader.\
+                get_data('mantid_workspace_1.workspace.axis2')
+            arr = np.zeros((1605642,), dtype='int32')
+            pixel_id_data.read_direct(arr)
+            pixel_id_data = arr
+        except (TypeError, FileNotFoundError) as e:
+            detector_data = []
+            monitor_data = []
+            tof_data = []
+            pixel_id_data = []
+            print(e)
 
-    for loki_bank_id in loki_banks:
+    for loki_bank_id in det_banks_data:
         if plot_endpoint_locations:
             for idx in range(4):
-                start_point = loki_banks[loki_bank_id]['A'][idx]
-                end_point = loki_banks[loki_bank_id]['B'][idx]
+                start_point = det_banks_data[loki_bank_id]['A'][idx]
+                end_point = det_banks_data[loki_bank_id]['B'][idx]
                 color = (random.random(), random.random(), random.random())
                 offset = 0.001
                 ax.plot([start_point[0] * SCALE_FACTOR,
@@ -1069,7 +1085,7 @@ if __name__ == '__main__':
                         [start_point[2] * SCALE_FACTOR + offset,
                          end_point[2] * SCALE_FACTOR + offset],
                         color=color)
-        bank = Bank(loki_banks[loki_bank_id], loki_bank_id)
+        bank = Bank(det_banks_data[loki_bank_id], loki_bank_id)
         detector_tube = bank.build_detector_bank()
         bank_translation = bank.get_bank_translation()
         if plot_tube_locations:
@@ -1121,21 +1137,21 @@ if __name__ == '__main__':
             start_index = end_index
 
         # Create source.
-        loki_source = Source(loki_source[LOCATION], loki_source[NAME])
+        loki_source = Source(data_source[LOCATION], data_source[NAME])
         trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
             loki_source.compound_geometry(trans_path)
         print(f'Source {SOURCE} is done!')
 
         # Create sample.
-        loki_sample = Sample(loki_sample[LOCATION], loki_sample[NAME])
+        loki_sample = Sample(data_sample[LOCATION], data_sample[NAME])
         transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
         data[ENTRY][VALUES][SAMPLE] = \
             loki_sample.compound_geometry(transformation_path)
         print(f'Sample {SAMPLE} is done!')
 
         # Create choppers.
-        for loki_chopper in loki_disk_choppers:
+        for loki_chopper in data_disk_choppers:
             disk_chopper = DiskChopper(loki_chopper[LOCATION],
                                        loki_chopper[NAME])
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_chopper[NAME]}' \
@@ -1149,7 +1165,7 @@ if __name__ == '__main__':
 
         # Create monitors.
         nx_log_transform_monitor = [False, False, False, False, True]
-        for c, loki_monitor in enumerate(loki_monitors):
+        for c, loki_monitor in enumerate(data_monitors):
             monitor = Monitor(loki_monitor[LOCATION], loki_monitor[NAME])
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_monitor[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
@@ -1159,7 +1175,7 @@ if __name__ == '__main__':
             print(f'Monitor {loki_monitor[NAME]} is done!')
 
         # Create slits.
-        for loki_slit in loki_slits:
+        for loki_slit in data_slits:
             slit = Slit(loki_slit[LOCATION], loki_slit[NAME])
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{loki_slit[NAME]}' \
                          f'/{TRANSFORMATIONS}/'
@@ -1170,7 +1186,7 @@ if __name__ == '__main__':
             print(f'Slit {loki_slit[NAME]} is done!')
 
         # Create users.
-        for c, user in enumerate(loki_users):
+        for c, user in enumerate(data_users):
             user_var = 'user_' + str(c)
             data[ENTRY][VALUES][user_var] = NexusInfo.get_nx_user(user)
             print(f'NXuser {user_var} is done!')
@@ -1180,13 +1196,11 @@ if __name__ == '__main__':
         nexus_file_builder.construct_nxs_file()
 
         # Add NURF Data.
-        dummy_file = '103418'
-        path_to_dummy_nxs_file = '..'
-
-        # get dummy data
-        dummy_data = load_one_spectro_file(dummy_file, path_to_dummy_nxs_file)
-
-        # append to data to Loki Nurf
-        nurf_file_creator('loki.nxs', '.', dummy_data)
-
-
+        if add_nurf_to_nxs:
+            dummy_file = '103418'
+            path_to_dummy_nxs_file = '..'
+            # get dummy data
+            dummy_data = load_one_spectro_file(dummy_file,
+                                               path_to_dummy_nxs_file)
+            # append to data to Loki Nurf
+            nurf_file_creator('loki.nxs', '.', dummy_data)
