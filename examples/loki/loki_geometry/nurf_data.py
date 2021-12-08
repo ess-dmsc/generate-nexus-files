@@ -209,7 +209,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
 
         grp_pumps = hf.create_group("/entry/sample/HPLC_pump")
         grp_pumps.attrs["NX_class"] = 'NXenvironment'
-        grp_pumps.create_dataset("description", data='Pumps')
+        grp_pumps.create_dataset("description", data='HPLC_pump')
 
         #no more valves
         #grp_valves = grp_nurf.create_group("Valves")
