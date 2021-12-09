@@ -9,9 +9,9 @@ import random
 from enum import Enum
 from typing import Dict, List, Optional
 from nurf_data import load_one_spectro_file, nurf_file_creator
-IMPORT_LAMOR = False  # Change depending on what data set should be used.
-if IMPORT_LAMOR:
-    from lamor_data import FRACTIONAL_PRECISION, \
+IMPORT_LARMOR = False  # Change depending on what data set should be used.
+if IMPORT_LARMOR:
+    from larmor_data import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
