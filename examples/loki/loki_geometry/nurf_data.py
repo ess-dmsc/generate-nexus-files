@@ -102,23 +102,19 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
 
     # open the file and append
     with h5py.File(loki_file, 'a') as hf:
-        grp_nurf = hf.create_group('/entry/NUrF')
-        grp_nurf.attrs["NX_class"] = 'NXenvironment'
-        grp_nurf.create_dataset('description',
-                                data='Combined fluo, UV, densitometry setup for SANS experiment at LOKI')
-
+        
+        
+        #print(list(hf['/entry/'].keys()))
+        
         # create the various subgrous and their attributes
 
         # UV subgroup
-        grp_uv = grp_nurf.create_group("UV")
-        grp_uv.attrs["NX_class"] = 'NXenvironment'
+        grp_uv = hf.create_group("/entry/instrument/UV")
+        grp_uv.attrs["NX_class"] = 'NXdetector'
         grp_uv.create_dataset('description', data='UV')
         grp_uv.create_dataset('type',
                               data='HR4PRO-UV-VIS-ES, DH-2000-FHS-DUV-TTL, QP600-2-SR')
-        # grp_uv.attrs["UV spectrometer"] = 'HR4PRO-UV-VIS-ES'
-        # grp_uv.attrs["UV light source"] = 'DH-2000-FHS-DUV-TTL'
-        # grp_uv.attrs["UV fibre optics"] = 'QP600-2-SR'
-
+    
         # create the various datasets for UV
         uv_inttime = grp_uv.create_dataset('UV_IntegrationTime',
                                            data=data['UV_IntegrationTime'],
@@ -154,8 +150,8 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_wavelength.attrs['long name'] = 'UV_wavelength'
 
         # Fluorescence subgroup
-        grp_fluo = grp_nurf.create_group("Fluorescence")
-        grp_fluo.attrs["NX_class"] = 'NXenvironment'
+        grp_fluo = hf.create_group("/entry/instrument/Fluorescence")
+        grp_fluo.attrs["NX_class"] = 'NXdetector'
         # grp_fluo.attrs["description"] = 'Fluorescence'
         # grp_fluo.attrs["Fluo lightsource"] = 'LSM-265A,-310A with LDC-1'
         grp_fluo.create_dataset('description', data='LSM-265A,-310A with LDC-1')
@@ -206,19 +202,20 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_wavelength.attrs['long name'] = 'Fluo_wavelength'
 
         # dummy groups, no information currently available
-        grp_sample_cell = grp_nurf.create_group("Sample cell")
+        grp_sample_cell = hf.create_group("/entry/sample/Sample_cell")
         grp_sample_cell.attrs["NX_class"] = 'NXenvironment'
         grp_sample_cell.create_dataset('description', data='NUrF sample cell')
         grp_sample_cell.create_dataset('type', data='SQ1-ALL')
 
-        grp_pumps = grp_nurf.create_group("Pumps")
+        grp_pumps = hf.create_group("/entry/sample/HPLC_pump")
         grp_pumps.attrs["NX_class"] = 'NXenvironment'
-        grp_pumps.create_dataset("description", data='Pumps')
+        grp_pumps.create_dataset("description", data='HPLC_pump')
 
-        grp_valves = grp_nurf.create_group("Valves")
-        grp_valves.attrs["NX_class"] = 'NXenvironment'
-        grp_valves.create_dataset("description", data='Valves')
+        #no more valves
+        #grp_valves = grp_nurf.create_group("Valves")
+        #grp_valves.attrs["NX_class"] = 'NXenvironment'
+        #grp_valves.create_dataset("description", data='Valves')
 
-        grp_densito = grp_nurf.create_group("Densitometer")
-        grp_densito.attrs["NX_class"] = 'NXenvironment'
+        grp_densito = hf.create_group("/entry/instrument/Densitometer")
+        grp_densito.attrs["NX_class"] = 'NXdetector'
         grp_densito.create_dataset("description", data='Densitometer')
