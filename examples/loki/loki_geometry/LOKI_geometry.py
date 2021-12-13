@@ -1025,8 +1025,8 @@ if __name__ == '__main__':
     generate_nexus_content_into_nxs = True
     add_data_to_nxs = False
     add_nurf_to_nxs = False
-    # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
-    bank_ids_transform_as_nxlog = [-1]
+    bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
+    # bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
 
