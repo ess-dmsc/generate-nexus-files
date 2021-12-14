@@ -1002,6 +1002,10 @@ class NexusFileLoader:
             return nx_data, nx_attributes
         return nx_data
 
+    def get_attributes(self, dot_path):
+        dot_path_list = dot_path.split('.')
+        return self._get_attributes(dot_path_list, self._nexus_content)
+
     def _get_data(self, dot_path_list, nexus_data):
         if len(dot_path_list) > 1:
             return self._get_data(dot_path_list[1:],

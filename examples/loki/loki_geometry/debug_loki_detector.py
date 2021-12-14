@@ -21,9 +21,11 @@ if __name__ == '__main__':
                 f'entry.instrument.detector_{i}.y_pixel_offset')),
             'z_off': get_nexus_np_array(nexus_loader.get_data(
                 f'entry.instrument.detector_{i}.z_pixel_offset'))}
-        data, attribute = nexus_loader.get_data(
-                f'entry.instrument.detector_{i}.transformations.trans_{i + 1}',
-                True)
+        attribute = nexus_loader.get_attributes(
+            f'entry.instrument.detector_{i}.transformations.trans_{i + 1}')
+        data = nexus_loader.get_data(
+            f'entry.instrument.detector_{i}.transformations.trans_{i + 1}.value',
+            False)
         tmp_det['xyz'] = np.array((tmp_det['x_off'],
                                    tmp_det['y_off'],
                                    tmp_det['z_off'])).T
