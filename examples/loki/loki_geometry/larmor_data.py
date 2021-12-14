@@ -1,4 +1,4 @@
-from numpy import sqrt, deg2rad
+from numpy import sqrt, deg2rad, array
 
 LENGTH_UNIT = 'm'
 SCALE_FACTOR = .001
@@ -25,33 +25,54 @@ user_1 = {
 
 data_users = [user_1]
 
+z_offset = (0, 0, 25300)
+
+
+def add_offset(position):
+    return tuple(array(position) - array(z_offset))
+
+
 data_sample = {
-    'location': (0, 0, 0),
-    'name': 'LOKI_sample'
+    'location': add_offset((0, 0, 25300)),
+    'name': 'larmor_sample'
 }
 
 data_source = {
-    'location': (0, 0, -23600),
+    'location': add_offset((0, 0, 0)),
     'name': 'moderator'
 }
 
-data_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, -17100),
-                       'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2},
-                      {'name': 'chopper_2', 'location': (0, 0, -8570),
-                       'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2}]
+data_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, 9689),
+                       'rotation_speed': 14.0, 'slits': 1,
+                       'disk_rad': 270.0},
+                      {'name': 'chopper_2', 'location': (0, 0, 9739),
+                       'rotation_speed': 14.0, 'slits': 1,
+                       'disk_rad': 270.0}]
 
-data_monitors = [{'location': (0, 0, -16800), 'name': 'monitor_0'}]
+data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
+                 {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2'},
+                 {'location': add_offset((0, 0, 24056)), 'name': 'monitor_3'},
+                 {'location': add_offset((0, 0, 25760)), 'name': 'monitor_4'},
+                 {'location': add_offset((0, 0, 29650)), 'name': 'monitor_5'}]
 
-data_slits = [{'location': (0, 0, -8000), 'name': 'slit_1'
-                  , 'x_gap': 30, 'y_gap': 25},
-              {'location': (0, 0, -5000), 'name': 'slit_2'
-                  , 'x_gap': 30, 'y_gap': 25},
-              {'location': (0, 0, -3000), 'name': 'slit_3',
-               'x_gap': 30, 'y_gap': 25}]
+s1 = 0.03
+s2 = 0.02
+s3 = 0.008
+s_eq1 = s3 + 0.75 * (s2 - s3) / 4.82
 
-# Data from lamor document.
+data_slits = [{'location': add_offset((0, 0, 17050)), 'name': 'coarsejaws'
+                  , 'x_gap': s1 * 1000, 'y_gap': s1 * 1000},
+              {'location': add_offset((0, 0, 20430)), 'name': 'slit_1'
+                  , 'x_gap': s2 * 1000, 'y_gap': s2 * 1000},
+              {'location': add_offset((0, 0, 24500)), 'name': 'slit_2',
+               'x_gap': s_eq1 * 1000, 'y_gap': s_eq1 * 1000},
+              {'location': add_offset((0, 0, 25250)), 'name': 'slit_2a',
+               'x_gap': 6, 'y_gap': 8},
+              {'location': add_offset((0, 0, 25300)), 'name': 'SANS_sample',
+               'x_gap': 50, 'y_gap': 50}
+              ]
+
+# Data from larmor document.
 d_x = 1.953
 dz_sample = 4431
 y_1 = 6.28
