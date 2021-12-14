@@ -60,10 +60,10 @@ s2 = 0.02
 s3 = 0.008
 s_eq1 = s3 + 0.75 * (s2 - s3) / 4.82
 
-data_slits = [{'location': add_offset((0, 0, 17050)), 'name': 'coarsejaws'
-                  , 'x_gap': s1 * 1000, 'y_gap': s1 * 1000},
-              {'location': add_offset((0, 0, 20430)), 'name': 'slit_1'
-                  , 'x_gap': s2 * 1000, 'y_gap': s2 * 1000},
+data_slits = [{'location': add_offset((0, 0, 17050)), 'name': 'coarsejaws',
+               'x_gap': s1 * 1000, 'y_gap': s1 * 1000},
+              {'location': add_offset((0, 0, 20430)), 'name': 'slit_1',
+               'x_gap': s2 * 1000, 'y_gap': s2 * 1000},
               {'location': add_offset((0, 0, 24500)), 'name': 'slit_2',
                'x_gap': s_eq1 * 1000, 'y_gap': s_eq1 * 1000},
               {'location': add_offset((0, 0, 25250)), 'name': 'slit_2a',
@@ -82,37 +82,39 @@ tube_l = 1000
 
 
 # pixel_num is pixel 1 to 512, n is tube 1 to 128
-def L_n(n):
+def l_n(n):
     return (n - 1) % 4 + 1
 
 
-def R_n(n):
+def r_n(n):
     return int((n - 1) / 4) + 1 - 16
 
 
-def X_n(pixel_num):
+def x_n(pixel_num):
     return -tube_l/2 + d_x / 2 + d_x * (pixel_num - 1)
 
 
-def Y_n(n):
-    return -(-R_n(n) * y_2 + (L_n(n) - 1) * y_1)
+def y_n(n):
+    return -(-r_n(n) * y_2 + (l_n(n) - 1) * y_1)
 
 
-def Z_n(n):
-    return (L_n(n) - 1) * z_1 + dz_sample
+def z_n(n):
+    return (l_n(n) - 1) * z_1 + dz_sample
 
 
-det_banks_data = {0: {'A': [(X_n(1), Y_n(1), Z_n(1)),
-                            (X_n(1), Y_n(4), Z_n(4)),
-                            (X_n(1), Y_n(125), Z_n(125)),
-                            (X_n(1), Y_n(128), Z_n(128))],
-                      'B': [(X_n(512), Y_n(1), Z_n(1)),
-                            (X_n(512), Y_n(4), Z_n(4)),
-                            (X_n(512), Y_n(125), Z_n(125)),
-                            (X_n(512), Y_n(128), Z_n(128))],
+det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
+                            (x_n(1), y_n(4), z_n(4)),
+                            (x_n(1), y_n(125), z_n(125)),
+                            (x_n(1), y_n(128), z_n(128))],
+                      'B': [(x_n(512), y_n(1), z_n(1)),
+                            (x_n(512), y_n(4), z_n(4)),
+                            (x_n(512), y_n(125), z_n(125)),
+                            (x_n(512), y_n(128), z_n(128))],
                       'num_tubes': 128,
                       'bank_offset': (0, 0, 0)
                       },
                   }
+
+file_name = 'larmor.nxs'
 
 print(det_banks_data)

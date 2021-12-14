@@ -16,14 +16,14 @@ if IMPORT_LARMOR:
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users
+        data_source, data_sample, data_users, file_name
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users
+        data_source, data_sample, data_users, file_name
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -950,10 +950,12 @@ class NexusFileBuilder:
     definition and data content of the nexus that is supposed to be created.
     """
 
-    def __init__(self, data_struct: Dict, file_name: str = 'loki',
+    def __init__(self, data_struct: Dict, filename: str = 'loki',
                  file_format: str = 'nxs'):
         self.data_struct = data_struct
-        self.hf5_file = h5py.File('.'.join([file_name, file_format]), 'w')
+        if '.' + file_format not in filename:
+            filename = '.'.join([filename, file_format])
+        self.hf5_file = h5py.File(filename, 'w')
 
     def construct_nxs_file(self):
         self._construct_nxs_file(self.data_struct, self.hf5_file)
@@ -1028,7 +1030,7 @@ if __name__ == '__main__':
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     add_data_to_nxs = False
-    add_nurf_to_nxs = False
+    add_nurf_to_nxs = True
     bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     # bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
@@ -1196,7 +1198,7 @@ if __name__ == '__main__':
             print(f'NXuser {user_var} is done!')
 
         # Construct nexus file.
-        nexus_file_builder = NexusFileBuilder(data)
+        nexus_file_builder = NexusFileBuilder(data, filename=file_name)
         nexus_file_builder.construct_nxs_file()
 
         # Add NURF Data.
@@ -1207,4 +1209,4 @@ if __name__ == '__main__':
             dummy_data = load_one_spectro_file(dummy_file,
                                                path_to_dummy_nxs_file)
             # append to data to Loki Nurf
-            nurf_file_creator('loki.nxs', '.', dummy_data)
+            nurf_file_creator(file_name, '.', dummy_data)
