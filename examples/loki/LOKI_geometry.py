@@ -778,8 +778,8 @@ class Entry:
     Simple representation of a NeXus Entry.
     """
 
-    def __init__(self, proposal_id: int, title: str, experiment_desc: str = ''):
-        self._proposal_id = proposal_id
+    def __init__(self, experiment_id: int, title: str, experiment_desc: str = ''):
+        self._experiment_id = experiment_id
         self._title = title
         self._experiment_desc = experiment_desc
 
@@ -790,8 +790,8 @@ class Entry:
                     NexusInfo.get_values_attrs_as_dict(
                         {}, NexusInfo.get_instrument_class_attr()),
                 'title': NexusInfo.get_values_attrs_as_dict(self._title),
-                'proposal_id': NexusInfo.get_values_attrs_as_dict(
-                    self._proposal_id),
+                'experiment_identifier': NexusInfo.get_values_attrs_as_dict(
+                    self._experiment_id),
                 'experiment_description': NexusInfo.get_values_attrs_as_dict(
                     self._experiment_desc),
                 'start_time': NexusInfo.get_values_attrs_as_dict(start_time)
@@ -1123,7 +1123,7 @@ if __name__ == '__main__':
             data[bank.get_bank_id()] = bank.compound_data_in_list()
         write_csv_file(data[0] + data[4])
 
-    nx_entry = Entry(proposal_id=1234, title="My experiment",
+    nx_entry = Entry(experiment_id="p1234", title="My experiment",
                      experiment_desc="this is an experiment")
     data = nx_entry.get_nx_entry(start_time=datetime.now().isoformat())
 
