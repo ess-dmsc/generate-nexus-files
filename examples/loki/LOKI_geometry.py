@@ -1031,7 +1031,7 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    add_data_to_nxs = False
+    add_data_to_nxs = True
     add_nurf_to_nxs = True
     bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     # bank_ids_transform_as_nxlog = [-1]
@@ -1055,9 +1055,14 @@ if __name__ == '__main__':
                                                  'detector_count')
 
             # detector count data
-            arr = np.zeros((1605642, 300), dtype='float')
+            arr = np.zeros((1605642, 300), dtype='int32')
             detector_data.read_direct(arr)
             detector_data = arr
+
+            # monitor event count data.
+            arr = np.zeros((1605642, ), dtype='int32')
+            monitor_data.read_direct(arr)
+            monitor_data = arr
 
             # time of flight data
             tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
