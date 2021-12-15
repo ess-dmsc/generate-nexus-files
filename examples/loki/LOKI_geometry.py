@@ -1180,6 +1180,7 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
                 monitor.compound_geometry(trans_path,
                                           nx_log_transform_monitor[c])
+            monitor.add_data(mon_data=monitor_data)
             print(f'Monitor {loki_monitor[NAME]} is done!')
 
         # Create slits.
