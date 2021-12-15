@@ -109,105 +109,105 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # create the various subgrous and their attributes
 
         # UV subgroup
-        grp_uv = hf.create_group("/entry/instrument/UV")
+        grp_uv = hf.create_group("/entry/instrument/uv")
         grp_uv.attrs["NX_class"] = 'NXdetector'
         grp_uv.create_dataset('description', data='UV')
         grp_uv.create_dataset('type',
                               data='HR4PRO-UV-VIS-ES, DH-2000-FHS-DUV-TTL, QP600-2-SR')
     
         # create the various datasets for UV
-        uv_inttime = grp_uv.create_dataset('UV_IntegrationTime',
+        uv_inttime = grp_uv.create_dataset('uv_integration_time',
                                            data=data['UV_IntegrationTime'],
                                            shape=data[
                                                'UV_IntegrationTime'].shape,
                                            dtype=np.int32)
-        uv_inttime.attrs['long_name'] = 'UV_IntegrationTime'
+        uv_inttime.attrs['long_name'] = 'uv_integration_time'
         uv_inttime.attrs['units'] = 's'  # TODO: unit to be verified
 
-        uv_bkg = grp_uv.create_dataset('UV_background',
+        uv_bkg = grp_uv.create_dataset('uv_background',
                                        data=data['UV_background'],
                                        shape=data['UV_background'].shape,
                                        dtype=np.float32)
-        uv_bkg.attrs['long name'] = 'UV_background'
+        uv_bkg.attrs['long name'] = 'uv_background'
 
-        uv_int0 = grp_uv.create_dataset('UV_intensity0',
+        uv_int0 = grp_uv.create_dataset('uv_intensity0',
                                         data=data['UV_intensity0'],
                                         shape=data['UV_intensity0'].shape,
                                         dtype=np.float32)
-        uv_int0.attrs['long name'] = 'UV_intensity0'
+        uv_int0.attrs['long name'] = 'uv_intensity0'
 
-        uv_spectra = grp_uv.create_dataset('UV_spectra',
+        uv_spectra = grp_uv.create_dataset('uv_spectra',
                                            data=data['UV_spectra'],
                                            shape=data['UV_spectra'].shape,
                                            dtype=np.float32)
-        uv_spectra.attrs['long name'] = 'UV_spectra'
+        uv_spectra.attrs['long name'] = 'uv_spectra'
 
-        uv_wavelength = grp_uv.create_dataset('UV_wavelength',
+        uv_wavelength = grp_uv.create_dataset('uv_wavelength',
                                               data=data['UV_wavelength'],
                                               shape=data['UV_wavelength'].shape,
                                               dtype=np.float32)
         uv_wavelength.attrs['units'] = 'nm'  # TODO: unit to be verified
-        uv_wavelength.attrs['long name'] = 'UV_wavelength'
+        uv_wavelength.attrs['long name'] = 'uv_wavelength'
 
         # Fluorescence subgroup
-        grp_fluo = hf.create_group("/entry/instrument/Fluorescence")
+        grp_fluo = hf.create_group("/entry/instrument/fluorescence")
         grp_fluo.attrs["NX_class"] = 'NXdetector'
         # grp_fluo.attrs["description"] = 'Fluorescence'
         # grp_fluo.attrs["Fluo lightsource"] = 'LSM-265A,-310A with LDC-1'
         grp_fluo.create_dataset('description', data='LSM-265A,-310A with LDC-1')
 
         # create the various datasets for fluo
-        fluo_inttime = grp_fluo.create_dataset('Fluo_IntegrationTime',
+        fluo_inttime = grp_fluo.create_dataset('fluo_integration_time',
                                                data=data[
                                                    'Fluo_IntegrationTime'],
                                                shape=data[
                                                    'Fluo_IntegrationTime'].shape,
                                                dtype=np.int32)
         fluo_inttime.attrs['units'] = 's'  # TODO: unit to be verified
-        fluo_inttime.attrs['long name'] = 'Fluo_IntegrationTime'
+        fluo_inttime.attrs['long name'] = 'fluo_integration_time'
 
-        fluo_bkg = grp_fluo.create_dataset('Fluo_background',
+        fluo_bkg = grp_fluo.create_dataset('fluo_background',
                                            data=data['Fluo_background'],
                                            shape=data['Fluo_background'].shape,
                                            dtype=np.float32)
-        fluo_bkg.attrs['long name'] = 'Fluo_background'
+        fluo_bkg.attrs['long name'] = 'fluo_background'
 
-        fluo_int0 = grp_fluo.create_dataset('Fluo_intensity0',
+        fluo_int0 = grp_fluo.create_dataset('fluo_intensity0',
                                             data=data['Fluo_intensity0'],
                                             shape=data['Fluo_intensity0'].shape,
                                             dtype=np.float32)
-        fluo_int0.attrs['long name'] = 'Fluo_intensity0'
+        fluo_int0.attrs['long name'] = 'fluo_intensity0'
 
-        fluo_monowavelengths = grp_fluo.create_dataset('Fluo_monowavelengths',
+        fluo_monowavelengths = grp_fluo.create_dataset('fluo_monowavelengths',
                                                        data=data[
                                                            'Fluo_monowavelengths'],
                                                        shape=data[
                                                            'Fluo_monowavelengths'].shape,
                                                        dtype=np.float32)
         fluo_monowavelengths.attrs['units'] = 'nm'  # TODO: unit to be verified
-        fluo_monowavelengths.attrs['long name'] = 'Fluo_monowavelengths'
+        fluo_monowavelengths.attrs['long name'] = 'fluo_monowavelengths'
 
-        fluo_spectra = grp_fluo.create_dataset('Fluo_spectra',
+        fluo_spectra = grp_fluo.create_dataset('fluo_spectra',
                                                data=data['Fluo_spectra'],
                                                shape=data['Fluo_spectra'].shape,
                                                dtype=np.float32)
-        fluo_spectra.attrs['long name'] = 'Fluo_spectra'
+        fluo_spectra.attrs['long name'] = 'fluo_spectra'
 
-        fluo_wavelength = grp_fluo.create_dataset('Fluo_wavelength',
+        fluo_wavelength = grp_fluo.create_dataset('fluo_wavelength',
                                                   data=data['Fluo_wavelength'],
                                                   shape=data[
                                                       'Fluo_wavelength'].shape,
                                                   dtype=np.float32)
         fluo_wavelength.attrs['units'] = 'nm'  # TODO: unit to be verified
-        fluo_wavelength.attrs['long name'] = 'Fluo_wavelength'
+        fluo_wavelength.attrs['long name'] = 'fluo_wavelength'
 
         # dummy groups, no information currently available
-        grp_sample_cell = hf.create_group("/entry/sample/Sample_cell")
+        grp_sample_cell = hf.create_group("/entry/sample/sample_cell")
         grp_sample_cell.attrs["NX_class"] = 'NXenvironment'
         grp_sample_cell.create_dataset('description', data='NUrF sample cell')
         grp_sample_cell.create_dataset('type', data='SQ1-ALL')
 
-        grp_pumps = hf.create_group("/entry/sample/HPLC_pump")
+        grp_pumps = hf.create_group("/entry/sample/hplc_pump")
         grp_pumps.attrs["NX_class"] = 'NXenvironment'
         grp_pumps.create_dataset("description", data='HPLC_pump')
 
@@ -216,6 +216,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         #grp_valves.attrs["NX_class"] = 'NXenvironment'
         #grp_valves.create_dataset("description", data='Valves')
 
-        grp_densito = hf.create_group("/entry/instrument/Densitometer")
+        grp_densito = hf.create_group("/entry/instrument/densitometer")
         grp_densito.attrs["NX_class"] = 'NXdetector'
         grp_densito.create_dataset("description", data='Densitometer')
