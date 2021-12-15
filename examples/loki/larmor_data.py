@@ -102,6 +102,7 @@ def z_n(n):
     return (l_n(n) - 1) * z_1 + dz_sample
 
 
+det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
 det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(1), y_n(4), z_n(4)),
                             (x_n(1), y_n(125), z_n(125)),

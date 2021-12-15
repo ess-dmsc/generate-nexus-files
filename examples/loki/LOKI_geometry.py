@@ -16,14 +16,14 @@ if IMPORT_LARMOR:
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users, file_name
+        data_source, data_sample, data_users, file_name, det_pixel_id_start
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users, file_name
+        data_source, data_sample, data_users, file_name, det_pixel_id_start
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -90,7 +90,7 @@ class IdIterator:
         return IdIterator(start)
 
 
-pixel_id_iter = iter(IdIterator(11))
+pixel_id_iter = iter(IdIterator(det_pixel_id_start))
 straw_id_iter = iter(IdIterator())
 transform_id_iter = iter(IdIterator(1))
 
