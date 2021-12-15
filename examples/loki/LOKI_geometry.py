@@ -1018,7 +1018,7 @@ class NexusFileLoader:
 
 
 if __name__ == '__main__':
-    loki_detector_data_filepath = '../loki_data.nxs'
+    loki_detector_data_filepath = 'loki_data.nxs'
     plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
@@ -1198,7 +1198,7 @@ if __name__ == '__main__':
         # Add NURF Data.
         if add_nurf_to_nxs:
             dummy_file = '103418'
-            path_to_dummy_nxs_file = '..'
+            path_to_dummy_nxs_file = '.'
             # get dummy data
             dummy_data = load_one_spectro_file(dummy_file,
                                                path_to_dummy_nxs_file)
