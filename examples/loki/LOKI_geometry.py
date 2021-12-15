@@ -260,6 +260,8 @@ class NexusInfo:
         norm = np.linalg.norm(position)
         if norm:
             position = position / norm
+        else:
+            position = np.array([0., 0., 1.0])
         if as_nx_log:
             geo_data[TRANSFORMATIONS] = \
                 NexusInfo.get_nxlog_transform_translation([norm],
