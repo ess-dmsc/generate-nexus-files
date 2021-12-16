@@ -10,7 +10,7 @@ TUBE_DEPTH = 4
 # Straw information.
 NUM_STRAWS_PER_TUBE = 7
 STRAW_DIAMETER = 8.00 * SCALE_FACTOR
-STRAW_RESOLUTION = 512
+STRAW_RESOLUTION = 256  # Might need to switch to 512 though for commisiong tests.
 STRAW_Y_LOC = 1.14 * SCALE_FACTOR
 STRAW_Z_LOC = 7.67 * SCALE_FACTOR
 STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
@@ -102,7 +102,7 @@ def z_n(n):
     return (l_n(n) - 1) * z_1 + dz_sample
 
 
-det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
+det_pixel_id_start = 11  # starting pixel ID for the 'first' detector bank.
 det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(1), y_n(4), z_n(4)),
                             (x_n(1), y_n(125), z_n(125)),
@@ -111,11 +111,15 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(512), y_n(4), z_n(4)),
                             (x_n(512), y_n(125), z_n(125)),
                             (x_n(512), y_n(128), z_n(128))],
-                      'num_tubes': 128,
+                      'num_tubes': 224,
                       'bank_offset': (0, 0, 0)
                       },
                   }
 
 file_name = 'larmor.nxs'
+detector_data_filepath = 'larmor_data.nxs'
+axis_1_size = 1000
+axis_2_size = det_banks_data[0]['num_tubes'] * NUM_STRAWS_PER_TUBE * \
+              STRAW_RESOLUTION + det_pixel_id_start - 1
 
 print(det_banks_data)

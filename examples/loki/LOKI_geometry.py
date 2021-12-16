@@ -16,14 +16,16 @@ if IMPORT_LARMOR:
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users, file_name, det_pixel_id_start
+        data_source, data_sample, data_users, file_name, det_pixel_id_start, \
+        axis_1_size, axis_2_size, detector_data_filepath
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
-        data_source, data_sample, data_users, file_name, det_pixel_id_start
+        data_source, data_sample, data_users, file_name, det_pixel_id_start, \
+        axis_1_size, axis_2_size, detector_data_filepath
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
@@ -199,7 +201,10 @@ class NexusInfo:
     @staticmethod
     def get_nx_log_group(nx_log_data=None, time=None, time_unit='ns'):
         if time is None:
-            if isinstance(nx_log_data[VALUES], VALID_ARRAY_TYPES_NXS):
+            if isinstance(nx_log_data[VALUES], list):
+                time = list(range(0, len(nx_log_data[VALUES])))
+            elif isinstance(nx_log_data[VALUES], np.ndarray):
+                # TODO: Probably need to change this for some data.
                 time = list(range(0, len(nx_log_data[VALUES])))
             else:
                 time = [0]
@@ -778,7 +783,8 @@ class Entry:
     Simple representation of a NeXus Entry.
     """
 
-    def __init__(self, experiment_id: int, title: str, experiment_desc: str = ''):
+    def __init__(self, experiment_id: int, title: str,
+                 experiment_desc: str = ''):
         self._experiment_id = experiment_id
         self._title = title
         self._experiment_desc = experiment_desc
@@ -1026,7 +1032,6 @@ class NexusFileLoader:
 
 
 if __name__ == '__main__':
-    loki_detector_data_filepath = 'loki_data.nxs'
     plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
@@ -1043,7 +1048,7 @@ if __name__ == '__main__':
     tof_data = []
     pixel_id_data = []
     if add_data_to_nxs:
-        nexus_loader = NexusFileLoader(loki_detector_data_filepath)
+        nexus_loader = NexusFileLoader(detector_data_filepath)
         try:
             nexus_loader.load_file()
             detector_data = \
@@ -1055,26 +1060,26 @@ if __name__ == '__main__':
                                                  'detector_count')
 
             # detector count data
-            arr = np.zeros((1605642, 300), dtype='int32')
+            arr = np.zeros((axis_2_size, axis_1_size), dtype='int32')
             detector_data.read_direct(arr)
             detector_data = arr
 
             # monitor event count data.
-            arr = np.zeros((1605642, ), dtype='int32')
+            arr = np.zeros((axis_2_size, ), dtype='int32')
             monitor_data.read_direct(arr)
             monitor_data = arr
 
             # time of flight data
             tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
                                                   'axis1')
-            arr = np.zeros((301,), dtype='int32')
+            arr = np.zeros((axis_1_size + 1,), dtype='int32')
             tof_data.read_direct(arr)
             tof_data = arr
 
             # pixel id data
             pixel_id_data = nexus_loader.\
                 get_data('mantid_workspace_1.workspace.axis2')
-            arr = np.zeros((1605642,), dtype='int32')
+            arr = np.zeros((axis_2_size,), dtype='int32')
             pixel_id_data.read_direct(arr)
             pixel_id_data = arr
         except (TypeError, FileNotFoundError) as e:
