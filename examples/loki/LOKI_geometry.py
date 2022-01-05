@@ -10,6 +10,7 @@ from enum import Enum
 from typing import Dict, List, Optional
 from nurf_data import load_one_spectro_file, nurf_file_creator
 IMPORT_LARMOR = False  # Change depending on what data set should be used.
+DEBUG_LARMOR_DET = False  #
 if IMPORT_LARMOR:
     from larmor_data import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
@@ -26,6 +27,22 @@ else:
         data_disk_choppers, data_monitors, data_slits, \
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
         axis_1_size, axis_2_size, detector_data_filepath
+
+if DEBUG_LARMOR_DET:
+    from larmor_data import det_banks_data as larmor_det_data
+    det_banks_data[9] = larmor_det_data[0]
+
+    bank_9_offs = np.array(det_banks_data[9]['A'][0]) - \
+                  np.array(det_banks_data[0]['A'][0])
+
+    for key in ['A', 'B']:
+        tmp = []
+        for item in det_banks_data[9][key]:
+            tmp.append(tuple(np.array(item) - bank_9_offs))
+        det_banks_data[9][key] = tmp
+
+
+
 
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)

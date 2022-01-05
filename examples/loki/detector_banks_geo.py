@@ -62,7 +62,7 @@ data_slits = [{'location': (0, 0, -8000), 'name': 'slit_1'
               {'location': (0, 0, -3000), 'name': 'slit_3',
                'x_gap': 30, 'y_gap': 25}]
 
-det_pixel_id_start = 11  # starting pixel ID for the 'first' detector bank.
+det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
 det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                             (-500, -799.84, 5091.28),
                             (-500, 781, 5012.5),
