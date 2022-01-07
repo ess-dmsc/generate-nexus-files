@@ -28,7 +28,7 @@ else:
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
         axis_1_size, axis_2_size, detector_data_filepath
 
-if DEBUG_LARMOR_DET:
+if DEBUG_LARMOR_DET and not IMPORT_LARMOR:
     from larmor_data import det_banks_data as larmor_det_data
     det_banks_data[9] = larmor_det_data[0]
 
