@@ -9,7 +9,7 @@ import random
 from enum import Enum
 from typing import Dict, List, Optional
 from nurf_data import load_one_spectro_file, nurf_file_creator
-IMPORT_LARMOR = False  # Change depending on what data set should be used.
+IMPORT_LARMOR = True  # Change depending on what data set should be used.
 DEBUG_LARMOR_DET = False  #
 if IMPORT_LARMOR:
     from larmor_data import FRACTIONAL_PRECISION, \
@@ -1053,10 +1053,10 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    add_data_to_nxs = True
-    add_nurf_to_nxs = True
-    bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
-    # bank_ids_transform_as_nxlog = [-1]
+    add_data_to_nxs = False
+    add_nurf_to_nxs = False
+    # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
+    bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
     ax = plt.axes(projection='3d')
 
@@ -1164,8 +1164,9 @@ if __name__ == '__main__':
             transform_nxlog = True if bank.get_bank_id() \
                                       in bank_ids_transform_as_nxlog else False
             bank.compound_detector_geometry(trans_path, transform_nxlog)
-            bank.add_data(detector_data[start_index:end_index],
-                          tof_data)
+            if add_data_to_nxs:
+                bank.add_data(detector_data[start_index:end_index],
+                              tof_data)
             item_det = bank.get_nexus_dict()
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
@@ -1207,7 +1208,8 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
                 monitor.compound_geometry(trans_path,
                                           nx_log_transform_monitor[c])
-            monitor.add_data(mon_data=monitor_data)
+            if add_data_to_nxs:
+                monitor.add_data(mon_data=monitor_data)
             print(f'Monitor {loki_monitor[NAME]} is done!')
 
         # Create slits.
