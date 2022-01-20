@@ -25,11 +25,11 @@ user_1 = {
 
 data_users = [user_1]
 
-z_offset = (0, 0, 25300)
+z_offset = (0, 0, -25300)
 
 
 def add_offset(position):
-    return tuple(array(position) - array(z_offset))
+    return tuple(array(position) + array(z_offset))
 
 
 data_sample = {
@@ -116,7 +116,7 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(STRAW_RESOLUTION), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
                             (x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
-                      'bank_offset': (0, 0, 0)
+                      'bank_offset': add_offset((0, 0, 0))
                       },
                   }
 
