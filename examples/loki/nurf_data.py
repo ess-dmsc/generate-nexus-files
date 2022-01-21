@@ -122,15 +122,10 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_spectra_data.attrs['long_name']= 'uv_spectra'
         uv_spectra_data.attrs['units']= 'a.u.'
         
-        # How to write type from NXdetector? 
-        # type: (optional) NX_CHAR
-        # Description of type such as He3 gas cylinder, He3 PSD, scintillator, fission chamber, proportion counter, ion
-        # chamber, ccd, pixel, image plate, CMOS, ...
-
-        # Like this?
-        string_dt = h5py.special_dtype(vlen=str)
+        # define type of detector 
+        string_dt = h5py.special_dtype(vlen=str) # variable-length string 
         uv_spectra_type=uv_spectra.create_dataset('type', data='ccd', dtype=string_dt)
-        uv_spectra_type.attrs['type']='ccd'
+        
 
     
         # subgroup for uv_integration time
@@ -230,6 +225,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # subgroup for fluo_spectra
         fluo_spectra=grp_fluo.create_group("fluo_spectra")
         fluo_spectra.attrs["NX_class"] = 'NXdetector'
+        
+        # define type of detector 
+        fluo_spectra_type=fluo_spectra.create_dataset('type', data='ccd', dtype=string_dt)
         
         fluo_spectra_data = fluo_spectra.create_dataset('fluo_spectra',
                                                data=data['Fluo_spectra'],
