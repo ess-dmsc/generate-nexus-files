@@ -42,8 +42,6 @@ if DEBUG_LARMOR_DET and not IMPORT_LARMOR:
         det_banks_data[9][key] = tmp
 
 
-
-
 VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
 N_VERTICES = 3
@@ -54,12 +52,15 @@ INSTRUMENT = 'instrument'
 LOCATION = 'location'
 NAME = 'name'
 NX_CLASS = 'NX_class'
+NX_DATA = 'NXdata'
 NXLOG_VALUE = 'value'
 NXLOG_NAME = 'nx_log'
 ROTATION = 'rotation'
 SAMPLE = 'sample'
 SOURCE = 'source'
 TIME = 'time'
+TOF = 'tof'
+SPECTRUM = 'spectrum'
 TRANSFORMATION_TYPE = 'transformation_type'
 TRANSFORMATIONS = 'transformations'
 TRANSLATION = 'translation'
@@ -216,7 +217,7 @@ class NexusInfo:
         }
 
     @staticmethod
-    def get_nx_log_group(nx_log_data=None, time=None, time_unit='ns'):
+    def get_nx_log_group(nx_log_data=None, time=None, time_unit='tof', x_label= None, y_label=None):
         if time is None:
             if isinstance(nx_log_data[VALUES], list):
                 time = list(range(0, len(nx_log_data[VALUES])))
@@ -227,6 +228,10 @@ class NexusInfo:
                 time = [0]
         if nx_log_data is None:
             nx_log_data = {VALUES: {}, ATTR: {}}
+        if not x_label:
+            x_label = TIME
+        if not y_label:
+            y_label = NXLOG_VALUE
         attributes = nx_log_data[ATTR]
         if attributes is None:
             attributes = {}
@@ -234,9 +239,9 @@ class NexusInfo:
         return {
             VALUES:
                 {
-                    NXLOG_VALUE:
+                    y_label:
                         nx_log_data,
-                    TIME:
+                    x_label:
                         {
                             VALUES: time,
                             ATTR: {UNITS: time_unit}
@@ -781,12 +786,25 @@ class Bank:
     def add_data(self, det_data, time_of_flight, time_unit='s'):
         data_nexus = \
             NexusInfo.get_nx_log_group(
-                nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data))
+                nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data),
+                time=time_of_flight, x_label=TOF)
         self._nexus_dict[VALUES].update({'data': data_nexus})
-        tof_nexus = NexusInfo.get_nx_log_group(
-            nx_log_data=NexusInfo.get_values_attrs_as_dict(
-                time_of_flight, attrs={UNITS: time_unit}))
-        self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
+        # tof_nexus = NexusInfo.get_nx_log_group(
+        #     nx_log_data=NexusInfo.get_values_attrs_as_dict(
+        #         time_of_flight, attrs={UNITS: time_unit}))
+        # self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
+
+    def add_static_data(self, det_data, time_of_flight, spectrum):
+        data_to_nxdata = {
+                'values': NexusInfo.get_values_attrs_as_dict(det_data),
+                TOF: NexusInfo.get_values_attrs_as_dict(time_of_flight,
+                                                        {UNITS: 'tof'}),
+                SPECTRUM: NexusInfo.get_values_attrs_as_dict(spectrum)
+            }
+        self._nexus_dict[VALUES].update(
+            {'data': NexusInfo.get_values_attrs_as_dict(data_to_nxdata,
+                                                        {NX_CLASS: NX_DATA})}
+        )
 
     def get_nexus_dict(self):
         return self._nexus_dict
@@ -962,8 +980,8 @@ class Slit(SimpleNexusClass):
         y_gap_nexus = NexusInfo.get_values_attrs_as_dict(y_gap,
                                                          {UNITS: gap_unit})
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
-        geo_data['x_gap'] = NexusInfo.get_nx_log_group(nx_log_data=x_gap_nexus)
-        geo_data['y_gap'] = NexusInfo.get_nx_log_group(nx_log_data=y_gap_nexus)
+        geo_data['x_gap'] = x_gap_nexus
+        geo_data['y_gap'] = y_gap_nexus
         self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data, NexusInfo.get_slit_class_attr())
         return self._nexus_dict
@@ -1053,7 +1071,7 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    add_data_to_nxs = False
+    add_data_to_nxs = True
     add_nurf_to_nxs = False
     # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     bank_ids_transform_as_nxlog = [-1]
@@ -1077,14 +1095,16 @@ if __name__ == '__main__':
                                                  'detector_count')
 
             # detector count data
-            arr = np.zeros((axis_2_size, axis_1_size), dtype='int32')
+            monitor_count = 10
+            arr = np.zeros((axis_2_size + monitor_count, axis_1_size),
+                           dtype='int32')
             detector_data.read_direct(arr)
-            detector_data = arr
+            detector_data = arr[monitor_count:, :]
 
             # monitor event count data.
-            arr = np.zeros((axis_2_size, ), dtype='int32')
-            monitor_data.read_direct(arr)
-            monitor_data = arr
+            # arr = np.zeros((axis_2_size, ), dtype='int32')
+            # monitor_data.read_direct(arr)
+            # monitor_data = arr
 
             # time of flight data
             tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
@@ -1096,9 +1116,9 @@ if __name__ == '__main__':
             # pixel id data
             pixel_id_data = nexus_loader.\
                 get_data('mantid_workspace_1.workspace.axis2')
-            arr = np.zeros((axis_2_size,), dtype='int32')
+            arr = np.zeros((axis_2_size + monitor_count,), dtype='int32')
             pixel_id_data.read_direct(arr)
-            pixel_id_data = arr
+            pixel_id_data = arr[:-monitor_count]
         except (TypeError, FileNotFoundError) as e:
             detector_data = []
             monitor_data = []
@@ -1165,8 +1185,8 @@ if __name__ == '__main__':
                                       in bank_ids_transform_as_nxlog else False
             bank.compound_detector_geometry(trans_path, transform_nxlog)
             if add_data_to_nxs:
-                bank.add_data(detector_data[start_index:end_index],
-                              tof_data)
+                bank.add_static_data(detector_data[start_index:end_index],
+                                     tof_data, pixel_id_data)
             item_det = bank.get_nexus_dict()
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
@@ -1208,7 +1228,7 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
                 monitor.compound_geometry(trans_path,
                                           nx_log_transform_monitor[c])
-            if add_data_to_nxs:
+            if add_data_to_nxs and False:
                 monitor.add_data(mon_data=monitor_data)
             print(f'Monitor {loki_monitor[NAME]} is done!')
 

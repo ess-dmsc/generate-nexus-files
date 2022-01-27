@@ -48,6 +48,7 @@ data_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, 9689),
                       {'name': 'chopper_2', 'location': (0, 0, 9739),
                        'rotation_speed': 14.0, 'slits': 1,
                        'disk_rad': 270.0}]
+data_disk_choppers = []
 
 data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
                  {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2'},
@@ -124,6 +125,6 @@ file_name = 'larmor.nxs'
 detector_data_filepath = 'larmor_data.nxs'
 axis_1_size = 1000
 axis_2_size = det_banks_data[0]['num_tubes'] * NUM_STRAWS_PER_TUBE * \
-              STRAW_RESOLUTION + det_pixel_id_start - 1
+              STRAW_RESOLUTION + det_pixel_id_start - 1  # TODO: INVESTIGATE THIS.
 
 print(det_banks_data)
