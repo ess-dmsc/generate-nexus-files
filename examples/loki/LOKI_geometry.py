@@ -9,7 +9,7 @@ import random
 from enum import Enum
 from typing import Dict, List, Optional
 from nurf_data import load_one_spectro_file, nurf_file_creator
-IMPORT_LARMOR = True  # Change depending on what data set should be used.
+IMPORT_LARMOR = False  # Change depending on what data set should be used.
 DEBUG_LARMOR_DET = False  #
 if IMPORT_LARMOR:
     from larmor_data import FRACTIONAL_PRECISION, \
@@ -1054,7 +1054,7 @@ if __name__ == '__main__':
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
     add_data_to_nxs = False
-    add_nurf_to_nxs = False
+    add_nurf_to_nxs = True
     # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     bank_ids_transform_as_nxlog = [-1]
     detector_banks: List[Bank] = []
