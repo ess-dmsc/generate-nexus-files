@@ -1097,7 +1097,7 @@ if __name__ == '__main__':
             # detector count data
             monitor_count = 10
             arr = np.zeros((axis_2_size + monitor_count, axis_1_size),
-                           dtype='int32')
+                           dtype='int16')
             detector_data.read_direct(arr)
             detector_data = arr[monitor_count:, :]
 
