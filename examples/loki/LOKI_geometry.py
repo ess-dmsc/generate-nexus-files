@@ -18,7 +18,7 @@ if IMPORT_LARMOR:
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
-        axis_1_size, axis_2_size, detector_data_filepath
+        axis_1_size, axis_2_size, detector_data_filepath, isis_larmor_data_filepath
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
@@ -60,6 +60,7 @@ SAMPLE = 'sample'
 SOURCE = 'source'
 TIME = 'time'
 TOF = 'tof'
+TOPIC = 'topic'
 SPECTRUM = 'spectrum'
 TRANSFORMATION_TYPE = 'transformation_type'
 TRANSFORMATIONS = 'transformations'
@@ -164,6 +165,15 @@ class NexusInfo:
     @staticmethod
     def get_slit_class_attr():
         return {NX_CLASS: 'NXslit'}
+
+    @staticmethod
+    def get_event_data(nx_event_data):
+        return {
+            VALUES: nx_event_data,
+            ATTR: {NX_CLASS: 'NXevent_data',
+                   TOPIC: 'topic',
+                   SOURCE: 'source'}
+        }
 
     @staticmethod
     def get_nx_user(new_user):
@@ -795,16 +805,34 @@ class Bank:
         # self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
 
     def add_static_data(self, det_data, time_of_flight, spectrum):
+        # data_to_nxdata = {
+        #         'values': NexusInfo.get_values_attrs_as_dict(det_data),
+        #         TOF: NexusInfo.get_values_attrs_as_dict(time_of_flight,
+        #                                                 {UNITS: 'tof'}),
+        #         SPECTRUM: NexusInfo.get_values_attrs_as_dict(spectrum)
+        #     }
+        # self._nexus_dict[VALUES].update(
+        #     {'data': NexusInfo.get_values_attrs_as_dict(data_to_nxdata,
+        #                                                 {NX_CLASS: NX_DATA})}
+        # )
         data_to_nxdata = {
-                'values': NexusInfo.get_values_attrs_as_dict(det_data),
-                TOF: NexusInfo.get_values_attrs_as_dict(time_of_flight,
-                                                        {UNITS: 'tof'}),
-                SPECTRUM: NexusInfo.get_values_attrs_as_dict(spectrum)
-            }
+            'data': NexusInfo.get_values_attrs_as_dict(det_data),
+        }
         self._nexus_dict[VALUES].update(
-            {'data': NexusInfo.get_values_attrs_as_dict(data_to_nxdata,
-                                                        {NX_CLASS: NX_DATA})}
+            data_to_nxdata
         )
+        data_to_nxdata = {
+            'tof': NexusInfo.get_values_attrs_as_dict(time_of_flight, {UNITS: 's'}),
+        }
+        self._nexus_dict[VALUES].update(
+            data_to_nxdata
+        )
+        # data_to_nxdata = {
+        #     'spectrum': NexusInfo.get_values_attrs_as_dict(spectrum),
+        # }
+        # self._nexus_dict[VALUES].update(
+        #     data_to_nxdata
+        # )
 
     def get_nexus_dict(self):
         return self._nexus_dict
@@ -840,7 +868,7 @@ class Entry:
             NexusInfo.get_entry_class_attr())}
 
 
-class SimpleNexusClass(ABC):
+class SimpleNexus(ABC):
     """
     Abstraction of a simple nexus class.
     """
@@ -868,7 +896,7 @@ class SimpleNexusClass(ABC):
         return self._nexus_dict
 
 
-class Source(SimpleNexusClass):
+class Source(SimpleNexus):
     """
     Abstraction of an instrument source.
     """
@@ -885,7 +913,7 @@ class Source(SimpleNexusClass):
         return self._nexus_dict
 
 
-class Sample(SimpleNexusClass):
+class Sample(SimpleNexus):
     """
         Abstraction of an instrument sample.
     """
@@ -902,7 +930,7 @@ class Sample(SimpleNexusClass):
         return self._nexus_dict
 
 
-class DiskChopper(SimpleNexusClass):
+class DiskChopper(SimpleNexus):
     """
         Abstraction of an instrument disk chopper.
     """
@@ -934,7 +962,7 @@ class DiskChopper(SimpleNexusClass):
         return self._nexus_dict
 
 
-class Monitor(SimpleNexusClass):
+class Monitor(SimpleNexus):
     """
         Abstraction of an instrument monitor.
     """
@@ -957,7 +985,7 @@ class Monitor(SimpleNexusClass):
         self._nexus_dict[VALUES].update({'data': data_nexus})
 
 
-class Slit(SimpleNexusClass):
+class Slit(SimpleNexus):
     """
         Abstraction of an instrument slit.
     """
@@ -985,6 +1013,76 @@ class Slit(SimpleNexusClass):
         self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data, NexusInfo.get_slit_class_attr())
         return self._nexus_dict
+
+
+class EventData:
+
+    # def __init__(self, spectrum, tof, ev_data):
+    #     self._spectrum = spectrum
+    #     self._tof = tof
+    #     self._event_data = ev_data
+    #     self._nx_event_data = {}
+    #     self._extract_and_fit_data()
+    #     self._extract_and_add_data()
+    #
+    # def _extract_and_fit_data(self):
+    #     manipulated_tof = self._tof
+    #     # Event time data.
+    #     event_time_zero = \
+    #         NexusInfo.get_values_attrs_as_dict(manipulated_tof,
+    #                                            {UNITS: 'ns',
+    #                                             'start': '1970-01-01T00:00:00Z'}
+    #                                            )
+    #     event_time_offset = \
+    #         NexusInfo.get_values_attrs_as_dict(manipulated_tof, {UNITS: 'ns'})
+    #     self._nx_event_data['event_time_offset'] = event_time_offset
+    #     self._nx_event_data['event_time_zero'] = event_time_zero
+    #
+    #     # Leave empty as we do not need this data and it is not there.
+    #     cue_index = NexusInfo.get_values_attrs_as_dict([])
+    #     cue_timestamp_zero = NexusInfo.get_values_attrs_as_dict([], {UNITS: 'ns'})
+    #     self._nx_event_data['cue_index'] = cue_index
+    #     self._nx_event_data['cue_timestamp_zero'] = cue_timestamp_zero
+    #
+    #     # Event index and id data.
+    #     event_index = NexusInfo.get_values_attrs_as_dict([])
+    #     event_id = NexusInfo.get_values_attrs_as_dict([])
+    #     self._nx_event_data['event_index'] = event_index
+    #     self._nx_event_data['event_id'] = event_id
+
+    def __init__(self, event_id, event_index, event_time_offset, event_time_zero):
+        self._event_id = event_id
+        self._event_index = event_index
+        self._event_time_zero = event_time_zero
+        self._event_time_offset = event_time_offset
+        self._nx_event_data = {}
+        self._extract_and_add_data()
+
+    def _extract_and_add_data(self):
+        # Leave empty as we do not need this data and it is not there.
+        cue_index = NexusInfo.get_values_attrs_as_dict([])
+        cue_timestamp_zero = NexusInfo.get_values_attrs_as_dict([],
+                                                                {UNITS: 'ns'})
+        self._nx_event_data['cue_index'] = cue_index
+        self._nx_event_data['cue_timestamp_zero'] = cue_timestamp_zero
+        # event time offset
+        self._nx_event_data['event_time_offset'] = \
+            NexusInfo.get_values_attrs_as_dict(self._event_time_offset,
+                                               {UNITS: 'us'})
+        # event time zero
+        self._nx_event_data['event_time_zero'] = \
+            NexusInfo.get_values_attrs_as_dict(self._event_time_zero,
+                                               {UNITS: 's',
+                                                'start': '2021-05-17T17:58:54'})
+        # event id
+        self._nx_event_data['event_id'] = \
+            NexusInfo.get_values_attrs_as_dict(self._event_id)
+        # event index
+        self._nx_event_data['event_index'] = \
+            NexusInfo.get_values_attrs_as_dict(self._event_index)
+
+    def get_nx_event_data(self):
+        return NexusInfo.get_event_data(self._nx_event_data)
 
 
 class NexusFileBuilder:
@@ -1071,7 +1169,8 @@ if __name__ == '__main__':
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = False
     generate_nexus_content_into_nxs = True
-    add_data_to_nxs = True
+    add_simulated_data_to_nxs = False
+    add_larmor_isis_data_to_nxs = True
     add_nurf_to_nxs = False
     # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     bank_ids_transform_as_nxlog = [-1]
@@ -1082,7 +1181,42 @@ if __name__ == '__main__':
     monitor_data = []
     tof_data = []
     pixel_id_data = []
-    if add_data_to_nxs:
+    event_id = []
+    event_index = []
+    event_time_offset = []
+    event_time_zero = []
+    if add_larmor_isis_data_to_nxs:
+        nexus_loader = NexusFileLoader(isis_larmor_data_filepath)
+        try:
+            nexus_loader.load_file()
+            event_data_nx = 'raw_data_1.detector_1_events.'
+            event_id = nexus_loader.get_data(event_data_nx +
+                                             'event_id')
+            event_index = nexus_loader.get_data(event_data_nx +
+                                                'event_index')
+            event_time_offset = nexus_loader.get_data(event_data_nx +
+                                                      'event_time_offset')
+            event_time_zero = nexus_loader.get_data(event_data_nx +
+                                                      'event_time_zero')
+            # event id readout
+            arr = np.zeros((3095936, ), dtype='uint')
+            event_id.read_direct(arr)
+            event_id = arr
+            # event index readout
+            arr = np.zeros((4822,), dtype='uint')
+            event_index.read_direct(arr)
+            event_index = arr
+            # event time offset
+            arr = np.zeros((3095936,), dtype='float')
+            event_time_offset.read_direct(arr)
+            event_time_offset = arr
+            # event time zero
+            arr = np.zeros((4822,), dtype='float')
+            event_time_zero.read_direct(arr)
+            event_time_zero = arr
+        except (TypeError, FileNotFoundError) as e:
+            print(e)
+    elif add_simulated_data_to_nxs:
         nexus_loader = NexusFileLoader(detector_data_filepath)
         try:
             nexus_loader.load_file()
@@ -1125,6 +1259,11 @@ if __name__ == '__main__':
             tof_data = []
             pixel_id_data = []
             print(e)
+    # event_data = EventData(pixel_id_data, tof_data, detector_data)
+    event_data = EventData(event_id,
+                           event_index,
+                           event_time_offset,
+                           event_time_zero)
 
     for loki_bank_id in det_banks_data:
         if plot_endpoint_locations:
@@ -1184,7 +1323,7 @@ if __name__ == '__main__':
             transform_nxlog = True if bank.get_bank_id() \
                                       in bank_ids_transform_as_nxlog else False
             bank.compound_detector_geometry(trans_path, transform_nxlog)
-            if add_data_to_nxs:
+            if add_simulated_data_to_nxs:
                 bank.add_static_data(detector_data[start_index:end_index],
                                      tof_data, pixel_id_data)
             item_det = bank.get_nexus_dict()
@@ -1228,7 +1367,7 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_monitor[NAME]] = \
                 monitor.compound_geometry(trans_path,
                                           nx_log_transform_monitor[c])
-            if add_data_to_nxs and False:
+            if add_simulated_data_to_nxs and False:
                 monitor.add_data(mon_data=monitor_data)
             print(f'Monitor {loki_monitor[NAME]} is done!')
 
@@ -1248,6 +1387,10 @@ if __name__ == '__main__':
             user_var = 'user_' + str(c)
             data[ENTRY][VALUES][user_var] = NexusInfo.get_nx_user(user)
             print(f'NXuser {user_var} is done!')
+
+
+        # Throw everything into event data.
+        data[ENTRY][VALUES]['larmor_events'] = event_data.get_nx_event_data()
 
         # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data, filename=file_name)
