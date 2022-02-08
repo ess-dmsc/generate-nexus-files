@@ -1062,13 +1062,14 @@ class EventData:
         # Leave empty as we do not need this data and it is not there.
         cue_index = NexusInfo.get_values_attrs_as_dict([])
         cue_timestamp_zero = NexusInfo.get_values_attrs_as_dict([],
-                                                                {UNITS: 'ns'})
+                                                                {UNITS: 'ns',
+                                                                 'start': '2021-05-17T17:58:54'})
         self._nx_event_data['cue_index'] = cue_index
         self._nx_event_data['cue_timestamp_zero'] = cue_timestamp_zero
         # event time offset
         self._nx_event_data['event_time_offset'] = \
             NexusInfo.get_values_attrs_as_dict(self._event_time_offset,
-                                               {UNITS: 'us'})
+                                               {UNITS: 'ns'})
         # event time zero
         self._nx_event_data['event_time_zero'] = \
             NexusInfo.get_values_attrs_as_dict(self._event_time_zero,
@@ -1207,9 +1208,9 @@ if __name__ == '__main__':
             event_index.read_direct(arr)
             event_index = arr
             # event time offset
-            arr = np.zeros((3095936,), dtype='float')
+            arr = np.zeros((3095936,), dtype='uint')
             event_time_offset.read_direct(arr)
-            event_time_offset = arr
+            event_time_offset = arr * 1000  # to ns.
             # event time zero
             arr = np.zeros((4822,), dtype='float')
             event_time_zero.read_direct(arr)
