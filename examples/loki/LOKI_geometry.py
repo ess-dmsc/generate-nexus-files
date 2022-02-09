@@ -910,6 +910,10 @@ class Source(SimpleNexus):
         self._nexus_dict = NexusInfo.get_values_attrs_as_dict(
             geo_data,
             NexusInfo.get_source_class_attr())
+        self._nexus_dict[VALUES]['type'] = NexusInfo.get_values_attrs_as_dict(
+            'Spallation Neutron Source')
+        self._nexus_dict[VALUES]['probe'] = NexusInfo.get_values_attrs_as_dict(
+            'neutron')
         return self._nexus_dict
 
 
@@ -1317,9 +1321,12 @@ if __name__ == '__main__':
     start_index = 0
     end_index = start_index
     if generate_nexus_content_into_nxs:
-        for bank in detector_banks:
+        for c, bank in enumerate(detector_banks):
             end_index += bank.get_number_of_pixels()
-            key_det = f'detector_{bank.get_bank_id()}'
+            if NAME in det_banks_data[c]:
+                key_det = det_banks_data[c][NAME]
+            else:
+                key_det = f'detector_{bank.get_bank_id()}'
             trans_path = f'/{ENTRY}/{INSTRUMENT}/{key_det}/{TRANSFORMATIONS}/'
             transform_nxlog = True if bank.get_bank_id() \
                                       in bank_ids_transform_as_nxlog else False
@@ -1333,18 +1340,21 @@ if __name__ == '__main__':
             start_index = end_index
 
         # Create source.
-        loki_source = Source(data_source[LOCATION], data_source[NAME])
-        trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
-        data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
-            loki_source.compound_geometry(trans_path)
-        print(f'Source {SOURCE} is done!')
+        if data_source:
+            loki_source = Source(data_source[LOCATION],
+                                 data_source[NAME])
+            trans_path = f'/{ENTRY}/{INSTRUMENT}/{SOURCE}/{TRANSFORMATIONS}/'
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][SOURCE] = \
+                loki_source.compound_geometry(trans_path)
+            print(f'Source {SOURCE} is done!')
 
         # Create sample.
-        loki_sample = Sample(data_sample[LOCATION], data_sample[NAME])
-        transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
-        data[ENTRY][VALUES][SAMPLE] = \
-            loki_sample.compound_geometry(transformation_path)
-        print(f'Sample {SAMPLE} is done!')
+        if data_sample:
+            loki_sample = Sample(data_sample[LOCATION], data_sample[NAME])
+            transformation_path = f'/{ENTRY}/{SAMPLE}/{TRANSFORMATIONS}/'
+            data[ENTRY][VALUES][SAMPLE] = \
+                loki_sample.compound_geometry(transformation_path)
+            print(f'Sample {SAMPLE} is done!')
 
         # Create choppers.
         for loki_chopper in data_disk_choppers:
@@ -1391,7 +1401,7 @@ if __name__ == '__main__':
 
 
         # Throw everything into event data.
-        data[ENTRY][VALUES]['larmor_events'] = event_data.get_nx_event_data()
+        data[ENTRY][VALUES]['larmor_detector_events'] = event_data.get_nx_event_data()
 
         # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data, filename=file_name)

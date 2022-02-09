@@ -37,6 +37,8 @@ data_sample = {
     'name': 'larmor_sample'
 }
 
+data_sample = {}
+
 data_source = {
     'location': add_offset((0, 0, 0)),
     'name': 'moderator'
@@ -56,6 +58,10 @@ data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
                  {'location': add_offset((0, 0, 25760)), 'name': 'monitor_4'},
                  {'location': add_offset((0, 0, 29650)), 'name': 'monitor_5'}]
 
+
+data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
+                 {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2'},]
+
 s1 = 0.03
 s2 = 0.02
 s3 = 0.008
@@ -72,6 +78,8 @@ data_slits = [{'location': add_offset((0, 0, 17050)), 'name': 'coarsejaws',
               {'location': add_offset((0, 0, 25300)), 'name': 'SANS_sample',
                'x_gap': 50, 'y_gap': 50}
               ]
+
+data_slits = []
 
 # Data from larmor document.
 d_x = 1.953
@@ -117,7 +125,8 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(STRAW_RESOLUTION), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
                             (x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
-                      'bank_offset': add_offset((0, 0, 0))
+                      'bank_offset': add_offset((0, 0, 0)),
+                      'name': 'larmor_detector'
                       },
                   }
 
