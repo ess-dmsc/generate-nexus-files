@@ -1141,6 +1141,9 @@ class NexusFileLoader:
             return nexus_data[dot_path_list[0]].attrs
 
 
+FLOAT, INTEGER, STRING = "float", "int32", "string"
+
+
 class JsonConfigTranslator:
 
     def __init__(self, nexus_struct, json_filename='config.json'):
@@ -1154,15 +1157,27 @@ class JsonConfigTranslator:
         self._json_config[CHILDREN].append(res)
 
     @staticmethod
-    def _flatten_list(t):
+    def _check_type(val):
+        if isinstance(val, tuple):
+            val = val[0]
+        if isinstance(val, str):
+            dtype = STRING
+        elif isinstance(val, int):
+            dtype = INTEGER
+        else:
+            dtype = FLOAT
+        return dtype
+
+    def _flatten_list(self, t):
         if isinstance(t, str):
-            return t
+            return t, STRING
         elif np.isscalar(t[0]) and len(t) == 1:
-            return t[0]
+            return t[0], self._check_type(t[0])
         else:
             if isinstance(t[0], np.ndarray):
-                return t[0].tolist()
-            return t
+                t_list = t[0].tolist()
+                return t_list, self._check_type(t_list[0])
+            return t, self._check_type(t[0])
 
     @staticmethod
     def _get_attributes(nexus_dict):
@@ -1181,10 +1196,11 @@ class JsonConfigTranslator:
 
         # Populate children.
         if not isinstance(nexus_dict[VALUES], dict):
-            nxs_data = self._flatten_list(nexus_dict[VALUES])
+            nxs_data, dtype = self._flatten_list(nexus_dict[VALUES])
             child = {MODULE: DATASET, CONFIG: {
                 NAME: object_name,
-                VALUES: nxs_data
+                VALUES: nxs_data,
+                TYPE: dtype
             }}
             attributes = self._get_attributes(nexus_dict)
             if attributes:
