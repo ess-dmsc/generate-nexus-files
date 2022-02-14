@@ -1175,7 +1175,9 @@ class JsonConfigTranslator:
             return t[0], self._check_type(t[0])
         else:
             if isinstance(t[0], np.ndarray):
-                t_list = t[0].tolist()
+                t_list = []
+                for list_item in t:
+                    t_list.append(list_item.tolist())
                 return t_list, self._check_type(t_list[0])
             return t, self._check_type(t[0])
 
