@@ -1164,20 +1164,32 @@ class JsonConfigTranslator:
                 return t[0].tolist()
             return t
 
+    @staticmethod
+    def _get_attributes(nexus_dict):
+        attributes = []
+        if nexus_dict[ATTR]:
+            for name, value in nexus_dict[ATTR].items():
+                if value:
+                    attributes.append({
+                        NAME: name,
+                        VALUES: value
+                    })
+        return attributes
+
     def _translate(self, object_name, nexus_dict):
         children = []
-        attributes = []
 
         # Populate children.
         if not isinstance(nexus_dict[VALUES], dict):
             nxs_data = self._flatten_list(nexus_dict[VALUES])
-            children.append({
-                MODULE: DATASET,
-                CONFIG: {
-                    NAME: object_name,
-                    VALUES: nxs_data
-                }
-            })
+            child = {MODULE: DATASET, CONFIG: {
+                NAME: object_name,
+                VALUES: nxs_data
+            }}
+            attributes = self._get_attributes(nexus_dict)
+            if attributes:
+                child[ATTR] = attributes
+            return child
         elif MODULE in nexus_dict:
             children.append(
                 nexus_dict[MODULE]
@@ -1194,14 +1206,9 @@ class JsonConfigTranslator:
         }
 
         # Populate attributes if they exist.
-        if nexus_dict[ATTR]:
-            for name, value in nexus_dict[ATTR].items():
-                if value:
-                    attributes.append({
-                        NAME: name,
-                        VALUES: value
-                    })
-        output_dict[ATTR] = attributes
+        attributes = self._get_attributes(nexus_dict)
+        if attributes:
+            output_dict[ATTR] = attributes
         return output_dict
 
     def save_to_json(self):
