@@ -1,4 +1,5 @@
 import csv
+import json
 from abc import ABC
 
 from datetime import datetime
@@ -18,7 +19,8 @@ if IMPORT_LARMOR:
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
-        axis_1_size, axis_2_size, detector_data_filepath, isis_larmor_data_filepath
+        axis_1_size, axis_2_size, detector_data_filepath, \
+        isis_larmor_data_filepath
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
@@ -46,10 +48,14 @@ VALID_DATA_TYPES_NXS = (str, int, datetime, float)
 VALID_ARRAY_TYPES_NXS = (list, np.ndarray)
 N_VERTICES = 3
 ATTR = 'attributes'
+CHILDREN = 'children'
+CONFIG = 'config'
+DATASET = 'dataset'
 DEPENDS_ON = 'depends_on'
 ENTRY = 'entry'
 INSTRUMENT = 'instrument'
 LOCATION = 'location'
+MODULE = 'module'
 NAME = 'name'
 NX_CLASS = 'NX_class'
 NX_DATA = 'NXdata'
@@ -65,6 +71,7 @@ SPECTRUM = 'spectrum'
 TRANSFORMATION_TYPE = 'transformation_type'
 TRANSFORMATIONS = 'transformations'
 TRANSLATION = 'translation'
+TYPE = 'type'
 UNITS = 'units'
 VALUES = 'values'
 VECTOR = 'vector'
@@ -170,15 +177,21 @@ class NexusInfo:
     def get_event_data(nx_event_data):
         return {
             VALUES: nx_event_data,
-            ATTR: {NX_CLASS: 'NXevent_data',
-                   TOPIC: 'topic',
-                   SOURCE: 'source'}
+            ATTR: {NX_CLASS: 'NXevent_data'},
+            MODULE:
+                {
+                    MODULE: 'ev42',
+                    CONFIG: {
+                            TOPIC: 'topic',
+                            SOURCE: 'source'
+                    }
+                }
         }
 
     @staticmethod
     def get_nx_user(new_user):
         user_values = {
-            key: {VALUES: val, ATTR: None} for key, val in new_user.items()
+            u_key: {VALUES: val, ATTR: None} for u_key, val in new_user.items()
         }
         return {
             VALUES: user_values,
@@ -227,7 +240,8 @@ class NexusInfo:
         }
 
     @staticmethod
-    def get_nx_log_group(nx_log_data=None, time=None, time_unit='tof', x_label= None, y_label=None):
+    def get_nx_log_group(nx_log_data=None, time=None, time_unit='tof',
+                         x_label=None, y_label=None):
         if time is None:
             if isinstance(nx_log_data[VALUES], list):
                 time = list(range(0, len(nx_log_data[VALUES])))
@@ -757,11 +771,11 @@ class Bank:
 
         tube_direction = np.array(self._bank_geometry['A'][0]) - \
                          np.array(self._bank_geometry['B'][0])
-        for key in unit_vectors_xyz:
-            scalar_product = np.dot(unit_vectors_xyz[key], tube_direction)
-            if scalar_product and key == 'x':
+        for label_key in unit_vectors_xyz:
+            scalar_product = np.dot(unit_vectors_xyz[label_key], tube_direction)
+            if scalar_product and label_key == 'x':
                 return DetectorAlignment.HORIZONTAL
-            elif scalar_product and key == 'y':
+            elif scalar_product and label_key == 'y':
                 return DetectorAlignment.VERTICAL
 
         raise ValueError(f'The alignment of bank detector {self._bank_id} is'
@@ -793,28 +807,14 @@ class Bank:
             NexusInfo.get_detector_class_attr())
         return self._nexus_dict
 
-    def add_data(self, det_data, time_of_flight, time_unit='s'):
+    def add_data(self, det_data, time_of_flight):
         data_nexus = \
             NexusInfo.get_nx_log_group(
                 nx_log_data=NexusInfo.get_values_attrs_as_dict(det_data),
                 time=time_of_flight, x_label=TOF)
         self._nexus_dict[VALUES].update({'data': data_nexus})
-        # tof_nexus = NexusInfo.get_nx_log_group(
-        #     nx_log_data=NexusInfo.get_values_attrs_as_dict(
-        #         time_of_flight, attrs={UNITS: time_unit}))
-        # self._nexus_dict[VALUES].update({'time_of_flight': tof_nexus})
 
-    def add_static_data(self, det_data, time_of_flight, spectrum):
-        # data_to_nxdata = {
-        #         'values': NexusInfo.get_values_attrs_as_dict(det_data),
-        #         TOF: NexusInfo.get_values_attrs_as_dict(time_of_flight,
-        #                                                 {UNITS: 'tof'}),
-        #         SPECTRUM: NexusInfo.get_values_attrs_as_dict(spectrum)
-        #     }
-        # self._nexus_dict[VALUES].update(
-        #     {'data': NexusInfo.get_values_attrs_as_dict(data_to_nxdata,
-        #                                                 {NX_CLASS: NX_DATA})}
-        # )
+    def add_static_data(self, det_data, time_of_flight):
         data_to_nxdata = {
             'data': NexusInfo.get_values_attrs_as_dict(det_data),
         }
@@ -822,17 +822,12 @@ class Bank:
             data_to_nxdata
         )
         data_to_nxdata = {
-            'tof': NexusInfo.get_values_attrs_as_dict(time_of_flight, {UNITS: 's'}),
+            'tof': NexusInfo.get_values_attrs_as_dict(time_of_flight,
+                                                      {UNITS: 's'}),
         }
         self._nexus_dict[VALUES].update(
             data_to_nxdata
         )
-        # data_to_nxdata = {
-        #     'spectrum': NexusInfo.get_values_attrs_as_dict(spectrum),
-        # }
-        # self._nexus_dict[VALUES].update(
-        #     data_to_nxdata
-        # )
 
     def get_nexus_dict(self):
         return self._nexus_dict
@@ -1021,53 +1016,30 @@ class Slit(SimpleNexus):
 
 class EventData:
 
-    # def __init__(self, spectrum, tof, ev_data):
-    #     self._spectrum = spectrum
-    #     self._tof = tof
-    #     self._event_data = ev_data
-    #     self._nx_event_data = {}
-    #     self._extract_and_fit_data()
-    #     self._extract_and_add_data()
-    #
-    # def _extract_and_fit_data(self):
-    #     manipulated_tof = self._tof
-    #     # Event time data.
-    #     event_time_zero = \
-    #         NexusInfo.get_values_attrs_as_dict(manipulated_tof,
-    #                                            {UNITS: 'ns',
-    #                                             'start': '1970-01-01T00:00:00Z'}
-    #                                            )
-    #     event_time_offset = \
-    #         NexusInfo.get_values_attrs_as_dict(manipulated_tof, {UNITS: 'ns'})
-    #     self._nx_event_data['event_time_offset'] = event_time_offset
-    #     self._nx_event_data['event_time_zero'] = event_time_zero
-    #
-    #     # Leave empty as we do not need this data and it is not there.
-    #     cue_index = NexusInfo.get_values_attrs_as_dict([])
-    #     cue_timestamp_zero = NexusInfo.get_values_attrs_as_dict([], {UNITS: 'ns'})
-    #     self._nx_event_data['cue_index'] = cue_index
-    #     self._nx_event_data['cue_timestamp_zero'] = cue_timestamp_zero
-    #
-    #     # Event index and id data.
-    #     event_index = NexusInfo.get_values_attrs_as_dict([])
-    #     event_id = NexusInfo.get_values_attrs_as_dict([])
-    #     self._nx_event_data['event_index'] = event_index
-    #     self._nx_event_data['event_id'] = event_id
-
-    def __init__(self, event_id, event_index, event_time_offset, event_time_zero):
-        self._event_id = event_id
-        self._event_index = event_index
-        self._event_time_zero = event_time_zero
-        self._event_time_offset = event_time_offset
+    def __init__(self, ev_id=None, ev_index=None, ev_time_offset=None,
+                 ev_time_zero=None):
+        if ev_time_zero is None:
+            ev_time_zero = []
+        if ev_time_offset is None:
+            ev_time_offset = []
+        if ev_id is None:
+            ev_id = []
+        if ev_index is None:
+            ev_index = []
+        self._event_id = ev_id
+        self._event_index = ev_index
+        self._event_time_zero = ev_time_zero
+        self._event_time_offset = ev_time_offset
         self._nx_event_data = {}
         self._extract_and_add_data()
 
     def _extract_and_add_data(self):
         # Leave empty as we do not need this data and it is not there.
+        time_stamp = '2021-05-17T17:58:54'
         cue_index = NexusInfo.get_values_attrs_as_dict([])
-        cue_timestamp_zero = NexusInfo.get_values_attrs_as_dict([],
-                                                                {UNITS: 'ns',
-                                                                 'start': '2021-05-17T17:58:54'})
+        cue_timestamp_zero = \
+            NexusInfo.get_values_attrs_as_dict([], {UNITS: 'ns',
+                                                    'start': time_stamp})
         self._nx_event_data['cue_index'] = cue_index
         self._nx_event_data['cue_timestamp_zero'] = cue_timestamp_zero
         # event time offset
@@ -1078,7 +1050,7 @@ class EventData:
         self._nx_event_data['event_time_zero'] = \
             NexusInfo.get_values_attrs_as_dict(self._event_time_zero,
                                                {UNITS: 's',
-                                                'start': '2021-05-17T17:58:54'})
+                                                'start': time_stamp})
         # event id
         self._nx_event_data['event_id'] = \
             NexusInfo.get_values_attrs_as_dict(self._event_id)
@@ -1167,6 +1139,74 @@ class NexusFileLoader:
                                         nexus_data[dot_path_list[0]])
         else:
             return nexus_data[dot_path_list[0]].attrs
+
+
+class JsonConfigTranslator:
+
+    def __init__(self, nexus_struct, json_filename='config.json'):
+        self._nexus_struct = nexus_struct
+        self._json_filename = json_filename
+        self._json_config = {CHILDREN: []}
+
+    def translate(self):
+        entry_name = list(self._nexus_struct)[0]
+        res = self._translate(entry_name, self._nexus_struct[entry_name])
+        self._json_config[CHILDREN].append(res)
+
+    @staticmethod
+    def _flatten_list(t):
+        if isinstance(t, str):
+            return t
+        elif np.isscalar(t[0]) and len(t) == 1:
+            return t[0]
+        else:
+            if isinstance(t[0], np.ndarray):
+                return t[0].tolist()
+            return t
+
+    def _translate(self, object_name, nexus_dict):
+        children = []
+        attributes = []
+
+        # Populate children.
+        if not isinstance(nexus_dict[VALUES], dict):
+            nxs_data = self._flatten_list(nexus_dict[VALUES])
+            children.append({
+                MODULE: DATASET,
+                CONFIG: {
+                    NAME: object_name,
+                    VALUES: nxs_data
+                }
+            })
+        elif MODULE in nexus_dict:
+            children.append(
+                nexus_dict[MODULE]
+            )
+        else:
+            for name, value in nexus_dict[VALUES].items():
+                child = self._translate(name, value)
+                if child:
+                    children.append(child)
+        output_dict = {
+            NAME: object_name,
+            TYPE: 'group',
+            CHILDREN: children,
+        }
+
+        # Populate attributes if they exist.
+        if nexus_dict[ATTR]:
+            for name, value in nexus_dict[ATTR].items():
+                if value:
+                    attributes.append({
+                        NAME: name,
+                        VALUES: value
+                    })
+        output_dict[ATTR] = attributes
+        return output_dict
+
+    def save_to_json(self):
+        with open(self._json_filename, 'w', encoding='utf-8') as file:
+            json.dump(self._json_config, file, indent=4)
 
 
 if __name__ == '__main__':
@@ -1333,7 +1373,7 @@ if __name__ == '__main__':
             bank.compound_detector_geometry(trans_path, transform_nxlog)
             if add_simulated_data_to_nxs:
                 bank.add_static_data(detector_data[start_index:end_index],
-                                     tof_data, pixel_id_data)
+                                     tof_data)
             item_det = bank.get_nexus_dict()
             data[ENTRY][VALUES][INSTRUMENT][VALUES][key_det] = item_det
             print(f'Detector {key_det} is done!')
@@ -1399,9 +1439,17 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][user_var] = NexusInfo.get_nx_user(user)
             print(f'NXuser {user_var} is done!')
 
-
         # Throw everything into event data.
-        data[ENTRY][VALUES]['larmor_detector_events'] = event_data.get_nx_event_data()
+        data[ENTRY][VALUES][INSTRUMENT][VALUES]['larmor_detector_events'] = \
+            event_data.get_nx_event_data()
+        data[ENTRY][VALUES][INSTRUMENT][VALUES]['monitor_1_events'] = \
+            EventData().get_nx_event_data()
+        data[ENTRY][VALUES][INSTRUMENT][VALUES]['monitor_2_events'] = \
+            EventData().get_nx_event_data()
+
+        translator = JsonConfigTranslator(data)
+        translator.translate()
+        translator.save_to_json()
 
         # Construct nexus file.
         nexus_file_builder = NexusFileBuilder(data, filename=file_name)
