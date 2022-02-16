@@ -103,75 +103,101 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
     # open the file and append
     with h5py.File(loki_file, 'a') as hf:
         
-        
         #print(list(hf['/entry/'].keys()))
-        
+                
         # create the various subgrous and their attributes
+        
+        #comment on names
+        #UV/FL_Background is the dark
+        #UV/FL_Intensity0 is the reference
+        #UV/FL_Spectra is the sample
+        
+        # image key for the uv_dark
+        # number of frames (nFrames) given indirectly by second(?) dimension of uv_dark_data, 2 is the value for darks 
+        # TODO: keep in mind what happens if multiple dark frames are taken
+        
+        #print(data.keys())
+        print('shape, UV spectra',np.shape(data['UV_spectra']))
+        print('dim, UV spectra',data['UV_spectra'].ndim)
+        print('shape, UV background', np.shape(data['UV_background']))
+        print('dim, UV background',data['UV_background'].ndim)
+        print('shape, UV reference', np.shape(data['UV_intensity0']))
+        print('dim, UV reference',data['UV_intensity0'].ndim)
+        
+        #I need to reshape data['UV_spectra']
+        print(data['UV_spectra'].ndim)
+        data['UV_spectra']=np.reshape(data['UV_spectra'],(np.shape(data['UV_spectra'])[0],np.shape(data['UV_spectra'])[1]))
+        print(np.shape(data['UV_spectra']), data['UV_spectra'].ndim)
+
+        # other option to stack all data together
+        #all_data1=np.row_stack((data['UV_spectra'],data['UV_background'], data['UV_intensity0']))
+        #print('all_data shape', np.shape(all_data1))
+        #print(all_data1[:,0:4])
+        
+        # but I want it this way 
+        all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
+        print('all_data shape', np.shape(all_data))
+        print(all_data[0:4,:])
+        
+        # assemble image_key #TODO needs later to be verified with real data from hardware
+        nb_spectra=np.shape(data['UV_spectra'])[0]
+        uv_ik_spectra=np.zeros((1,nb_spectra))  #interperation here: 0 for sample (in comparison to projections)
+      
+        
+        if data['UV_background'].ndim==1:
+            nb_darks=1
+        else: 
+            nb_darks=np.shape(data['UV_background'])[0]  #TODO: needs to be verified with real data from Judith's setup
+   
+        uv_ik_dark=2* np.ones((1,nb_darks)) 
+        #print(ik_dark)
+        
+        if data['UV_intensity0'].ndim==1:
+            nb_ref=1
+        else:
+            nb_ref=np.shape(data['UV_intensity0'])[0]  #TODO: needs to be verified with real data from Judith's setup
+        uv_ik_ref=4*np.ones((1,nb_ref))  #new image key: 4 for reference
+        #print(ik_ref)
+        
+        # assmebling of image_key
+        uv_image_key=np.column_stack((uv_ik_spectra,uv_ik_dark, uv_ik_ref))  #all_data is as well organised in columns
+        
         
         # UV subgroup
         grp_uv = hf.create_group("/entry/instrument/uv")
-        grp_uv.attrs["NX_class"] = 'NXdetector_group'
+        grp_uv.attrs["NX_class"] = 'NXdata'
         
-        # subgroup for uv_spectra
-        uv_spectra=grp_uv.create_group("uv_spectra")
-        uv_spectra.attrs["NX_class"] = 'NXdetector'
-        uv_spectra_data=uv_spectra.create_dataset('data', data=data['UV_spectra'],
+        # subgroup for uv all data (sample, dark, reference)
+        uv_signal=grp_uv.create_group("uv_all_data")
+        uv_signal_data=uv_signal.create_dataset('data', data=all_data,
+                                           shape=all_data.shape)
+        uv_signal_data.attrs['long_name']= 'uv_all_data'
+        uv_signal_data.attrs['units']= ''
+        uv_signal_data.attrs['signal']= 'data'  #indicate that the main signal is data 
+        uv_signal_data.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
+        uv_signal_image_key=uv_signal.create_dataset('image_key',data=uv_image_key,shape=uv_image_key.shape, dtype=np.int32)
+       
+     
+        # uv_wavelength
+        uv_wavelength_data=grp_uv.create_dataset('uv_wavelength', data=data['UV_wavelength'],
+                                              shape=data['UV_wavelength'].shape,
+                                              dtype=np.float32)
+        
+        uv_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
+        uv_wavelength_data.attrs['long name'] = 'uv_wavelength'
+                
+                
+        # uv_integration_time
+        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'],
                                            shape=data[
-                                               'UV_spectra'].shape,
+                                               'UV_IntegrationTime'].shape, 
                                            dtype=np.int32)
-        uv_spectra_data.attrs['long_name']= 'uv_spectra'
-        uv_spectra_data.attrs['units']= 'a.u.'
-        
-        # define type of detector 
-        string_dt = h5py.special_dtype(vlen=str) # variable-length string 
-        uv_spectra_type=uv_spectra.create_dataset('type', data='ccd', dtype=string_dt)
-        
-
-    
-        # subgroup for uv_integration time
-        uv_inttime=grp_uv.create_group("uv_integration_time")
-        uv_inttime.attrs["NX_class"] = 'NXdetector'
-    
-        uv_inttime_data=uv_inttime.create_dataset('uv_integration_time',
-                                           data=data['UV_IntegrationTime'],
-                                           shape=data[
-                                               'UV_IntegrationTime'].shape,
-                                           dtype=np.int32)
+                   
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 's'  # TODO: unit to be verified
 
-        # subgroup for uv_background
-        uv_bkg=grp_uv.create_group("uv_background")
-        uv_bkg.attrs["NX_class"] = 'NXdetector'
-
-        uv_bkg_data = uv_bkg.create_dataset('data',
-                                       data=data['UV_background'],
-                                       shape=data['UV_background'].shape,
-                                       dtype=np.float32)
-        uv_bkg_data.attrs['long name'] = 'uv_background'
-        uv_bkg_data.attrs['data'] = 'a.u.'
-
-        # subgroup for uv_intensity0
-        uv_int0=grp_uv.create_group("uv_intensity0")
-        uv_int0.attrs["NX_class"] = 'NXdetector'
-        uv_int0_data = uv_int0.create_dataset('data', data=data['UV_intensity0'], 
-                                            shape=data['UV_intensity0'].shape, 
-                                            dtype=np.float32)
-        uv_int0_data.attrs['long name'] = 'uv_intensity0'
-        uv_int0_data.attrs['units'] = 'a.u.'
-
         
-        # subgroup for uv_wavelength
-        uv_wavelength=grp_uv.create_group("uv_wavelength")
-        uv_wavelength.attrs["NX_class"] = 'NXdetector'
         
-        uv_wavelength_data = uv_wavelength.create_dataset('data',
-                                              data=data['UV_wavelength'],
-                                              shape=data['UV_wavelength'].shape,
-                                              dtype=np.float32)
-        uv_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
-        uv_wavelength_data.attrs['long name'] = 'uv_wavelength'
-
         # Fluorescence subgroup
         grp_fluo = hf.create_group("/entry/instrument/fluorescence")
         grp_fluo.attrs["NX_class"] = 'NXdetector_group'
@@ -224,10 +250,8 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
 
         # subgroup for fluo_spectra
         fluo_spectra=grp_fluo.create_group("fluo_spectra")
-        fluo_spectra.attrs["NX_class"] = 'NXdetector'
+        fluo_spectra.attrs["NX_class"] = 'NXdata'
         
-        # define type of detector 
-        fluo_spectra_type=fluo_spectra.create_dataset('type', data='ccd', dtype=string_dt)
         
         fluo_spectra_data = fluo_spectra.create_dataset('fluo_spectra',
                                                data=data['Fluo_spectra'],
