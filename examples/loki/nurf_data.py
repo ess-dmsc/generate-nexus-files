@@ -119,25 +119,25 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
     
         # I want it this way 
         uv_all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
-       
+        
         # assemble image_key #TODO needs later to be verified with real data from hardware
-        nb_spectra=np.shape(data['UV_spectra'])[0]
-        uv_ik_spectra=np.zeros((1,nb_spectra))  #interperation here: 0 for sample (in comparison to projections)
+        uv_nb_spectra=np.shape(data['UV_spectra'])[0]
+        uv_ik_spectra=np.zeros((1,uv_nb_spectra))  #interperation here: 0 for sample (in comparison to projections)
       
         # find out how many nFrames each item (sample, dark, reference) has
         if data['UV_background'].ndim==1:
-            nb_darks=1
+            uv_nb_darks=1
         else: 
-            nb_darks=np.shape(data['UV_background'])[1]  #TODO: needs to be verified with real data from Judith's setup
+            uv_nb_darks=np.shape(data['UV_background'])[1]  #TODO: needs to be verified with real data from Judith's setup
    
-        uv_ik_dark=2* np.ones((1,nb_darks)) 
+        uv_ik_dark=2* np.ones((1,uv_nb_darks)) 
         #print(ik_dark)
         
         if data['UV_intensity0'].ndim==1:
-            nb_ref=1
+            uv_nb_ref=1
         else:
-            nb_ref=np.shape(data['UV_intensity0'])[1]  #TODO: needs to be verified with real data from Judith's setup
-        uv_ik_ref=4*np.ones((1,nb_ref))  #new image key: 4 for reference
+            uv_nb_ref=np.shape(data['UV_intensity0'])[1]  #TODO: needs to be verified with real data from Judith's setup
+        uv_ik_ref=4*np.ones((1,uv_nb_ref))  #new image key: 4 for reference
         #print(ik_ref)
         
         # assmebling of image_key
@@ -175,52 +175,69 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
                                            dtype=np.int32)
                    
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
-        uv_inttime_data.attrs['units'] = 's'  # TODO: unit to be verified
+        uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
 
+        # currenty real fluo data is often messed up (i.e. empty spectra inbetween real ones)
+        # reshaping
+        data['Fluo_spectra']=np.reshape(data['Fluo_spectra'],(np.shape(data['Fluo_spectra'])[0],np.shape(data['Fluo_spectra'])[1]))
+        fluo_nb_spectra=np.shape(data['Fluo_spectra'])[0]
+        fluo_ik_spectra=np.zeros((1, fluo_nb_spectra))
         
+        if data['Fluo_background'].ndim==1:
+            fluo_nb_dark=1
+        else:
+            fluo_nb_dark=np.shape(data['Fluo_background'])[1] #TODO: needs to be verified with Judith's setup
+        fluo_ik_dark=2*np.ones((1,fluo_nb_dark))
         
+        if data['Fluo_intensity0'].ndim==1:
+            fluo_nb_ref=1
+        else:
+            fluo_nb_ref=np.shape(data['Fluo_intensity0'])[1] #TODO: needs to be verified with Judith's setup
+        fluo_ik_ref=4*np.ones((1,fluo_nb_ref))
+            
+        fluo_image_key=np.column_stack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
+        
+        # something is not okay with the real Fluo_intensity0 data, it contains only one 0, at least in my file from the ILL beamtime
+        # this code block can later be adjusted
+        try:
+            assert (np.shape(data['Fluo_intensity0'])[0]!=1), 'Fluo_intensity0 contains only one value.'
+        except AssertionError as error:
+            data['Fluo_intensity0']=data['Fluo_intensity0'][0]*np.ones((np.shape(data['Fluo_background'])[0]))
+           
+        # assemble all fluo data    
+        fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
+        
+    
         # Fluorescence subgroup
         grp_fluo = hf.create_group("/entry/instrument/fluorescence")
-        grp_fluo.attrs["NX_class"] = 'NXdetector_group'
+        grp_fluo.attrs["NX_class"] = 'NXdata'
         
-        
+        # subgroup for fluo all data (sample, dark, reference)
+        fluo_signal=grp_fluo.create_group("fluo_all_data")
+                
+        fluo_signal_data = fluo_signal.create_dataset('data',
+                                               data=fluo_all_data,
+                                               shape=fluo_all_data.shape)
+        fluo_signal_data.attrs['long name'] = 'fluo_all_data'
+        fluo_signal_data.attrs['units'] = 'a.u.'
+
+        fluo_signal_data.attrs['signal']= 'data'  #indicate that the main signal is data 
+        fluo_signal_data.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
+        fluo_signal_image_key=fluo_signal.create_dataset('image_key',data=fluo_image_key,shape=fluo_image_key.shape, dtype=np.int32)
+       
+
+
         # subgroup for fluo_integration_time
-        fluo_inttime=grp_fluo.create_group("fluo_integration_time")
-        fluo_inttime.attrs["NX_class"] = 'NXdetector'
-        
-        fluo_inttime_data = fluo_inttime.create_dataset('fluo_integration_time',
+        fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
                                                data=data['Fluo_IntegrationTime'],
                                                shape=data['Fluo_IntegrationTime'].shape,
                                                dtype=np.int32)
-        fluo_inttime_data.attrs['units'] = 's'  # TODO: unit to be verified
+        fluo_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently micro-seconds
         fluo_inttime_data.attrs['long name'] = 'fluo_integration_time'
 
 
-        # subgroup for fluo_bkg
-        fluo_bkg=grp_fluo.create_group("fluo_background")
-        fluo_bkg.attrs["NX_class"] = 'NXdetector'
-        fluo_bkg_data = fluo_bkg.create_dataset('fluo_background',
-                                           data=data['Fluo_background'],
-                                           shape=data['Fluo_background'].shape,
-                                           dtype=np.float32)
-        fluo_bkg_data.attrs['long name'] = 'fluo_background'
-        fluo_bkg_data.attrs['unit'] = 'a.u.'
-
-        # subgroup for fluo_intensity0
-        fluo_int0=grp_fluo.create_group("fluo_intensity0")
-        fluo_int0.attrs["NX_class"] = 'NXdetector'
-        fluo_int0_data = fluo_int0.create_dataset('fluo_intensity0',
-                                            data=data['Fluo_intensity0'],
-                                            shape=data['Fluo_intensity0'].shape,
-                                            dtype=np.float32)
-        fluo_int0_data.attrs['long name'] = 'fluo_intensity0'
-        fluo_int0_data.attrs['units'] = 'a.u.'
-
-
         # subgroup for fluo_monowavelengths
-        fluo_monowavelengths=grp_fluo.create_group("fluo_monowavelengths")
-        fluo_monowavelengths.attrs["NX_class"] = 'NXdetector'
-        fluo_monowavelengths_data = fluo_monowavelengths.create_dataset('fluo_monowavelengths',
+        fluo_monowavelengths_data = grp_fluo.create_dataset('fluo_monowavelengths',
                                                        data=data[
                                                            'Fluo_monowavelengths'],
                                                        shape=data[
@@ -229,22 +246,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_monowavelengths_data.attrs['units'] = 'nm'  # TODO: unit to be verified
         fluo_monowavelengths_data.attrs['long name'] = 'fluo_monowavelengths'
 
-        # subgroup for fluo_spectra
-        fluo_spectra=grp_fluo.create_group("fluo_spectra")
-        fluo_spectra.attrs["NX_class"] = 'NXdata'
         
-        
-        fluo_spectra_data = fluo_spectra.create_dataset('fluo_spectra',
-                                               data=data['Fluo_spectra'],
-                                               shape=data['Fluo_spectra'].shape,
-                                               dtype=np.float32)
-        fluo_spectra_data.attrs['long name'] = 'fluo_spectra'
-        fluo_spectra_data.attrs['units'] = 'a.u.'
-
         # subgroup for fluo_wavelength
-        fluo_wavelength=grp_fluo.create_group("fluo_wavelength")
-        fluo_wavelength.attrs["NX_class"] = 'NXdetector'
-        fluo_wavelength_data= fluo_wavelength.create_dataset('fluo_wavelength',
+        fluo_wavelength_data= grp_fluo.create_dataset('fluo_wavelength',
                                                   data=data['Fluo_wavelength'],
                                                   shape=data[
                                                       'Fluo_wavelength'].shape,
