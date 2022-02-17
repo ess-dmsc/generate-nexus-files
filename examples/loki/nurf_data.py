@@ -102,25 +102,23 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
 
     # open the file and append
     with h5py.File(loki_file, 'a') as hf:
-        
-        #print(list(hf['/entry/'].keys()))
                 
         #comment on names
         #UV/FL_Background is the dark
         #UV/FL_Intensity0 is the reference
         #UV/FL_Spectra is the sample
         
-        # image key for the uv_dark
-        # number of frames (nFrames) given indirectly as part of the shape of the arrays 
+        # image_key: number of frames (nFrames) given indirectly as part of the shape of the arrays 
         # TODO: keep in mind what happens if multiple dark or reference frames are taken
         
         #I need to reshape data['UV_spectra']
         data['UV_spectra']=np.reshape(data['UV_spectra'],(np.shape(data['UV_spectra'])[0],np.shape(data['UV_spectra'])[1]))
     
-        # I want it this way 
+        # assemble all spectra in one variable
         uv_all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
         
-        # assemble image_key #TODO needs later to be verified with real data from hardware
+        # assemble image_key 
+        # #TODO: needs later to be verified with real data from hardware
         uv_nb_spectra=np.shape(data['UV_spectra'])[0]
         uv_ik_spectra=np.zeros((1,uv_nb_spectra))  #interperation here: 0 for sample (in comparison to projections)
       
@@ -201,8 +199,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
             
         fluo_image_key=np.column_stack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
         
-        # something is not okay with the real Fluo_intensity0 data, it contains only one 0, at least in my file from the ILL beamtime
-        # this code block can later be adjusted
+        # Something is not okay with the real Fluo_intensity0 data from ILL. It contains only one 0, at least in my file from the ILL beamtime. 
+        # Also, some fluo spcetra in between are just dummy ones. There were acquisition problems.
+        # This code block can later be adjusted
         try:
             assert (np.shape(data['Fluo_intensity0'])[0]!=1), 'Fluo_intensity0 contains only one value.'
         except AssertionError as error:
@@ -211,7 +210,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble all fluo data    
         fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
         
-
         
         # subgroup for fluo all data (sample, dark, reference)
         fluo_signal=grp_fluo.create_group("fluo_all_data")
@@ -226,7 +224,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_signal_data.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
         fluo_signal_image_key=fluo_signal.create_dataset('image_key',data=fluo_image_key,shape=fluo_image_key.shape, dtype=np.int32)
        
-
 
         # subgroup for fluo_integration_time
         fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
