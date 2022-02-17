@@ -177,6 +177,10 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
 
+        # Fluorescence subgroup
+        grp_fluo = hf.create_group("/entry/instrument/fluorescence")
+        grp_fluo.attrs["NX_class"] = 'NXdata'
+        
         # currenty real fluo data is often messed up (i.e. empty spectra inbetween real ones)
         # reshaping
         data['Fluo_spectra']=np.reshape(data['Fluo_spectra'],(np.shape(data['Fluo_spectra'])[0],np.shape(data['Fluo_spectra'])[1]))
@@ -207,10 +211,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble all fluo data    
         fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
         
-    
-        # Fluorescence subgroup
-        grp_fluo = hf.create_group("/entry/instrument/fluorescence")
-        grp_fluo.attrs["NX_class"] = 'NXdata'
+
         
         # subgroup for fluo all data (sample, dark, reference)
         fluo_signal=grp_fluo.create_group("fluo_all_data")
