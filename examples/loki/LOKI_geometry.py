@@ -858,7 +858,7 @@ class Entry:
                     self._experiment_id),
                 'experiment_description': NexusInfo.get_values_attrs_as_dict(
                     self._experiment_desc),
-                'start_time': NexusInfo.get_values_attrs_as_dict(start_time)
+                # 'start_time': NexusInfo.get_values_attrs_as_dict(start_time)
             },
             NexusInfo.get_entry_class_attr())}
 
@@ -1231,7 +1231,8 @@ class JsonConfigTranslator:
 
     def save_to_json(self):
         with open(self._json_filename, 'w', encoding='utf-8') as file:
-            json.dump(self._json_config, file, indent=4)
+            # json.dump(self._json_config, file, indent=4)
+            json.dump(self._json_config, file, separators=(',', ':'))
 
 
 if __name__ == '__main__':
@@ -1465,12 +1466,12 @@ if __name__ == '__main__':
             print(f'NXuser {user_var} is done!')
 
         # Throw everything into event data.
-        data[ENTRY][VALUES][INSTRUMENT][VALUES]['larmor_detector_events'] = \
-            event_data.get_nx_event_data()
-        data[ENTRY][VALUES][INSTRUMENT][VALUES]['monitor_1_events'] = \
-            EventData().get_nx_event_data()
-        data[ENTRY][VALUES][INSTRUMENT][VALUES]['monitor_2_events'] = \
-            EventData().get_nx_event_data()
+        for bank in det_banks_data:
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][det_banks_data[bank][NAME]][VALUES]['larmor_detector_events'] = \
+                event_data.get_nx_event_data()
+        for c, monitor in enumerate(data_monitors):
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c}_events'] = \
+                EventData().get_nx_event_data()
 
         translator = JsonConfigTranslator(data)
         translator.translate()
