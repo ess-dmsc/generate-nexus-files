@@ -1110,6 +1110,10 @@ class NexusFileLoader:
         self._file_path = file_path
         self._nexus_content = None
 
+    def close(self):
+        if self._nexus_content:
+            self._nexus_content.close()
+
     def load_file(self):
         self._nexus_content = h5py.File(self._file_path, 'r')
 
