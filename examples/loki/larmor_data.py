@@ -37,7 +37,7 @@ data_sample = {
     'name': 'larmor_sample'
 }
 
-data_sample = {}
+# data_sample = {}
 
 data_source = {
     'location': add_offset((0, 0, 0)),
@@ -59,8 +59,10 @@ data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
                  {'location': add_offset((0, 0, 29650)), 'name': 'monitor_5'}]
 
 
-data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
-                 {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2'},]
+data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1',
+                  'topic': 'monitor_topic', 'source': 'monitor_source'},
+                 {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2',
+                  'topic': 'monitor_topic', 'source': 'monitor_source'},]
 
 s1 = 0.03
 s2 = 0.02
@@ -126,7 +128,9 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
                             (x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
                       'bank_offset': (0, 0, 0),
-                      'name': 'larmor_detector'
+                      'name': 'larmor_detector',
+                      'topic': 'loki_detector',
+                      'source': 'loki'
                       },
                   }
 

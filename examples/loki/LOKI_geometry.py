@@ -174,7 +174,7 @@ class NexusInfo:
         return {NX_CLASS: 'NXslit'}
 
     @staticmethod
-    def get_event_data(nx_event_data):
+    def get_event_data(nx_event_data, topic, source):
         return {
             VALUES: nx_event_data,
             ATTR: {NX_CLASS: 'NXevent_data'},
@@ -182,8 +182,8 @@ class NexusInfo:
                 {
                     MODULE: 'ev42',
                     CONFIG: {
-                            TOPIC: 'topic',
-                            SOURCE: 'source'
+                            TOPIC: topic,
+                            SOURCE: source
                     }
                 }
         }
@@ -1058,8 +1058,12 @@ class EventData:
         self._nx_event_data['event_index'] = \
             NexusInfo.get_values_attrs_as_dict(self._event_index)
 
-    def get_nx_event_data(self):
-        return NexusInfo.get_event_data(self._nx_event_data)
+    def get_nx_event_data(self, topic=None, source=None):
+        if not topic:
+            topic = 'topic'
+        if not source:
+            source = 'source'
+        return NexusInfo.get_event_data(self._nx_event_data, topic, source)
 
 
 class NexusFileBuilder:
@@ -1472,10 +1476,11 @@ if __name__ == '__main__':
         # Throw everything into event data.
         for bank in det_banks_data:
             data[ENTRY][VALUES][INSTRUMENT][VALUES][det_banks_data[bank][NAME]][VALUES]['larmor_detector_events'] = \
-                event_data.get_nx_event_data()
+                event_data.get_nx_event_data(det_banks_data[bank][TOPIC],
+                                             det_banks_data[bank][SOURCE])
         for c, monitor in enumerate(data_monitors):
             data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c + 1}_events'] = \
-                EventData().get_nx_event_data()
+                EventData().get_nx_event_data(monitor[TOPIC], monitor[SOURCE])
 
         translator = JsonConfigTranslator(data)
         translator.translate()
