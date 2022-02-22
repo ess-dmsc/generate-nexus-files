@@ -1474,7 +1474,7 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][det_banks_data[bank][NAME]][VALUES]['larmor_detector_events'] = \
                 event_data.get_nx_event_data()
         for c, monitor in enumerate(data_monitors):
-            data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c}_events'] = \
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c + 1}_events'] = \
                 EventData().get_nx_event_data()
 
         translator = JsonConfigTranslator(data)
