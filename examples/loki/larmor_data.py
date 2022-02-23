@@ -37,7 +37,7 @@ data_sample = {
     'name': 'larmor_sample'
 }
 
-# data_sample = {}
+data_sample = {}
 
 data_source = {
     'location': add_offset((0, 0, 0)),
