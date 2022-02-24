@@ -92,7 +92,7 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
 
 def write_csv_file(csv_data):
     column_names = ['bank id', 'tube id', 'straw id', 'local straw position',
-                    'pixel id']
+                    'pixel id', 'x', 'y', 'z']
     with open('detector_geometry.csv', 'w') as file:
         csv_writer = csv.writer(file)
         csv_writer.writerow(column_names)
@@ -426,19 +426,23 @@ class Pixel(Cylinder):
 
     def compound_data_in_list(self, bank_id: int, tube_id: int,
                               straw_id: int, straw_offset: np.array) -> List:
-        # point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        point_a = np.array(self.nominal_vertices_coordinates['Vertex A'])
+        point_a_offsets = point_a + straw_offset
         data_list: List = []
         loc_pixel_id_iter = iter(IdIterator())
-        print(straw_offset)
         for pixel_offset in self.pixel_xyz_offsets:
+            point_to_save = point_a + point_a_offsets + pixel_offset
             data_list.append((bank_id,
                               tube_id,
                               straw_id,
                               next(loc_pixel_id_iter),
-                              next(pixel_id_iter)))
-            print(pixel_offset)
-        ret_val = data_list[:2] + data_list[-2:]
-        return ret_val
+                              next(pixel_id_iter),
+                              point_to_save[0],
+                              point_to_save[1],
+                              point_to_save[2]))
+        # ret_val = data_list[:2] + data_list[-2:]
+        # return ret_val
+        return data_list
 
     def get_pixel_data(self, straw_offset: np.array):
         data_offsets: List = []
@@ -481,6 +485,7 @@ class Straw:
                     [[1, 0, 0],
                      [0, -np.sin(theta), np.cos(theta)],
                      [0, np.cos(theta), np.sin(theta)]])
+
         else:
             def rotation(theta):
                 return np.array(
@@ -493,14 +498,22 @@ class Straw:
             tmp_angle = rotation_angle * straw_idx + \
                         STRAW_ALIGNMENT_OFFSET_ANGLE
             rotated_vector = np.dot(rotation(tmp_angle), base_vec_1)
-            straw_offs.append(rotated_vector * TUBE_OUTER_STRAW_DIST_FROM_CP)
+            inter_res = \
+                (rotated_vector * TUBE_OUTER_STRAW_DIST_FROM_CP).tolist()
+            for count, _ in enumerate(inter_res):
+                inter_res[count] = round(inter_res[count], 5)
+            inter_res = np.array(inter_res)
+            straw_offs.append(inter_res)
+        straw_offs = reorder_straw_offsets_in_list(straw_offs)
         if plot_all:
             ax_tmp = plt.axes(projection='3d')
-            ax_tmp.scatter3D([value[0] for value in straw_offs],
-                             [value[1] for value in straw_offs],
-                             [value[2] for value in straw_offs])
+            for count, value in enumerate(straw_offs):
+                ax_tmp.scatter3D(value[0] * 1000, value[1] * 1000,
+                                 value[2] * 1000)
+                ax_tmp.text(value[0] * 1000, value[1] * 1000, value[2] * 1000,
+                            '%s' % (str(count)), size=20, zorder=1, color='k')
+                print(count, ':', value * 1000)
             plt.show()
-        straw_offs = reorder_straw_offsets_in_list(straw_offs)
         self._straw_xyz_offsets = straw_offs
 
     def populate_with_pixels(self, plot_all: bool = False):
@@ -1246,10 +1259,10 @@ class JsonConfigTranslator:
 if __name__ == '__main__':
     plot_tube_locations = False
     plot_endpoint_locations = False
-    generate_nexus_content_into_csv = False
+    generate_nexus_content_into_csv = True
     generate_nexus_content_into_nxs = True
     add_simulated_data_to_nxs = False
-    add_larmor_isis_data_to_nxs = True
+    add_larmor_isis_data_to_nxs = False
     add_nurf_to_nxs = False
     # bank_ids_transform_as_nxlog = [n for n in range(0, 9)]
     bank_ids_transform_as_nxlog = [-1]
@@ -1386,7 +1399,10 @@ if __name__ == '__main__':
     if generate_nexus_content_into_csv:
         for bank in detector_banks:
             data[bank.get_bank_id()] = bank.compound_data_in_list()
-        write_csv_file(data[0] + data[4])
+        if IMPORT_LARMOR:
+            write_csv_file(data[0])
+        else:
+            write_csv_file(data[0] + data[4])
 
     nx_entry = Entry(experiment_id="p1234", title="My experiment",
                      experiment_desc="this is an experiment")
