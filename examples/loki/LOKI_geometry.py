@@ -477,22 +477,22 @@ class Straw:
         self._pixel = None
 
     def set_straw_offsets(self, alignment: DetectorAlignment,
-                          base_vec_1: np.array, plot_all: bool = False):
+                          plot_all: bool = False):
         straw_offs = [np.array([0, 0, 0])]
         if alignment is DetectorAlignment.HORIZONTAL:
             def rotation(theta):
                 return np.array(
                     [[1, 0, 0],
-                     [0, -np.sin(theta), np.cos(theta)],
-                     [0, np.cos(theta), np.sin(theta)]])
-
+                     [0, np.cos(theta), np.sin(theta)],
+                     [0, -np.sin(theta), np.cos(theta)]])
+            base_vec_1 = np.array([0, 0, 1])
         else:
             def rotation(theta):
                 return np.array(
                     [[np.cos(theta), 0, np.sin(theta)],
                      [0, 1, 0],
                      [-np.sin(theta), 0, np.cos(theta)]])
-        base_vec_1 = base_vec_1 / np.linalg.norm(base_vec_1)
+            base_vec_1 = np.array([0, 1, 0])
         rotation_angle = np.deg2rad(360 / (NUM_STRAWS_PER_TUBE - 1))
         for straw_idx in range(NUM_STRAWS_PER_TUBE - 1):
             tmp_angle = rotation_angle * straw_idx + \
@@ -513,6 +513,9 @@ class Straw:
                 ax_tmp.text(value[0] * 1000, value[1] * 1000, value[2] * 1000,
                             '%s' % (str(count)), size=20, zorder=1, color='k')
                 print(count, ':', value * 1000)
+                ax_tmp.set_xlabel('X')
+                ax_tmp.set_ylabel('Y')
+                ax_tmp.set_zlabel('Z')
             plt.show()
         self._straw_xyz_offsets = straw_offs
 
@@ -613,7 +616,7 @@ class Tube:
                             tuple(point_radial),
                             self._point_end,
                             detector_bank_id)
-        self._straw.set_straw_offsets(self._alignment, base_vec_1)
+        self._straw.set_straw_offsets(self._alignment)
         self._straw.populate_with_pixels()
 
     def compound_data_in_dict(self) -> Dict:

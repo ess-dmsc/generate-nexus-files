@@ -1,4 +1,4 @@
-from numpy import sqrt, deg2rad, array
+from numpy import sqrt, deg2rad, array, arcsin, rad2deg
 
 LENGTH_UNIT = 'm'
 SCALE_FACTOR = .001
@@ -13,8 +13,10 @@ STRAW_DIAMETER = 8.00 * SCALE_FACTOR
 STRAW_RESOLUTION = 512  # Might need to switch to 512 though for commisiong tests.
 STRAW_Y_LOC = 1.14 * SCALE_FACTOR
 STRAW_Z_LOC = 7.67 * SCALE_FACTOR
-STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
 TUBE_OUTER_STRAW_DIST_FROM_CP = sqrt(STRAW_Y_LOC ** 2 + STRAW_Z_LOC ** 2)
+# STRAW_ALIGNMENT_OFFSET_ANGLE = deg2rad(5)
+STRAW_ALIGNMENT_OFFSET_ANGLE = arcsin(STRAW_Y_LOC / TUBE_OUTER_STRAW_DIST_FROM_CP)
+print(rad2deg(STRAW_ALIGNMENT_OFFSET_ANGLE))
 
 user_1 = {
     "name": "John Doe",
