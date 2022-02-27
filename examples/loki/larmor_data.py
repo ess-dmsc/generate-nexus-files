@@ -62,9 +62,9 @@ data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1'},
 
 
 data_monitors = [{'location': add_offset((0, 0, 9819.5)), 'name': 'monitor_1',
-                  'topic': 'monitor_topic', 'source': 'monitor_source'},
+                  'topic': 'monitor_topic', 'source': 'ttlmon'},
                  {'location': add_offset((0, 0, 20313)), 'name': 'monitor_2',
-                  'topic': 'monitor_topic', 'source': 'monitor_source'},]
+                  'topic': 'monitor_topic', 'source': 'ttlmon'},]
 
 s1 = 0.03
 s2 = 0.02
