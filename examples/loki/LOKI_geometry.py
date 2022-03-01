@@ -476,7 +476,7 @@ class Straw:
         self._detector_bank_id = detector_bank_id
         self._pixel = None
 
-    def set_straw_offsets(self, alignment: DetectorAlignment,
+    def set_straw_offsets(self, alignment: DetectorAlignment, base_vector,
                           plot_all: bool = False):
         straw_offs = [np.array([0, 0, 0])]
         if alignment is DetectorAlignment.HORIZONTAL:
@@ -618,7 +618,7 @@ class Tube:
                             tuple(point_radial),
                             self._point_end,
                             detector_bank_id)
-        self._straw.set_straw_offsets(self._alignment)
+        self._straw.set_straw_offsets(self._alignment, base_vec_1)
         self._straw.populate_with_pixels()
 
     def compound_data_in_dict(self) -> Dict:
@@ -1262,7 +1262,7 @@ class JsonConfigTranslator:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = True
+    plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = True
     generate_nexus_content_into_nxs = True
