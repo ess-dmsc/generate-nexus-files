@@ -120,14 +120,14 @@ tube_dim_2 = 56
 tube_dims = tube_dim_1 * tube_dim_2
 
 det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
-det_banks_data = {0: {'A': [(x_n(1), y_n(1), z_n(1)),
-                            (x_n(1), y_n(tube_dim_1), z_n(tube_dim_1)),
-                            (x_n(1), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
-                            (x_n(1), y_n(tube_dims), z_n(tube_dims))],
-                      'B': [(x_n(STRAW_RESOLUTION), y_n(1), z_n(1)),
-                            (x_n(STRAW_RESOLUTION), y_n(tube_dim_1), z_n(tube_dim_1)),
-                            (x_n(STRAW_RESOLUTION), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
-                            (x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims))],
+det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
+                            (x_n(1), y_n(tube_dims), z_n(tube_dims)),
+                            (x_n(1), y_n(1), z_n(1)),
+                            (x_n(1), y_n(tube_dim_1), z_n(tube_dim_1))],
+                      'B': [(x_n(STRAW_RESOLUTION), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims - tube_dim_1 + 1)),
+                            (x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims)),
+                            (x_n(STRAW_RESOLUTION), y_n(1), z_n(1)),
+                            (x_n(STRAW_RESOLUTION), y_n(tube_dim_1), z_n(tube_dim_1))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
                       'bank_offset': (0, 0, 0),
                       'name': 'larmor_detector',

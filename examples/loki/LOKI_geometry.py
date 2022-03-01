@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Dict, List, Optional
 from nurf_data import load_one_spectro_file, nurf_file_creator
 IMPORT_LARMOR = True  # Change depending on what data set should be used.
-DEBUG_LARMOR_DET = False  #
+DEBUG_LARMOR_DET = True  #
 if IMPORT_LARMOR:
     from larmor_data import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
@@ -594,6 +594,8 @@ class Tube:
         self._straw: Optional[Straw] = None
 
     def set_xyz_offsets(self, xyz_offsets):
+        for c, item in enumerate(xyz_offsets):
+            print(f'x_{c + 1}, y_{c + 1}, z_{c + 1}: ', item)
         self._xyz_offsets = xyz_offsets
 
     def get_xyz_offsets(self):
@@ -732,9 +734,9 @@ class Bank:
         # Generate tube offsets according to tube layout and the provided
         # grid corners.
         xyz_offsets = []
-        for x_i in range(self._tube_depth):
-            for y_i in range(self._tube_width):
-                xyz_offset = self._base_vec_1 * x_i + self._base_vec_2 * y_i
+        for j_i in range(self._tube_depth):
+            for k_i in range(self._tube_width):
+                xyz_offset = self._base_vec_1 * j_i + self._base_vec_2 * k_i
                 xyz_offsets.append(xyz_offset)
         return xyz_offsets
 
@@ -1260,7 +1262,7 @@ class JsonConfigTranslator:
 
 
 if __name__ == '__main__':
-    plot_tube_locations = False
+    plot_tube_locations = True
     plot_endpoint_locations = False
     generate_nexus_content_into_csv = True
     generate_nexus_content_into_nxs = True
