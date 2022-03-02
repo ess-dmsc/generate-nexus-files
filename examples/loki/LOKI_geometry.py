@@ -1264,8 +1264,8 @@ class JsonConfigTranslator:
 if __name__ == '__main__':
     plot_tube_locations = False
     plot_endpoint_locations = False
-    generate_nexus_content_into_csv = True
     generate_nexus_content_into_nxs = True
+    generate_nexus_content_into_csv = not generate_nexus_content_into_nxs
     add_simulated_data_to_nxs = False
     add_larmor_isis_data_to_nxs = False
     add_nurf_to_nxs = False

@@ -144,3 +144,4 @@ axis_2_size = det_banks_data[0]['num_tubes'] * NUM_STRAWS_PER_TUBE * \
               STRAW_RESOLUTION + det_pixel_id_start - 1  # TODO: INVESTIGATE THIS.
 
 print(det_banks_data)
+print(det_pixel_id_start)
