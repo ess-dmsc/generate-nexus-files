@@ -146,31 +146,24 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv = hf.create_group("/entry/instrument/uv")
         grp_uv.attrs["NX_class"] = 'NXdata'
         
-        # subgroup for uv all data (sample, dark, reference)
-        uv_signal=grp_uv.create_group("uv_all_data")
-        uv_signal_data=uv_signal.create_dataset('data', data=uv_all_data,
-                                           shape=uv_all_data.shape)
-        uv_signal_data.attrs['long_name']= 'uv_all_data'
+        uv_signal_data=grp_uv.create_dataset('data', data=uv_all_data, dtype=np.float32)
+        uv_signal_data.attrs['long name']= 'uv_all_data'
         uv_signal_data.attrs['units']= ''
-        uv_signal_data.attrs['signal']= 'data'  #indicate that the main signal is data 
-        uv_signal_data.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
-        uv_signal_image_key=uv_signal.create_dataset('image_key',data=uv_image_key,shape=uv_image_key.shape, dtype=np.int32)
+        grp_uv.attrs['signal']= 'data'  #indicate that the main signal is data 
+        grp_uv.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
+       
+        uv_signal_image_key=grp_uv.create_dataset('image_key',data=uv_image_key,shape=uv_image_key.shape, dtype=np.int32)
        
      
         # uv_wavelength
-        uv_wavelength_data=grp_uv.create_dataset('uv_wavelength', data=data['UV_wavelength'],
-                                              shape=data['UV_wavelength'].shape,
-                                              dtype=np.float32)
+        uv_wavelength_data=grp_uv.create_dataset('uv_wavelength', data=data['UV_wavelength'], dtype=np.float32)
         
         uv_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
         uv_wavelength_data.attrs['long name'] = 'uv_wavelength'
                 
                 
         # uv_integration_time
-        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'],
-                                           shape=data[
-                                               'UV_IntegrationTime'].shape, 
-                                           dtype=np.int32)
+        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'], dtype=np.int32)
                    
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
@@ -210,42 +203,36 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble all fluo data    
         fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
         
-        
-        # subgroup for fluo all data (sample, dark, reference)
-        fluo_signal=grp_fluo.create_group("fluo_all_data")
-                
-        fluo_signal_data = fluo_signal.create_dataset('data',
-                                               data=fluo_all_data,
-                                               shape=fluo_all_data.shape)
+      
+              
+        fluo_signal_data = grp_fluo.create_dataset('data',
+                                               data=fluo_all_data, dtype=np.float32)
         fluo_signal_data.attrs['long name'] = 'fluo_all_data'
         fluo_signal_data.attrs['units'] = 'a.u.'
 
-        fluo_signal_data.attrs['signal']= 'data'  #indicate that the main signal is data 
-        fluo_signal_data.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
-        fluo_signal_image_key=fluo_signal.create_dataset('image_key',data=fluo_image_key,shape=fluo_image_key.shape, dtype=np.int32)
+        grp_fluo.attrs['signal']= 'data'  #indicate that the main signal is data 
+        grp_fluo.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
+        fluo_signal_image_key=grp_fluo.create_dataset('image_key',data=fluo_image_key,shape=fluo_image_key.shape, dtype=np.int32)
        
 
-        # subgroup for fluo_integration_time
+        # fluo_integration_time
         fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
                                                data=data['Fluo_IntegrationTime'],
-                                               shape=data['Fluo_IntegrationTime'].shape,
-                                               dtype=np.int32)
+                                               dtype=np.float32)
         fluo_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently micro-seconds
         fluo_inttime_data.attrs['long name'] = 'fluo_integration_time'
 
 
-        # subgroup for fluo_monowavelengths
+        # fluo_monowavelengths
         fluo_monowavelengths_data = grp_fluo.create_dataset('fluo_monowavelengths',
                                                        data=data[
                                                            'Fluo_monowavelengths'],
-                                                       shape=data[
-                                                           'Fluo_monowavelengths'].shape,
                                                        dtype=np.float32)
         fluo_monowavelengths_data.attrs['units'] = 'nm'  # TODO: unit to be verified
         fluo_monowavelengths_data.attrs['long name'] = 'fluo_monowavelengths'
 
         
-        # subgroup for fluo_wavelength
+        # fluo_wavelength
         fluo_wavelength_data= grp_fluo.create_dataset('fluo_wavelength',
                                                   data=data['Fluo_wavelength'],
                                                   shape=data[
