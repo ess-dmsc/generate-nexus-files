@@ -163,10 +163,13 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
                 
                 
         # uv_integration_time
+        grp_uv.attrs['auxiliary_signals'] = ['uv_integration_time']
         uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'], dtype=np.int32)
                    
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
+
+
 
         # Fluorescence subgroup
         grp_fluo = hf.create_group("/entry/instrument/fluorescence")
@@ -216,6 +219,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
        
 
         # fluo_integration_time
+        grp_fluo.attrs['auxiliary_signals'] = ['fluo_integration_time']
         fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
                                                data=data['Fluo_IntegrationTime'],
                                                dtype=np.float32)
