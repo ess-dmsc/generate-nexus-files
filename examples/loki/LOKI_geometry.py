@@ -117,10 +117,17 @@ class IdIterator:
     def reset(start=0):
         return IdIterator(start)
 
-
+global pixel_id_iter, straw_id_iter, transform_id_iter
 pixel_id_iter = iter(IdIterator(det_pixel_id_start))
 straw_id_iter = iter(IdIterator())
 transform_id_iter = iter(IdIterator(1))
+
+
+def reset_all_iterators():
+    global pixel_id_iter, straw_id_iter, transform_id_iter
+    pixel_id_iter = iter(IdIterator(det_pixel_id_start))
+    straw_id_iter = iter(IdIterator())
+    transform_id_iter = iter(IdIterator(1))
 
 
 # Static class.
@@ -1265,7 +1272,7 @@ if __name__ == '__main__':
     plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_nxs = True
-    generate_nexus_content_into_csv = not generate_nexus_content_into_nxs
+    generate_nexus_content_into_csv = True
     add_simulated_data_to_nxs = False
     add_larmor_isis_data_to_nxs = False
     add_nurf_to_nxs = False
@@ -1408,6 +1415,7 @@ if __name__ == '__main__':
             write_csv_file(data[0])
         else:
             write_csv_file(data[0] + data[4])
+        reset_all_iterators()
 
     nx_entry = Entry(experiment_id="p1234", title="My experiment",
                      experiment_desc="this is an experiment")
