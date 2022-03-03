@@ -116,7 +116,7 @@ def z_n(n):
 
 
 tube_dim_1 = 4
-tube_dim_2 = 56
+tube_dim_2 = 32
 tube_dims = tube_dim_1 * tube_dim_2
 
 det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
