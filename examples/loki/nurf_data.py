@@ -111,11 +111,19 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # image_key: number of frames (nFrames) given indirectly as part of the shape of the arrays 
         # TODO: keep in mind what happens if multiple dark or reference frames are taken
         
+        # remove axis=2 of length one from the array
+        data['UV_spectra']=np.squeeze(data['UV_spectra'], axis=2)  #this removes the third axis in this array, TODO: needs later to be verified with real data from hardware
+        print('shape spectrum', np.shape(data['UV_spectra']))
+        print('shape background', np.shape(data['UV_background']))
+        print('shape intensity0', np.shape(data['UV_intensity0']))
+        
         #I need to reshape data['UV_spectra']
-        data['UV_spectra']=np.reshape(data['UV_spectra'],(np.shape(data['UV_spectra'])[0],np.shape(data['UV_spectra'])[1]))
+        #data['UV_spectra']=np.reshape(data['UV_spectra'],(np.shape(data['UV_spectra'])[0],np.shape(data['UV_spectra'])[1]))
     
         # assemble all spectra in one variable
-        uv_all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
+        #uv_all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
+        uv_all_data=np.row_stack((data['UV_spectra'],data['UV_background'], data['UV_intensity0']))
+        print('shape of uv_all_data', np.shape(uv_all_data))
         
         # assemble image_key 
         # #TODO: needs later to be verified with real data from hardware
@@ -140,6 +148,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         
         # assmebling of image_key
         uv_image_key=np.column_stack((uv_ik_spectra,uv_ik_dark, uv_ik_ref))  #all_data is as well organised in columns
+        
+        
+        
         
         
         # UV subgroup
