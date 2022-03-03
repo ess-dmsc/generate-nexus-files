@@ -130,7 +130,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
             uv_nb_darks=np.shape(data['UV_background'])[1]  #TODO: needs to be verified with real data from Judith's setup
    
         uv_ik_dark=2* np.ones((1,uv_nb_darks)) 
-        #print(ik_dark)
         
         if data['UV_intensity0'].ndim==1:
             uv_nb_ref=1
@@ -140,25 +139,43 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         #print(ik_ref)
         
         # assmebling of image_key
-        uv_image_key=np.column_stack((uv_ik_spectra,uv_ik_dark, uv_ik_ref))  #all_data is as well organised in columns
-        
-        
-        
+        uv_spectrum_key=np.column_stack((uv_ik_spectra,uv_ik_dark, uv_ik_ref))  #all_data is as well organised in columns
         
         
         # UV subgroup
         grp_uv = hf.create_group("/entry/instrument/uv")
         grp_uv.attrs["NX_class"] = 'NXdata'
         
+        # uv spectra
         uv_signal_data=grp_uv.create_dataset('data', data=uv_all_data, dtype=np.float32)
         uv_signal_data.attrs['long name']= 'uv_all_data'
         uv_signal_data.attrs['units']= ''
         grp_uv.attrs['signal']= 'data'  #indicate that the main signal is data 
-        grp_uv.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
+        grp_uv.attrs['axes']= [ "time", "wavelength" ] #time is here the first axis, i.e axis=0, wavelength is axis=1
+        
+        # define the AXISNAME_indices
+        grp_uv.attrs['uv_time_indices'] = 0
+        grp_uv.attrs['uv_spectrum_key_indices'] = 0
+        grp_uv.attrs['uv_integration_time_indices'] = 0
+        grp_uv.attrs['uv_wavelength_indices'] = 1
+        
+        # uv_spectrum_key
+        uv_signal_image_key=grp_uv.create_dataset('uv_spectrum_key',data=uv_spectrum_key, dtype=np.int32)
+        
+        # uv_time
+        # dummy timestamps for uv_time
+        # TODO: Codes will have to change later for the real hardware.
+        uv_time = np.empty(np.shape(uv_all_data)[0], dtype='datetime64[us]')  
+        for i in range(0, np.shape(uv_time)[0]):
+            uv_time[i]=np.datetime64('now')
+    
+        # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
+        # suggested work around because h5py does not support time types
+        uv_time_data=grp_uv.create_dataset('uv_time', data=uv_time.view('<i8'), dtype='<i8')
+        # to read
+        #print(uv_time_data[:].view('<M8[us]'))
+        # TODO: Do we need here an attribute for the unit?
        
-        uv_signal_image_key=grp_uv.create_dataset('image_key',data=uv_image_key,shape=uv_image_key.shape, dtype=np.int32)
-       
-     
         # uv_wavelength
         uv_wavelength_data=grp_uv.create_dataset('uv_wavelength', data=data['UV_wavelength'], dtype=np.float32)
         
@@ -167,13 +184,10 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
                 
                 
         # uv_integration_time
-        grp_uv.attrs['auxiliary_signals'] = ['uv_integration_time']
         uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'], dtype=np.int32)
                    
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
-
-
 
         # Fluorescence subgroup
         grp_fluo = hf.create_group("/entry/instrument/fluorescence")
@@ -198,7 +212,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
             fluo_nb_ref=np.shape(data['Fluo_intensity0'])[1] #TODO: needs to be verified with Judith's setup
         fluo_ik_ref=4*np.ones((1,fluo_nb_ref))
             
-        fluo_image_key=np.column_stack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
+        fluo_spectrum_key=np.column_stack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
         
         # Something is not okay with the real Fluo_intensity0 data from ILL. It contains only one 0, at least in my file from the ILL beamtime. 
         # Also, some fluo spcetra in between are just dummy ones. There were acquisition problems.
@@ -209,21 +223,42 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
             data['Fluo_intensity0']=data['Fluo_intensity0'][0]*np.ones((np.shape(data['Fluo_background'])[0]))
            
         # assemble all fluo data    
-        #fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
         fluo_all_data=np.row_stack((data['Fluo_spectra'],data['Fluo_background'], data['Fluo_intensity0']))
            
+        # fluo spectra
         fluo_signal_data = grp_fluo.create_dataset('data',
                                                data=fluo_all_data, dtype=np.float32)
         fluo_signal_data.attrs['long name'] = 'fluo_all_data'
         fluo_signal_data.attrs['units'] = 'a.u.'
+    
 
         grp_fluo.attrs['signal']= 'data'  #indicate that the main signal is data 
-        grp_fluo.attrs['axes']= [ "wavelength", "." ]   #see example in NXdata, time as x-axis is first entry
-        fluo_signal_image_key=grp_fluo.create_dataset('image_key',data=fluo_image_key,shape=fluo_image_key.shape, dtype=np.int32)
+        grp_fluo.attrs['axes']= [ "time", "wavelength"]
+        
+        # define the AXISNAME_indices
+        grp_fluo.attrs['fluo_time_indices'] = 0
+        grp_fluo.attrs['fluo_spectrum_key_indices'] = 0
+        grp_fluo.attrs['fluo_integration_time_indices'] = 0
+        grp_fluo.attrs['fluo_wavelength_indices'] = 1
+        
+        fluo_signal_image_key=grp_fluo.create_dataset('fluo_spectrum_key',data=fluo_spectrum_key, dtype=np.int32)
        
-
+        # fluo_time
+        # dummy timestamps for fluo_time
+        # TODO: Codes will have to change later for the real hardware.
+        fluo_time = np.empty(np.shape(fluo_all_data)[0], dtype='datetime64[us]')  
+        for i in range(0, np.shape(fluo_time)[0]):
+            fluo_time[i]=np.datetime64('now')
+    
+        # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
+        # suggested work around because h5py does not support time types
+        fluo_time_data=grp_fluo.create_dataset('fluo_time', data=fluo_time.view('<i8'), dtype='<i8')
+        # to read
+        #print(fluo_time_data[:].view('<M8[us]'))
+        # TODO: Do we need here an attribute for the unit?
+       
+       
         # fluo_integration_time
-        grp_fluo.attrs['auxiliary_signals'] = ['fluo_integration_time']
         fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
                                                data=data['Fluo_IntegrationTime'],
                                                dtype=np.float32)
@@ -248,6 +283,8 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
                                                   dtype=np.float32)
         fluo_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
         fluo_wavelength_data.attrs['long name'] = 'fluo_wavelength'
+
+
 
         # dummy groups, no information currently available
         #grp_sample_cell = hf.create_group("/entry/sample/sample_cell")
