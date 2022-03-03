@@ -111,19 +111,12 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # image_key: number of frames (nFrames) given indirectly as part of the shape of the arrays 
         # TODO: keep in mind what happens if multiple dark or reference frames are taken
         
-        # remove axis=2 of length one from the array
+        # remove axis=2 of length one from this array
         data['UV_spectra']=np.squeeze(data['UV_spectra'], axis=2)  #this removes the third axis in this array, TODO: needs later to be verified with real data from hardware
-        print('shape spectrum', np.shape(data['UV_spectra']))
-        print('shape background', np.shape(data['UV_background']))
-        print('shape intensity0', np.shape(data['UV_intensity0']))
         
-        #I need to reshape data['UV_spectra']
-        #data['UV_spectra']=np.reshape(data['UV_spectra'],(np.shape(data['UV_spectra'])[0],np.shape(data['UV_spectra'])[1]))
-    
         # assemble all spectra in one variable
-        #uv_all_data=np.column_stack((data['UV_spectra'].T,data['UV_background'], data['UV_intensity0']))
         uv_all_data=np.row_stack((data['UV_spectra'],data['UV_background'], data['UV_intensity0']))
-        print('shape of uv_all_data', np.shape(uv_all_data))
+      
         
         # assemble image_key 
         # #TODO: needs later to be verified with real data from hardware
@@ -187,8 +180,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs["NX_class"] = 'NXdata'
         
         # currenty real fluo data is often messed up (i.e. empty spectra inbetween real ones)
-        # reshaping
-        data['Fluo_spectra']=np.reshape(data['Fluo_spectra'],(np.shape(data['Fluo_spectra'])[0],np.shape(data['Fluo_spectra'])[1]))
+        # remove third axis of length one
+        data['Fluo_spectra']=np.squeeze(data['Fluo_spectra'], axis=2)
+        
         fluo_nb_spectra=np.shape(data['Fluo_spectra'])[0]
         fluo_ik_spectra=np.zeros((1, fluo_nb_spectra))
         
@@ -215,10 +209,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
             data['Fluo_intensity0']=data['Fluo_intensity0'][0]*np.ones((np.shape(data['Fluo_background'])[0]))
            
         # assemble all fluo data    
-        fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
-        
-      
-              
+        #fluo_all_data=np.column_stack((data['Fluo_spectra'].T,data['Fluo_background'], data['Fluo_intensity0']))
+        fluo_all_data=np.row_stack((data['Fluo_spectra'],data['Fluo_background'], data['Fluo_intensity0']))
+           
         fluo_signal_data = grp_fluo.create_dataset('data',
                                                data=fluo_all_data, dtype=np.float32)
         fluo_signal_data.attrs['long name'] = 'fluo_all_data'
