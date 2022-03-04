@@ -185,8 +185,12 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_wavelength_data.attrs['long name'] = 'uv_wavelength'
                 
                 
-        # uv_integration_time
-        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=data['UV_IntegrationTime'], dtype=np.int32)
+        # creating for each spectrum, even dark and background, the integration time
+        # TODO: needs to be verified with real hardware
+        uv_inttime=np.full(np.shape(uv_spectrum_key),data['UV_IntegrationTime'])
+        
+         # uv_integration_time
+        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=uv_inttime, dtype=np.int32)
                    
         uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
@@ -261,9 +265,13 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # TODO: Do we need here an attribute for the unit?
        
        
+        # creating integration time for each fluo spectrum including dark and reference
+        # TODO: needs to be verfied with hardware
+        fluo_inttime=np.full(np.shape(fluo_spectrum_key),data['Fluo_IntegrationTime'])
+       
         # fluo_integration_time
         fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
-                                               data=data['Fluo_IntegrationTime'],
+                                               data=fluo_inttime,
                                                dtype=np.float32)
         fluo_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently micro-seconds
         fluo_inttime_data.attrs['long name'] = 'fluo_integration_time'
@@ -281,13 +289,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # fluo_wavelength
         fluo_wavelength_data= grp_fluo.create_dataset('fluo_wavelength',
                                                   data=data['Fluo_wavelength'],
-                                                  shape=data[
-                                                      'Fluo_wavelength'].shape,
                                                   dtype=np.float32)
         fluo_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
         fluo_wavelength_data.attrs['long name'] = 'fluo_wavelength'
-
-
 
         # dummy groups, no information currently available
         #grp_sample_cell = hf.create_group("/entry/sample/sample_cell")
