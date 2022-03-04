@@ -121,26 +121,28 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble image_key 
         # #TODO: needs later to be verified with real data from hardware
         uv_nb_spectra=np.shape(data['UV_spectra'])[0]
-        uv_ik_spectra=np.zeros((1,uv_nb_spectra))  #interperation here: 0 for sample (in comparison to projections)
-      
+    
+        uv_ik_spectra=np.zeros(uv_nb_spectra)  #interperation here: 0 for sample (in comparison to projections)
+
         # find out how many nFrames each item (sample, dark, reference) has
         if data['UV_background'].ndim==1:
             uv_nb_darks=1
         else: 
             uv_nb_darks=np.shape(data['UV_background'])[1]  #TODO: needs to be verified with real data from Judith's setup
    
-        uv_ik_dark=2* np.ones((1,uv_nb_darks)) 
+        uv_ik_dark=2* np.ones((uv_nb_darks)) 
+        #uv_ik_dark=np.full(uv_nb_darks, 2)
         
         if data['UV_intensity0'].ndim==1:
             uv_nb_ref=1
         else:
             uv_nb_ref=np.shape(data['UV_intensity0'])[1]  #TODO: needs to be verified with real data from Judith's setup
-        uv_ik_ref=4*np.ones((1,uv_nb_ref))  #new image key: 4 for reference
-        #print(ik_ref)
+        uv_ik_ref=4*np.ones((uv_nb_ref))  #new image key: 4 for reference
+        #uv_ik_ref=np.full(uv_nb_ref,4)
+    
         
         # assmebling of image_key
-        uv_spectrum_key=np.column_stack((uv_ik_spectra,uv_ik_dark, uv_ik_ref))  #all_data is as well organised in columns
-        
+        uv_spectrum_key=np.hstack((uv_ik_spectra,uv_ik_dark, uv_ik_ref)) 
         
         # UV subgroup
         grp_uv = hf.create_group("/entry/instrument/uv")
@@ -198,21 +200,22 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         data['Fluo_spectra']=np.squeeze(data['Fluo_spectra'], axis=2)
         
         fluo_nb_spectra=np.shape(data['Fluo_spectra'])[0]
-        fluo_ik_spectra=np.zeros((1, fluo_nb_spectra))
+        fluo_ik_spectra=np.zeros(fluo_nb_spectra)
         
         if data['Fluo_background'].ndim==1:
             fluo_nb_dark=1
         else:
             fluo_nb_dark=np.shape(data['Fluo_background'])[1] #TODO: needs to be verified with Judith's setup
-        fluo_ik_dark=2*np.ones((1,fluo_nb_dark))
+        fluo_ik_dark=2*np.ones(fluo_nb_dark)
         
         if data['Fluo_intensity0'].ndim==1:
             fluo_nb_ref=1
         else:
             fluo_nb_ref=np.shape(data['Fluo_intensity0'])[1] #TODO: needs to be verified with Judith's setup
-        fluo_ik_ref=4*np.ones((1,fluo_nb_ref))
+        fluo_ik_ref=4*np.ones(fluo_nb_ref)
             
-        fluo_spectrum_key=np.column_stack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
+        fluo_spectrum_key=np.hstack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
+        
         
         # Something is not okay with the real Fluo_intensity0 data from ILL. It contains only one 0, at least in my file from the ILL beamtime. 
         # Also, some fluo spcetra in between are just dummy ones. There were acquisition problems.
