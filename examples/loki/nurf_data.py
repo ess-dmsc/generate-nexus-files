@@ -150,16 +150,16 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         
         # uv spectra
         uv_signal_data=grp_uv.create_dataset('data', data=uv_all_data, dtype=np.float32)
-        uv_signal_data.attrs['long name']= 'uv_all_data'
+        uv_signal_data.attrs['long name']= 'all_data'
         uv_signal_data.attrs['units']= ''
         grp_uv.attrs['signal']= 'data'  #indicate that the main signal is data 
         grp_uv.attrs['axes']= [ "time", "wavelength" ] #time is here the first axis, i.e axis=0, wavelength is axis=1
         
         # define the AXISNAME_indices
-        grp_uv.attrs['uv_time_indices'] = 0
-        grp_uv.attrs['uv_spectrum_key_indices'] = 0
-        grp_uv.attrs['uv_integration_time_indices'] = 0
-        grp_uv.attrs['uv_wavelength_indices'] = 1
+        grp_uv.attrs['time_indices'] = 0
+        grp_uv.attrs['spectrum_key_indices'] = 0
+        grp_uv.attrs['integration_time_indices'] = 0
+        grp_uv.attrs['wavelength_indices'] = 1
         
         # uv_spectrum_key
         uv_signal_image_key=grp_uv.create_dataset('uv_spectrum_key',data=uv_spectrum_key, dtype=np.int32)
