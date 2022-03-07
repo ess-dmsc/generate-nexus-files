@@ -117,13 +117,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble all spectra in one variable
         uv_all_data=np.row_stack((data['UV_spectra'],data['UV_background'], data['UV_intensity0']))
       
-        print(uv_all_data.size)
-        print(uv_all_data.ndim)
-        print(np.shape(uv_all_data))
-
         dummy_vec=np.full(np.shape(uv_all_data)[0], False) 
-        lidx=np.arange(0,np.shape(uv_all_data)[0])
-        print(dummy_vec, lidx)
 
         #create boolean masks for data, dark, reference
         uv_nb_spectra=np.shape(data['UV_spectra'])[0]
@@ -177,7 +171,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv.attrs['is_dark_indices'] = 0
         grp_uv.attrs['is_reference_indices'] = 0  
 
-        
+        grp_uv.create_dataset('is_data', data=uv_data_mask, dtype=bool)
+        grp_uv.create_dataset('is_dark', data=uv_dark_mask, dtype=bool)
+        grp_uv.create_dataset('is_reference', data=uv_ref_mask, dtype=bool)
 
         # uv_time
         # dummy timestamps for uv_time
@@ -203,7 +199,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
                 
         # creating for each spectrum, even dark and background, the integration time
         # TODO: needs to be verified with real hardware
-        uv_inttime=np.full(np.shape(uv_spectrum_key),data['UV_IntegrationTime'])
+        uv_inttime=np.full(np.shape(uv_all_data)[0],data['UV_IntegrationTime'])
         
          # uv_integration_time
         uv_inttime_data=grp_uv.create_dataset("integration_time",data=uv_inttime, dtype=np.int32)
@@ -218,25 +214,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # currenty real fluo data is often messed up (i.e. empty spectra inbetween real ones)
         # remove third axis of length one
         data['Fluo_spectra']=np.squeeze(data['Fluo_spectra'], axis=2)
-        
-        fluo_nb_spectra=np.shape(data['Fluo_spectra'])[0]
-        fluo_ik_spectra=np.zeros(fluo_nb_spectra)
-        
-        if data['Fluo_background'].ndim==1:
-            fluo_nb_dark=1
-        else:
-            fluo_nb_dark=np.shape(data['Fluo_background'])[1] #TODO: needs to be verified with Judith's setup
-        fluo_ik_dark=2*np.ones(fluo_nb_dark)
-        
-        if data['Fluo_intensity0'].ndim==1:
-            fluo_nb_ref=1
-        else:
-            fluo_nb_ref=np.shape(data['Fluo_intensity0'])[1] #TODO: needs to be verified with Judith's setup
-        fluo_ik_ref=4*np.ones(fluo_nb_ref)
-            
-        fluo_spectrum_key=np.hstack((fluo_ik_spectra,fluo_ik_dark, fluo_ik_ref))
-        
-        
+
         # Something is not okay with the real Fluo_intensity0 data from ILL. It contains only one 0, at least in my file from the ILL beamtime. 
         # Also, some fluo spcetra in between are just dummy ones. There were acquisition problems.
         # This code block can later be adjusted
@@ -247,6 +225,35 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
            
         # assemble all fluo data    
         fluo_all_data=np.row_stack((data['Fluo_spectra'],data['Fluo_background'], data['Fluo_intensity0']))
+
+        # dummy vec for mask
+        dummy_vec=np.full(np.shape(fluo_all_data)[0], False) 
+
+        # how many fluo data spectra
+        fluo_nb_spectra=np.shape(data['Fluo_spectra'])[0]
+        
+        #create boolean masks for data, dark, reference
+        # data mask, copy and replace first entries 
+        fluo_data_mask=copy.copy(dummy_vec)
+        fluo_data_mask[0:fluo_nb_spectra]=True
+
+        #how many backgrounds?
+        if data['Fluo_background'].ndim==1:
+            fluo_nb_dark=1
+        else:
+            fluo_nb_dark=np.shape(data['Fluo_background'])[1] #TODO: needs to be verified with Judith's setup
+        fluo_dark_mask=copy.copy(dummy_vec)
+        fluo_dark_mask[fluo_nb_spectra:fluo_nb_spectra+fluo_nb_dark]=True
+
+        #how many references? 
+        if data['Fluo_intensity0'].ndim==1:
+            fluo_nb_ref=1
+        else:
+            fluo_nb_ref=np.shape(data['Fluo_intensity0'])[1] #TODO: needs to be verified with Judith's setup
+
+        fluo_ref_mask=copy.copy(dummy_vec)
+        fluo_ref_mask[fluo_nb_spectra+fluo_nb_dark:fluo_nb_spectra+fluo_nb_dark+fluo_nb_ref]=True
+                
            
         # fluo spectra
         fluo_signal_data = grp_fluo.create_dataset('data',
@@ -260,12 +267,17 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         
         # define the AXISNAME_indices
         grp_fluo.attrs['time_indices'] = 0
-        grp_fluo.attrs['spectrum_key_indices'] = 0
         grp_fluo.attrs['integration_time_indices'] = 0
         grp_fluo.attrs['wavelength_indices'] = 1
 
-        
-        fluo_signal_image_key=grp_fluo.create_dataset('spectrum_key',data=fluo_spectrum_key, dtype=np.int32)
+        grp_fluo.attrs['is_data'] = 0
+        grp_fluo.attrs['is_dark'] = 0
+        grp_fluo.attrs['is_reference'] = 0  
+
+        grp_fluo.create_dataset('is_data',data=fluo_data_mask,dtype=bool)
+        grp_fluo.create_dataset('is_dark',data=fluo_dark_mask,dtype=bool)
+        grp_fluo.create_dataset('is_reference',data=fluo_ref_mask,dtype=bool)
+
        
         # fluo_time
         # dummy timestamps for fluo_time
@@ -285,7 +297,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
        
         # creating integration time for each fluo spectrum including dark and reference
         # TODO: needs to be verfied with hardware
-        fluo_inttime=np.full(np.shape(fluo_spectrum_key),data['Fluo_IntegrationTime'])
+        fluo_inttime=np.full(np.shape(fluo_all_data)[0],data['Fluo_IntegrationTime'])
        
         # fluo_integration_time
         fluo_inttime_data = grp_fluo.create_dataset('integration_time',
