@@ -151,7 +151,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # uv spectra
         uv_signal_data=grp_uv.create_dataset('data', data=uv_all_data, dtype=np.float32)
         uv_signal_data.attrs['long name']= 'all_data'
-        uv_signal_data.attrs['units']= ''
+        uv_signal_data.attrs['units']= 'counts'
         grp_uv.attrs['signal']= 'data'  #indicate that the main signal is data 
         grp_uv.attrs['axes']= [ "time", "wavelength" ] #time is here the first axis, i.e axis=0, wavelength is axis=1
         
@@ -174,6 +174,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
         # suggested work around because h5py does not support time types
         uv_time_data=grp_uv.create_dataset('time', data=uv_time.view('<i8'), dtype='<i8')
+        uv_time_data.attrs['unit'] = 'us'
         # to read
         #print(uv_time_data[:].view('<M8[us]'))
         # TODO: Do we need here an attribute for the unit?
@@ -236,7 +237,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_signal_data = grp_fluo.create_dataset('data',
                                                data=fluo_all_data, dtype=np.float32)
         fluo_signal_data.attrs['long name'] = 'all_data'
-        fluo_signal_data.attrs['units'] = 'a.u.'
+        fluo_signal_data.attrs['units'] = 'counts'
     
 
         grp_fluo.attrs['signal']= 'data'  #indicate that the main signal is data 
@@ -260,6 +261,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
         # suggested work around because h5py does not support time types
         fluo_time_data=grp_fluo.create_dataset('time', data=fluo_time.view('<i8'), dtype='<i8')
+        fluo_time_data.attrs['unit'] = 'us'
         # to read
         #print(fluo_time_data[:].view('<M8[us]'))
         # TODO: Do we need here an attribute for the unit?
