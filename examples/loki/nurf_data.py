@@ -162,7 +162,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv.attrs['wavelength_indices'] = 1
         
         # uv_spectrum_key
-        uv_signal_image_key=grp_uv.create_dataset('uv_spectrum_key',data=uv_spectrum_key, dtype=np.int32)
+        uv_signal_image_key=grp_uv.create_dataset('spectrum_key',data=uv_spectrum_key, dtype=np.int32)
         
         # uv_time
         # dummy timestamps for uv_time
@@ -173,16 +173,16 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
     
         # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
         # suggested work around because h5py does not support time types
-        uv_time_data=grp_uv.create_dataset('uv_time', data=uv_time.view('<i8'), dtype='<i8')
+        uv_time_data=grp_uv.create_dataset('time', data=uv_time.view('<i8'), dtype='<i8')
         # to read
         #print(uv_time_data[:].view('<M8[us]'))
         # TODO: Do we need here an attribute for the unit?
        
         # uv_wavelength
-        uv_wavelength_data=grp_uv.create_dataset('uv_wavelength', data=data['UV_wavelength'], dtype=np.float32)
+        uv_wavelength_data=grp_uv.create_dataset('wavelength', data=data['UV_wavelength'], dtype=np.float32)
         
         uv_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
-        uv_wavelength_data.attrs['long name'] = 'uv_wavelength'
+        uv_wavelength_data.attrs['long name'] = 'wavelength'
                 
                 
         # creating for each spectrum, even dark and background, the integration time
@@ -190,9 +190,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_inttime=np.full(np.shape(uv_spectrum_key),data['UV_IntegrationTime'])
         
          # uv_integration_time
-        uv_inttime_data=grp_uv.create_dataset("uv_integration_time",data=uv_inttime, dtype=np.int32)
+        uv_inttime_data=grp_uv.create_dataset("integration_time",data=uv_inttime, dtype=np.int32)
                    
-        uv_inttime_data.attrs['long_name'] = 'uv_integration_time'
+        uv_inttime_data.attrs['long_name'] = 'integration_time'
         uv_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently in micro-seconds
 
         # Fluorescence subgroup
