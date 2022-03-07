@@ -178,9 +178,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv.attrs['is_reference_indices'] = 0  
 
         
-        # uv_spectrum_key
-        uv_signal_image_key=grp_uv.create_dataset('spectrum_key',data=uv_spectrum_key, dtype=np.int32)
-        
+
         # uv_time
         # dummy timestamps for uv_time
         # TODO: Codes will have to change later for the real hardware.
