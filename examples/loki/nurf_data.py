@@ -270,9 +270,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs['integration_time_indices'] = 0
         grp_fluo.attrs['wavelength_indices'] = 1
 
-        grp_fluo.attrs['is_data'] = 0
-        grp_fluo.attrs['is_dark'] = 0
-        grp_fluo.attrs['is_reference'] = 0  
+        grp_fluo.attrs['is_data_indices'] = 0
+        grp_fluo.attrs['is_dark_indices'] = 0
+        grp_fluo.attrs['is_reference_indices'] = 0  
 
         grp_fluo.create_dataset('is_data',data=fluo_data_mask,dtype=bool)
         grp_fluo.create_dataset('is_dark',data=fluo_dark_mask,dtype=bool)
