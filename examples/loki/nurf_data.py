@@ -169,7 +169,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         
         # define the AXISNAME_indices
         grp_uv.attrs['time_indices'] = 0
-        grp_uv.attrs['spectrum_key_indices'] = 0
         grp_uv.attrs['integration_time_indices'] = 0
         grp_uv.attrs['wavelength_indices'] = 1
 
