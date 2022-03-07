@@ -2,7 +2,7 @@ import errno
 import os
 import h5py
 import numpy as np
-
+import copy 
 
 def load_one_spectro_file(file_handle, path_rawdata):
     """
@@ -117,6 +117,43 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # assemble all spectra in one variable
         uv_all_data=np.row_stack((data['UV_spectra'],data['UV_background'], data['UV_intensity0']))
       
+        print(uv_all_data.size)
+        print(uv_all_data.ndim)
+        print(np.shape(uv_all_data))
+
+        dummy_vec=np.full(np.shape(uv_all_data)[0], False) 
+        lidx=np.arange(0,np.shape(uv_all_data)[0])
+        print(dummy_vec, lidx)
+
+        #create boolean masks for data, dark, reference
+        uv_nb_spectra=np.shape(data['UV_spectra'])[0]
+
+        # data mask, copy and replace first entries 
+        uv_data_mask=copy.copy(dummy_vec)
+        uv_data_mask[0:uv_nb_spectra]=True
+
+        # dark mask
+        # find out how many darks exist
+        # TODO: Is there always a background or do we need to catch this case if there isn't?
+        if data['UV_background'].ndim==1:
+            uv_nb_darks=1
+        else: 
+            uv_nb_darks=np.shape(data['UV_background'])[1]  #TODO: needs to be verified with real data from Judith's setup
+
+        uv_dark_mask=copy.copy(dummy_vec)
+        uv_dark_mask[uv_nb_spectra:uv_nb_spectra+uv_nb_darks]=True
+
+        # reference 
+        # how many references where taken? 
+        if data['UV_intensity0'].ndim==1:
+            uv_nb_ref=1
+        else:
+            uv_nb_ref=np.shape(data['UV_intensity0'])[1]  #TODO: needs to be verified with real data from Judith's setup
+        
+        # reference mask, copy and replace first entries 
+        uv_ref_mask=copy.copy(dummy_vec)
+        uv_ref_mask[uv_nb_spectra+uv_nb_darks:uv_nb_spectra+uv_nb_darks+uv_nb_ref]=True
+
         
         # assemble image_key 
         # #TODO: needs later to be verified with real data from hardware
