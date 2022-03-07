@@ -160,6 +160,12 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv.attrs['spectrum_key_indices'] = 0
         grp_uv.attrs['integration_time_indices'] = 0
         grp_uv.attrs['wavelength_indices'] = 1
+
+        # introducing a key that is interpretable for sample, dark, and reference 
+        grp_uv.attrs['is_sample_indices'] = 0
+        grp_uv.attrs['is_dark_indices'] = 0
+        grp_uv.attrs['is_reference_indices'] = 0  
+
         
         # uv_spectrum_key
         uv_signal_image_key=grp_uv.create_dataset('spectrum_key',data=uv_spectrum_key, dtype=np.int32)
@@ -248,6 +254,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs['spectrum_key_indices'] = 0
         grp_fluo.attrs['integration_time_indices'] = 0
         grp_fluo.attrs['wavelength_indices'] = 1
+
         
         fluo_signal_image_key=grp_fluo.create_dataset('spectrum_key',data=fluo_spectrum_key, dtype=np.int32)
        
