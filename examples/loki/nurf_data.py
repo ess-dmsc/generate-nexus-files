@@ -235,7 +235,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # fluo spectra
         fluo_signal_data = grp_fluo.create_dataset('data',
                                                data=fluo_all_data, dtype=np.float32)
-        fluo_signal_data.attrs['long name'] = 'fluo_all_data'
+        fluo_signal_data.attrs['long name'] = 'all_data'
         fluo_signal_data.attrs['units'] = 'a.u.'
     
 
@@ -243,12 +243,12 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs['axes']= [ "time", "wavelength"]
         
         # define the AXISNAME_indices
-        grp_fluo.attrs['fluo_time_indices'] = 0
-        grp_fluo.attrs['fluo_spectrum_key_indices'] = 0
-        grp_fluo.attrs['fluo_integration_time_indices'] = 0
-        grp_fluo.attrs['fluo_wavelength_indices'] = 1
+        grp_fluo.attrs['time_indices'] = 0
+        grp_fluo.attrs['spectrum_key_indices'] = 0
+        grp_fluo.attrs['integration_time_indices'] = 0
+        grp_fluo.attrs['wavelength_indices'] = 1
         
-        fluo_signal_image_key=grp_fluo.create_dataset('fluo_spectrum_key',data=fluo_spectrum_key, dtype=np.int32)
+        fluo_signal_image_key=grp_fluo.create_dataset('spectrum_key',data=fluo_spectrum_key, dtype=np.int32)
        
         # fluo_time
         # dummy timestamps for fluo_time
@@ -259,7 +259,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
     
         # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
         # suggested work around because h5py does not support time types
-        fluo_time_data=grp_fluo.create_dataset('fluo_time', data=fluo_time.view('<i8'), dtype='<i8')
+        fluo_time_data=grp_fluo.create_dataset('time', data=fluo_time.view('<i8'), dtype='<i8')
         # to read
         #print(fluo_time_data[:].view('<M8[us]'))
         # TODO: Do we need here an attribute for the unit?
@@ -270,24 +270,24 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_inttime=np.full(np.shape(fluo_spectrum_key),data['Fluo_IntegrationTime'])
        
         # fluo_integration_time
-        fluo_inttime_data = grp_fluo.create_dataset('fluo_integration_time',
+        fluo_inttime_data = grp_fluo.create_dataset('integration_time',
                                                data=fluo_inttime,
                                                dtype=np.float32)
         fluo_inttime_data.attrs['units'] = 'us'  # TODO: unit to be verified, currently micro-seconds
-        fluo_inttime_data.attrs['long name'] = 'fluo_integration_time'
+        fluo_inttime_data.attrs['long name'] = 'integration_time'
 
 
         # fluo_monowavelengths
-        fluo_monowavelengths_data = grp_fluo.create_dataset('fluo_monowavelengths',
+        fluo_monowavelengths_data = grp_fluo.create_dataset('monowavelengths',
                                                        data=data[
                                                            'Fluo_monowavelengths'],
                                                        dtype=np.float32)
         fluo_monowavelengths_data.attrs['units'] = 'nm'  # TODO: unit to be verified
-        fluo_monowavelengths_data.attrs['long name'] = 'fluo_monowavelengths'
+        fluo_monowavelengths_data.attrs['long name'] = 'monowavelengths'
 
         
         # fluo_wavelength
-        fluo_wavelength_data= grp_fluo.create_dataset('fluo_wavelength',
+        fluo_wavelength_data= grp_fluo.create_dataset('wavelength',
                                                   data=data['Fluo_wavelength'],
                                                   dtype=np.float32)
         fluo_wavelength_data.attrs['units'] = 'nm'  # TODO: unit to be verified
