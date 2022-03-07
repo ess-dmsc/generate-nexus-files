@@ -153,7 +153,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         uv_signal_data.attrs['long name']= 'all_data'
         uv_signal_data.attrs['units']= 'counts'
         grp_uv.attrs['signal']= 'data'  #indicate that the main signal is data 
-        grp_uv.attrs['axes']= [ "time", "wavelength" ] #time is here the first axis, i.e axis=0, wavelength is axis=1
+        grp_uv.attrs['axes']= [ "spectrum", "wavelength" ] #time is here the first axis, i.e axis=0, wavelength is axis=1
         
         # define the AXISNAME_indices
         grp_uv.attrs['time_indices'] = 0
@@ -241,7 +241,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
     
 
         grp_fluo.attrs['signal']= 'data'  #indicate that the main signal is data 
-        grp_fluo.attrs['axes']= [ "time", "wavelength"]
+        grp_fluo.attrs['axes']= [ "spectrum",  "wavelength"]
         
         # define the AXISNAME_indices
         grp_fluo.attrs['time_indices'] = 0
