@@ -9,7 +9,9 @@ if __name__ == '__main__':
 
     fh = h5py.File(file_path, 'a')
     print(fh['entry']['instrument']['monitor_1'])
-    fh['entry']['instrument']['monitor_1']['detector_id'] = np.array(1)
-    fh['entry']['instrument']['monitor_2']['detector_id'] = np.array(2)
+    #fh['entry']['instrument']['monitor_1']['detector_id'] = np.array(1)
+    #fh['entry']['instrument']['monitor_2']['detector_id'] = np.array(2)
+    fh['entry']['proton_charge'] = 20.013132
+    fh['entry']['proton_charge'].attrs.create('units', 'uAh')
     fh.close()
 
