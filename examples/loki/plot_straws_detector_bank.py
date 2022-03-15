@@ -17,8 +17,10 @@ if __name__ == '__main__':
                 ax.add_artist(circle)
                 x, y = pos
                 plt.text(x - radius / 2, y - radius / 4, row['straw id'])
-        plt.xlim(-200, 50)
-        plt.ylim(-900, 20)
+                print('straw id:', row['straw id'],
+                      'first pixel id:', row['pixel id'])
+        plt.xlim(-200, 300)
+        plt.ylim(-900, 100)
         plt.xlabel('z (mm)')
         plt.ylabel('y (mm)')
         plt.show()
