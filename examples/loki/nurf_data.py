@@ -254,7 +254,38 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         fluo_ref_mask=copy.copy(dummy_vec)
         fluo_ref_mask[fluo_nb_spectra+fluo_nb_dark:fluo_nb_spectra+fluo_nb_dark+fluo_nb_ref]=True
                 
-           
+        
+        # maybe it does not matter at what monowavelength dark and reference are measured, but I have to add then dummy values
+        # dummy value for monowavelength for dark:  NaN nm
+        # dummy value for monowavelength for reference (until I know):  NaN nm
+        print('This is the start for mwl', data['Fluo_monowavelengths'])
+        # again the fluo data can be messed up here, example: 1 monowavelength, but 7 fluo spectra in  103418.nxs
+        try:
+            assert (np.shape(data['Fluo_monowavelengths'])[0]!=1), 'Fluo_monowavelengths contains only one value.'
+        except AssertionError as error:
+            data['Fluo_monowavelengths']=data['Fluo_monowavelengths'][0]*np.zeros((np.shape(data['Fluo_spectra'])[0]))
+        
+        #how many monowavelengths ?  
+        nb_monowavelengths=data['Fluo_monowavelengths'].size
+        print('This is the new monowavelength', data['Fluo_monowavelengths'])
+        
+        # create a dummy vector for monowavelength 
+        dummy_mwl=np.ones(dummy_vec.shape)*(-1)
+        # I replace the first entries with the corect Fluo_monowavelengths
+        dummy_mwl[0:nb_monowavelengths]=data['Fluo_monowavelengths']
+        print('This is the dummy vec mwl',dummy_mwl) 
+        # now I need to add the monowavelengths for dark and reference, but they are not stored with the ILL data :(
+        # I go for NaN
+        # add monowavelengths for number of darks
+        dummy_mwl[nb_monowavelengths:nb_monowavelengths+fluo_nb_dark]=np.nan
+        print('This is the dummy vec mwl after dark',dummy_mwl) 
+        # add monowavelengths for number of reference
+        dummy_mwl[nb_monowavelengths+fluo_nb_dark:nb_monowavelengths+fluo_nb_dark+fluo_nb_ref]=np.nan
+        print('This is the dummy vec mwl after ref',dummy_mwl) 
+        
+        data['Fluo_monowavelengths']=dummy_mwl
+        print('This is the end', data['Fluo_monowavelengths'])
+
         # fluo spectra
         fluo_signal_data = grp_fluo.create_dataset('data',
                                                data=fluo_all_data, dtype=np.float32)
@@ -268,7 +299,9 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # define the AXISNAME_indices
         grp_fluo.attrs['time_indices'] = 0
         grp_fluo.attrs['integration_time_indices'] = 0
+        grp_fluo.attrs['monowavelengths_indices'] = 0
         grp_fluo.attrs['wavelength_indices'] = 1
+        
 
         grp_fluo.attrs['is_data_indices'] = 0
         grp_fluo.attrs['is_dark_indices'] = 0
@@ -289,7 +322,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # see https://stackoverflow.com/questions/23570632/store-datetimes-in-hdf5-with-h5py 
         # suggested work around because h5py does not support time types
         fluo_time_data=grp_fluo.create_dataset('time', data=fluo_time.view('<i8'), dtype='<i8')
-        fluo_time_data.attrs['unit'] = 'us'
+        fluo_time_data.attrs['units'] = 'us'
         # to read
         #print(fluo_time_data[:].view('<M8[us]'))
         # TODO: Do we need here an attribute for the unit?
