@@ -258,7 +258,6 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         # maybe it does not matter at what monowavelength dark and reference are measured, but I have to add then dummy values
         # dummy value for monowavelength for dark:  NaN nm
         # dummy value for monowavelength for reference (until I know):  NaN nm
-        #print('This is the start for mwl', data['Fluo_monowavelengths'])
         # again the fluo data can be messed up here, example: 1 monowavelength, but 7 fluo spectra in  103418.nxs
         try:
             assert (np.shape(data['Fluo_monowavelengths'])[0]!=1), 'Fluo_monowavelengths contains only one value.'
@@ -267,24 +266,19 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         
         #how many monowavelengths ?  
         nb_monowavelengths=data['Fluo_monowavelengths'].size
-        #print('This is the new monowavelength', data['Fluo_monowavelengths'])
         
         # create a dummy vector for monowavelength 
         dummy_mwl=np.ones(dummy_vec.shape)*(-1)
         # I replace the first entries with the corect Fluo_monowavelengths
         dummy_mwl[0:nb_monowavelengths]=data['Fluo_monowavelengths']
-        #print('This is the dummy vec mwl',dummy_mwl) 
         # now I need to add the monowavelengths for dark and reference, but they are not stored with the ILL data :(
         # I go for NaN
         # add monowavelengths for number of darks
         dummy_mwl[nb_monowavelengths:nb_monowavelengths+fluo_nb_dark]=np.nan
-        #print('This is the dummy vec mwl after dark',dummy_mwl) 
         # add monowavelengths for number of reference
         dummy_mwl[nb_monowavelengths+fluo_nb_dark:nb_monowavelengths+fluo_nb_dark+fluo_nb_ref]=np.nan
-        #print('This is the dummy vec mwl after ref',dummy_mwl) 
         
         data['Fluo_monowavelengths']=dummy_mwl
-        #print('This is the end', data['Fluo_monowavelengths'])
 
         # fluo spectra
         fluo_signal_data = grp_fluo.create_dataset('data',
