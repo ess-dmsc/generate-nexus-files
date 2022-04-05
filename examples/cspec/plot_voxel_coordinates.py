@@ -24,13 +24,10 @@ if __name__ == '__main__':
     plot_voxes = False
     ax = fig.add_subplot(projection='3d')
     geo_data_list = []
-    # x_size = 25 / 1000
-    # y_size = 25 / 1000
-    # z_size = 10 / 1000
     x_size = 25 / 1000
     y_size = 25 / 1000
     z_size = 10 / 1000
-    nbr_voxels = 0
+
     with open(file_path, 'r') as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
         offset = None
@@ -50,19 +47,18 @@ if __name__ == '__main__':
                                           float(row['X']) / 1000])  # + offset,
                             }
                 geo_data_list.append(geo_data)
-                nbr_voxels += 1
 
         pixel_id = 1
         voxel_full_geometry = []
         vertices_list = []
         faces_list = []
         nbr_grids = 51
-        for i in range(nbr_grids):
-            nbr_voxels = 0
-            for voxel in geo_data_list:
+        nbr_voxels_in_grid = 96*2
+        for j in range(nbr_grids):
+            for i, voxel in enumerate(geo_data_list):
                 x, y, z = voxel['location'].tolist()
-                y += y_size * i
-                geo_data = {'Grid': f'Grid_{i + 1}',
+                y += y_size * j
+                geo_data = {'Grid': f'Grid_{j + 1}',
                             'Row': voxel['Row'],
                             'Voxel': voxel['Voxel'],
                             'location': np.array([x, y, z]),
@@ -77,17 +73,17 @@ if __name__ == '__main__':
                                  [x - x_size, y, z],
                                  [x, y, z]]
                 vertices = np.array(vertices_temp)
+                c = j * nbr_voxels_in_grid * 8
                 faces = np.array(
-                    [[4, 0 + 8 * i, 1 + 8 * i, 3 + 8 * i, 2 + 8 * i],
-                     [4, 2 + 8 * i, 3 + 8 * i, 5 + 8 * i, 4 + 8 * i],
-                     [4, 4 + 8 * i, 5 + 8 * i, 7 + 8 * i, 6 + 8 * i],
-                     [4, 6 + 8 * i, 7 + 8 * i, 1 + 8 * i, 0 + 8 * i],
-                     [4, 1 + 8 * i, 7 + 8 * i, 5 + 8 * i, 3 + 8 * i],
-                     [4, 6 + 8 * i, 0 + 8 * i, 2 + 8 * i, 4 + 8 * i]])
+                    [[4, 0 + 8 * i + c, 1 + 8 * i + c, 3 + 8 * i + c, 2 + 8 * i + c],
+                     [4, 2 + 8 * i + c, 3 + 8 * i + c, 5 + 8 * i + c, 4 + 8 * i + c],
+                     [4, 4 + 8 * i + c, 5 + 8 * i + c, 7 + 8 * i + c, 6 + 8 * i + c],
+                     [4, 6 + 8 * i + c, 7 + 8 * i + c, 1 + 8 * i + c, 0 + 8 * i + c],
+                     [4, 1 + 8 * i + c, 7 + 8 * i + c, 5 + 8 * i + c, 3 + 8 * i + c],
+                     [4, 6 + 8 * i + c, 0 + 8 * i + c, 2 + 8 * i + c, 4 + 8 * i + c]])
                 voxel_full_geometry.append(geo_data)
                 vertices_list.append(vertices)
                 faces_list.append(faces)
-                nbr_voxels += 1
                 if plot_voxes:
                     for item in vertices_temp:
                         ax.scatter(item[0], item[1], item[2],
@@ -99,7 +95,8 @@ if __name__ == '__main__':
             ax.set_ylabel('Y (mm)')
             ax.set_zlabel('Z (mm)')
             plt.show()
-        write_off_file("CSPEC.off", vertices_list, faces_list,
-                       np.array([[nbr_voxels * nbr_grids * 8,
-                                  nbr_voxels * nbr_grids * 6,
+        file_name = "CSPEC.off"
+        write_off_file(file_name, vertices_list, faces_list,
+                       np.array([[nbr_voxels_in_grid * nbr_grids * 8,
+                                  nbr_voxels_in_grid * nbr_grids * 6,
                                   0]]))
