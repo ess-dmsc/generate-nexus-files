@@ -21,7 +21,7 @@ if __name__ == '__main__':
                              'CSPEC_LET_Geometry.csv')
 
     fig = plt.figure()
-    plot_voxes = False
+    plot_voxels = False
     ax = fig.add_subplot(projection='3d')
     geo_data_list = []
     x_size = 25 / 1000
@@ -84,13 +84,13 @@ if __name__ == '__main__':
                 voxel_full_geometry.append(geo_data)
                 vertices_list.append(vertices)
                 faces_list.append(faces)
-                if plot_voxes:
+                if plot_voxels:
                     for item in vertices_temp:
                         ax.scatter(item[0], item[1], item[2],
                                    marker='o',
                                    color='b',
                                    edgecolor='r')
-        if plot_voxes:
+        if plot_voxels:
             ax.set_xlabel('X (mm)')
             ax.set_ylabel('Y (mm)')
             ax.set_zlabel('Z (mm)')
