@@ -160,6 +160,7 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
 
 file_name = 'loki.nxs'
 detector_data_filepath = 'loki_data.nxs'
+json_filename = "config_loki.json"
 axis_1_size = 300
 axis_2_size = sum([det_banks_data[x]['num_tubes'] for x in det_banks_data])\
               * NUM_STRAWS_PER_TUBE * STRAW_RESOLUTION + det_pixel_id_start - 1

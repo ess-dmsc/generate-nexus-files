@@ -117,6 +117,7 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims), z_n(tube_dims - tube_dim_1 
 file_name = 'larmor.nxs'
 detector_data_filepath = 'larmor_data.nxs'
 isis_larmor_data_filepath = 'LARMOR00058412.nxs'
+json_filename = "config_larmor.json"
 axis_1_size = 1000
 axis_2_size = det_banks_data[0]['num_tubes'] * NUM_STRAWS_PER_TUBE * \
               STRAW_RESOLUTION + det_pixel_id_start - 1

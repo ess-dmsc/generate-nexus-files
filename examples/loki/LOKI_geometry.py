@@ -20,7 +20,7 @@ if IMPORT_LARMOR:
         data_disk_choppers, data_monitors, data_slits, \
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
         axis_1_size, axis_2_size, detector_data_filepath, \
-        isis_larmor_data_filepath
+        isis_larmor_data_filepath, json_filename
 else:
     from detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
@@ -28,7 +28,7 @@ else:
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
         data_disk_choppers, data_monitors, data_slits, \
         data_source, data_sample, data_users, file_name, det_pixel_id_start, \
-        axis_1_size, axis_2_size, detector_data_filepath
+        axis_1_size, axis_2_size, detector_data_filepath, json_filename
 
 if DEBUG_LARMOR_DET and not IMPORT_LARMOR:
     from larmor_data import det_banks_data as larmor_det_data
@@ -1511,7 +1511,7 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c + 1}_events'] = \
                 EventData().get_nx_event_data(monitor[TOPIC], monitor[SOURCE])
 
-        translator = JsonConfigTranslator(data)
+        translator = JsonConfigTranslator(data, json_filename=json_filename)
         translator.translate()
         translator.save_to_json()
 
