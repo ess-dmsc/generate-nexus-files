@@ -354,10 +354,9 @@ def add_shape_to_detector(
 
 
 def __add_data_stream(streams, topic, source, path, module, value_type=None):
-    options = {"topic": topic, "source": source, "writer_module": module}
+    options = {"topic": topic, "source": source, "module": module}
     if value_type is not None:
         options["type"] = value_type
-
     streams[path] = options
 
 
