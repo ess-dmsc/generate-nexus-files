@@ -24,7 +24,7 @@ SAMPLE_TO_CLOSEST_SUBSTRATE_EDGE_m = 4.0  # R on diagrams
 WIRES_PER_BLADE = 32
 STRIPS_PER_BLADE = 32
 ANGLE_BETWEEN_SUBSTRATE_AND_NEUTRON_deg = 5.0  # theta on diagrams
-NUMBER_OF_BLADES = 9  # Maybe only 6 currently with digitisers?
+NUMBER_OF_BLADES = 11  # Maybe only 6 currently with digitisers?
 
 INSTRUMENT_NAME = "AMOR"
 EVENT_TOPIC = "FREIA_detector"
@@ -374,10 +374,10 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
 
     with nexus_file(nexus_filename) as nxs_file:
         nxs_file.entry.start_time = np.array(
-            ["8601TIME"], dtype=np.dtype("S9")
+            "8601TIME", dtype=np.dtype("S9")
         )  # NICOS replaces 8601TIME
         nxs_file.entry.title = np.array(
-            ["TITLE"], dtype=np.dtype("S6")
+            "TITLE", dtype=np.dtype("S6")
         )  # NICOS replaces TITLE
 
         streams = {}
