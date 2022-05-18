@@ -394,6 +394,7 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             "COM",
             "/entry/instrument/multiblade_detector/transformations/COM",
             "f142",
+            "double"
         )
         __add_data_stream(
             streams,
@@ -401,6 +402,7 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             "COZ",
             "/entry/instrument/multiblade_detector/transformations/COZ",
             "f142",
+            "double"
         )
         __add_data_stream(
             streams,
@@ -408,6 +410,7 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             "SOM",
             "/entry/sample/transformations/SOM",
             "f142",
+            "double"
         )
         __add_data_stream(
             streams,
@@ -415,6 +418,7 @@ def write_to_json_file(nexus_filename: str, json_filename: str):
             "SOZ",
             "/entry/sample/transformations/SOZ",
             "f142",
+            "double"
         )
         links = {}
         nexus_structure = converter.convert(nxs_file, streams, links)
