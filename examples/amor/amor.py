@@ -39,11 +39,12 @@ def _get_edges_of_each_strip() -> np.ndarray:
     assume beam is centred on the detector in this dimension and thus origin is in the middle
     """
     half_strips_per_blade = STRIPS_PER_BLADE * 0.5
-    return np.linspace(
+    res = np.linspace(
         -half_strips_per_blade * STRIP_PITCH_m,
         half_strips_per_blade * STRIP_PITCH_m,
         STRIPS_PER_BLADE + 1,
     )
+    return res
 
 
 def _midpoint_between_wires_radial_direction() -> np.ndarray:
@@ -56,15 +57,16 @@ def _get_centre_of_each_strip() -> np.ndarray:
     assume beam is centred on the detector in this dimension and thus origin is in the middle
     """
     half_strips_per_blade = STRIPS_PER_BLADE * 0.5
-    return np.linspace(
-        -half_strips_per_blade * STRIP_PITCH_m,
-        half_strips_per_blade * STRIP_PITCH_m,
+    res = np.linspace(
+        -(half_strips_per_blade - 0.5) * STRIP_PITCH_m,
+        (half_strips_per_blade-0.5) * STRIP_PITCH_m,
         STRIPS_PER_BLADE,
     )
+    return res
 
 
 def _wire_positions_radial_direction() -> np.ndarray:
-    return np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE)
+    return np.linspace((WIRES_PER_BLADE - 1) * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE)
 
 
 def rotate_around_x(angle_degrees: float, vertex: np.ndarray) -> np.ndarray:

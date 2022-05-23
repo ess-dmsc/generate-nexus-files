@@ -14,8 +14,8 @@ VALUES = "values"
 iw_dist = 0.0040  # inter-wire distance [m]
 is_dist = 0.0040  # inter-strip distance [m]
 ww_dist = 0.01011 # wire-wire dist (between cassettes) [m]
-wl_dist = 0.1400  # wire array length [m]
-precision = 0.0004  # precision [m]
+wl_dist = 0.1240  # wire array length [m]
+precision = 0.0001  # precision [m]
 
 
 class AmorGeometry:
@@ -92,6 +92,8 @@ if __name__ == '__main__':
 
 
     print("Testing intra-cassette distance")
+    ag.debug = True
+    ag.fatal = True
     for cass in range(10):
         po0 = (cass    ) * 32 * 32 + 1 # first pixel in first cassette
         po1 = (cass + 1) * 32 * 32 + 1 # first pixel in second cassette
@@ -99,7 +101,7 @@ if __name__ == '__main__':
             pixy1 = po0 + wire * 32
             pixy2 = po1 + wire * 32
             d = ag.dist(pixy1, pixy2)
-            ag.mprint("Wire {}, py1, py2 ({}, {}), dist {}".format(wire, pixy1, pixy2, d))
+            ag.mprint("Cassette {},  Wire {}, py1, py2 ({}, {}), dist {}".format(cass, wire, pixy1, pixy2, d))
             ag.expect_dist(d, ww_dist, precision)
 
 
