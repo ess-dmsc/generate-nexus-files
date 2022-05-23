@@ -7,16 +7,23 @@ import numpy as np
 # ICD: https://project.esss.dk/owncloud/index.php/s/Ja7ARvxtRUzEtiK
 # PPT: Multi-BladeGeom.ppt (from Francesco P.)
 
+NW = 32 # number of wires
+NS = 32 # number of strips
+
 CHILDREN = "children"
 CONFIG = "config"
 VALUES = "values"
 
-iw_dist = 0.0040  # inter-wire distance [m]
-is_dist = 0.0040  # inter-strip distance [m]
-ww_dist = 0.01011 # wire-wire dist (between cassettes) [m]
-wl_dist = 0.1240  # wire array length [m]
-precision = 0.0001  # precision [m]
+radius  = 4.0000    # sample to front wire [m]
+iw_dist = 0.0040    # inter-wire distance [m]
+is_dist = 0.0040    # inter-strip distance [m]
+ww_dist = 0.01011   # front wire-wire dist (between cassettes) [m]
+wl_dist = 0.1240    # wire array length [m]
+blang   = 1.448     # angle between blades [degrees]
 
+precision = 0.000002      # general precision [m]
+radius_precision = 0.0005 # !! Seems too large
+ang_precision = 0.108     # !! Seems too large
 
 class AmorGeometry:
 
@@ -60,9 +67,12 @@ class AmorGeometry:
         if (self.debug):
             print(str)
 
-    def expect_dist(self, val, expect, precision):
+    def cxy2pix(self, cass, y, x):
+        return cass * NW * NS + y * NS + x + 1
+
+    def expect(self, val, expect, precision):
         if abs(val - expect) > precision:
-            print("distance error: {} - {} ({}) > {}".format(val, expect, abs(val - expect), precision))
+            print("value error: {} - {} ({}) > {}".format(val, expect, abs(val - expect), precision))
             if self.fatal:
                 sys.exit(0)
 
@@ -71,50 +81,69 @@ if __name__ == '__main__':
     ag = AmorGeometry()
 
     print("Testing distance between x-coordinates for all wires")
-    for wire in range(352):
+    for y in range(352):
         for x in range(31):
-            pix1 = wire * 32 + 1 + x
-            pix2 = wire * 32 + 1 + x + 1
+            pix1 = ag.cxy2pix(0, y, x    )
+            pix2 = ag.cxy2pix(0, y, x + 1)
             d = ag.dist(pix1, pix2)
-            ag.mprint("Wire {}, px1, px2 ({}, {}), dist {}".format(wire, pix1, pix2, d))
-            ag.expect_dist(d, is_dist, precision)
+            ag.mprint("Wire {}, px1, px2 ({}, {}), dist {}".format(y, pix1, pix2, d))
+            ag.expect(d, is_dist, precision)
 
 
     print("Testing distance between y-coordinates for all wires within cassettes")
     for cass in range(11):
-        y0 = cass * 32
-        for wire in range(31):
-            pixy1 = (y0 + wire     ) * 32 + 1
-            pixy2 = (y0 + wire +  1) * 32 + 1
+        for y in range(31):
+            pixy1 = ag.cxy2pix(cass, y, 0)
+            pixy2 = ag.cxy2pix(cass, y + 1, 0)
             d = ag.dist(pixy1, pixy2)
-            ag.mprint("Wire {}, py1, py2 ({}, {}), dist {}".format(wire, pixy1, pixy2, d))
-            ag.expect_dist(d, iw_dist, precision)
+            ag.mprint("Casse {}, y {}, py1, py2 ({}, {}), dist {}".format(cass, y, pixy1, pixy2, d))
+            ag.expect(d, iw_dist, precision)
 
 
-    print("Testing intra-cassette distance")
-    ag.debug = True
-    ag.fatal = True
+    print("Testing radius of front wire")
+    for cass in range(11):
+        pix = ag.cxy2pix(cass, 31, 0)
+        c1 = ag.p2c(pix)
+        z = np.array([0.0, 0.0, 0.0])
+        r = np.linalg.norm(c1 - z)
+        ag.mprint("Cassette {}, x {}, y{}, radius {}".format(cass, c1[0], c1[1], r))
+        ag.expect(r, radius, radius_precision)
+
+
+
+    print("Testing intra-cassette distance (front wires only)")
     for cass in range(10):
-        po0 = (cass    ) * 32 * 32 + 1 # first pixel in first cassette
-        po1 = (cass + 1) * 32 * 32 + 1 # first pixel in second cassette
-        for wire in range(32):
-            pixy1 = po0 + wire * 32
-            pixy2 = po1 + wire * 32
+            pixy1 = ag.cxy2pix(cass    , 31, 0)
+            pixy2 = ag.cxy2pix(cass + 1, 31, 0)
             d = ag.dist(pixy1, pixy2)
-            ag.mprint("Cassette {},  Wire {}, py1, py2 ({}, {}), dist {}".format(cass, wire, pixy1, pixy2, d))
-            ag.expect_dist(d, ww_dist, precision)
+            ag.mprint("Cassette {}, py1, py2 ({}, {}), dist {}".format(cass, pixy1, pixy2, d))
+            ag.expect(d, ww_dist, precision)
+
+
+    print("Testing cassette order")
+    for cass in range(10):
+            pixy1 = ag.cxy2pix(cass    , 31, 0)
+            pixy2 = ag.cxy2pix(cass + 1, 31, 0)
+            c1 = ag.p2c(pixy1)
+            c2 = ag.p2c(pixy2)
+            ag.mprint("Cassette {}, py1, py2 ({}, {})".format(cass, pixy1, pixy2))
+            if c1[2] >= c2[2]:  # z values
+                print("error:")
+                sys.exit(0)
+            if c1[1] <= c2[1]:  # y values
+                print("error:")
+                sys.exit(0)
 
 
     print("Testing relative positions (within same cassette)")
     for cass in range(11):
-        po0 = cass * 32 * 32 + 1 # first pixel in cassette
-        for wire in range(31):
-            pixy1 = po0 + (wire    ) * 32
-            pixy2 = po0 + (wire + 1) * 32
+        for y in range(31):
+            pixy1 = ag.cxy2pix(cass, y    , 0)
+            pixy2 = ag.cxy2pix(cass, y + 1, 0)
             c1 = ag.p2c(pixy1)
             c2 = ag.p2c(pixy2)
-            ag.mprint("Wire {}, py1, py2 ({}, {}), c1, c1, ({}, {})".format(wire, pixy1, pixy2, c1[0], c2[0]))
-            # For two wires w1, w2 where w2 > w1:
+            ag.mprint("Cass {}, y {}, py1, py2 ({}, {}), c1, c1, ({}, {})".format(cass, y, pixy1, pixy2, c1[1], c2[1]))
+            # For two wires w1, w2 where y1 > y2
             # z and y coordinates for w1 must be larger than for w2
             if c1[2] <= c2[2]:  # z
                 print("error")
@@ -123,21 +152,31 @@ if __name__ == '__main__':
                 print("error")
                 sys.exit(0)
 
+
     print("Testing distance from first wire to last wire")
-    for cass in range(11):
-        ag.debug = True
-        ag.fatal = False
-        c11 = cass * 32 * 32 + 1
-        c12 = c11 + 992
+    for cass in range(10):
+        c11 = ag.cxy2pix(cass,  0, 0)
+        c12 = ag.cxy2pix(cass, 31, 0)
         d = ag.dist(c11, c12)
         ag.mprint("Cassette {}, wire array length {}".format(cass, d))
-        ag.expect_dist(d, wl_dist, precision)
-        # c21 = ag.p2c(1025)
-        # c22 = ag.p2c(2017)
-        # print(c11, c12)
-        # print(c21, c22)
-        # v1 = ag.p2v(1, 993)
-        # v2 = ag.p2v(1025, 2017)
-        # print(v1)
-        # print(v2)
-        # print(ag.angle(v1, v2))
+        ag.expect(d, wl_dist, precision)
+
+
+    print("Testing angle between blades")
+    ag.debug = False
+    for cass in range(10):
+        c11 = ag.cxy2pix(9,     31, 0)
+        c12 = ag.cxy2pix(9,      0, 0)
+        c21 = ag.cxy2pix(10, 31, 0)
+        c22 = ag.cxy2pix(10,  0, 0)
+        ag.mprint("Cass {}".format(cass))
+        ag.mprint("c1 {}, {}".format(c11, c12))
+        ag.mprint("p1, p2 {}, {}".format(ag.p2c(c11), ag.p2c(c12)))
+        ag.mprint("c2 {}, {}".format(c21, c22))
+        ag.mprint("p1, p2 {}, {}".format(ag.p2c(c21), ag.p2c(c22)))
+        v1 = ag.p2v(c11, c12)
+        v2 = ag.p2v(c21, c22)
+        ag.mprint("v1 {}".format(v1))
+        ag.mprint("v2 {}".format(v2))
+        ang = ag.angle(v1, v2)
+        ag.expect(ang, blang, ang_precision)
