@@ -11,9 +11,11 @@ CHILDREN = "children"
 CONFIG = "config"
 VALUES = "values"
 
+R = 4.0
+arc_angle = np.deg2rad(0.1448)
 iw_dist = 0.0040  # inter-wire distance [m]
 is_dist = 0.0040  # inter-strip distance [m]
-ww_dist = 0.01011 # wire-wire dist (between cassettes) [m]
+ww_dist = arc_angle * R  # wire-wire dist (between cassettes) [m]
 wl_dist = 0.1240  # wire array length [m]
 precision = 0.0001  # precision [m]
 
