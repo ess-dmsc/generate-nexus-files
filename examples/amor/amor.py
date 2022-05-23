@@ -57,9 +57,10 @@ def _get_centre_of_each_strip() -> np.ndarray:
     assume beam is centred on the detector in this dimension and thus origin is in the middle
     """
     half_strips_per_blade = STRIPS_PER_BLADE * 0.5
+    offset_centre = 0.5
     res = np.linspace(
-        -(half_strips_per_blade - 0.5) * STRIP_PITCH_m,
-        (half_strips_per_blade-0.5) * STRIP_PITCH_m,
+        -(half_strips_per_blade - offset_centre) * STRIP_PITCH_m,
+        (half_strips_per_blade-offset_centre) * STRIP_PITCH_m,
         STRIPS_PER_BLADE,
     )
     return res
@@ -191,6 +192,7 @@ def _construct_pixel_offsets_for_blade(blade_number: int):
 
 def _position_blade(blade_number, vertices):
     transformed_vertices = np.zeros_like(vertices)
+    idx = 2
     # This ensures we create the blades in the order that matches the detector IDs output by the EFU
     blade_index = abs(blade_number - NUMBER_OF_BLADES) - 1
     for index, vertex in enumerate(vertices):
