@@ -19,11 +19,12 @@ iw_dist = 0.0040    # inter-wire distance [m]
 is_dist = 0.0040    # inter-strip distance [m]
 ww_dist = 0.01011   # front wire-wire dist (between cassettes) [m]
 wl_dist = 0.1240    # wire array length [m]
-blang   = 1.448     # angle between blades [degrees]
+blang   = 0.1448    # angle between blades [degrees]
 
-precision = 0.000002      # general precision [m]
-radius_precision = 0.0005 # !! Seems too large
-ang_precision = 0.108     # !! Seems too large
+precision        = 0.0000000001 # general precision [m]
+ww_precision     = 0.000002 # wire wire dist prec [m]
+radius_precision = 0.00000000000001 # precision for radius [m]
+ang_precision    = 0.00000000001 # [degrees]
 
 class AmorGeometry:
 
@@ -60,8 +61,15 @@ class AmorGeometry:
         c2 = self.p2c(pix2)
         return np.linalg.norm(c2 - c1)
 
+    # Angle in radians
     def angle(self, v1, v2):
-        return np.arccos(np.dot(v1, v2))
+        uv1 = v1/ np.linalg.norm(v1)
+        uv2 = v2/ np.linalg.norm(v2)
+        return np.arccos(np.dot(uv1, uv2))
+
+    # radians to degrees
+    def r2d(self, radians):
+        return radians * 360.0 / (np.pi * 2)
 
     def mprint(self, str):
         if (self.debug):
@@ -104,6 +112,7 @@ if __name__ == '__main__':
     for cass in range(11):
         pix = ag.cxy2pix(cass, 31, 0)
         c1 = ag.p2c(pix)
+        c1[0] = 0
         z = np.array([0.0, 0.0, 0.0])
         r = np.linalg.norm(c1 - z)
         ag.mprint("Cassette {}, x {}, y{}, radius {}".format(cass, c1[0], c1[1], r))
@@ -117,7 +126,7 @@ if __name__ == '__main__':
             pixy2 = ag.cxy2pix(cass + 1, 31, 0)
             d = ag.dist(pixy1, pixy2)
             ag.mprint("Cassette {}, py1, py2 ({}, {}), dist {}".format(cass, pixy1, pixy2, d))
-            ag.expect(d, ww_dist, precision)
+            ag.expect(d, ww_dist, ww_precision)
 
 
     print("Testing cassette order")
@@ -162,21 +171,26 @@ if __name__ == '__main__':
         ag.expect(d, wl_dist, precision)
 
 
-    print("Testing angle between blades")
-    ag.debug = False
+    print("Testing blade angle")
     for cass in range(10):
-        c11 = ag.cxy2pix(9,     31, 0)
-        c12 = ag.cxy2pix(9,      0, 0)
-        c21 = ag.cxy2pix(10, 31, 0)
-        c22 = ag.cxy2pix(10,  0, 0)
-        ag.mprint("Cass {}".format(cass))
-        ag.mprint("c1 {}, {}".format(c11, c12))
-        ag.mprint("p1, p2 {}, {}".format(ag.p2c(c11), ag.p2c(c12)))
-        ag.mprint("c2 {}, {}".format(c21, c22))
-        ag.mprint("p1, p2 {}, {}".format(ag.p2c(c21), ag.p2c(c22)))
+        c11 = ag.cxy2pix(cass,     31, 0)
+        c12 = ag.cxy2pix(cass,      0, 0)
+        v1 = ag.p2v(c11, c12)
+        vz = [0, 0.0, 4.0]
+        ang = ag.r2d(ag.angle(v1, vz))
+        exp_ang = 5.0 + blang * (10 - cass)
+        ag.mprint("cass {} angle {} degrees, exp {}".format(cass, ang, exp_ang))
+        ag.expect(ang, exp_ang, ang_precision)
+
+
+    print("Testing angle between blades")
+    for cass in range(10):
+        c11 = ag.cxy2pix(cass,     31, 0)
+        c12 = ag.cxy2pix(cass,      0, 0)
+        c21 = ag.cxy2pix(cass + 1, 31, 0)
+        c22 = ag.cxy2pix(cass + 1,  0, 0)
         v1 = ag.p2v(c11, c12)
         v2 = ag.p2v(c21, c22)
-        ag.mprint("v1 {}".format(v1))
-        ag.mprint("v2 {}".format(v2))
-        ang = ag.angle(v1, v2)
+        ang = ag.r2d(ag.angle(v1, v2))
+        ag.mprint("cass {}-{} angle {} degrees".format(cass, cass + 1, ang))
         ag.expect(ang, blang, ang_precision)
