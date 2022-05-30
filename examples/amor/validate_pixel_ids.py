@@ -11,10 +11,6 @@ from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 NW = 32 # number of wires
 NS = 32 # number of strips
 
-CHILDREN = "children"
-CONFIG = "config"
-VALUES = "values"
-
 radius  = 4.0000    # sample to front wire [m]
 iw_dist = 0.0040    # inter-wire distance [m]
 is_dist = 0.0040    # inter-strip distance [m]
