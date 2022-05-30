@@ -6,6 +6,7 @@ import numpy as np
 # geometry specified in the ICD
 # ICD: https://project.esss.dk/owncloud/index.php/s/Ja7ARvxtRUzEtiK
 # PPT: Multi-BladeGeom.ppt (from Francesco P.)
+from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 NW = 32 # number of wires
 NS = 32 # number of strips
@@ -26,67 +27,16 @@ ww_precision     = 0.000002 # wire wire dist prec [m]
 radius_precision = 0.00000000000001 # precision for radius [m]
 ang_precision    = 0.00000000001 # [degrees]
 
-class AmorGeometry:
 
-    def __init__(self, debug = False, fatal = True):
-        self.debug = debug # enable debug print
-        self.fatal = fatal # terminate on first error
-        data = {}
-
-        with open("AMOR_nexus_structure.json", 'r') as json_file:
-            data = json.load(json_file)
-
-        multiblade_detector = data[CHILDREN][0][CHILDREN][1][CHILDREN][0][CHILDREN]
-        pixel_ids = multiblade_detector[1][CONFIG][VALUES]
-        x, y, z = multiblade_detector[5][CONFIG][VALUES], \
-                  multiblade_detector[6][CONFIG][VALUES], \
-                  multiblade_detector[7][CONFIG][VALUES]
-
-        self.id_dict = dict(zip(pixel_ids, zip(x, y, z)))
-
-
-    # pixel to coord
-    def p2c(self, pixel):
-        return np.asarray(self.id_dict[pixel])
-
-    # return vector from two pixels
-    def p2v(self, pix1, pix2):
-        c1 = self.p2c(pix1)
-        c2 = self.p2c(pix2)
-        return c2 - c1
-
-    # distance between two pixels
-    def dist(self, pix1, pix2):
-        c1 = self.p2c(pix1)
-        c2 = self.p2c(pix2)
-        return np.linalg.norm(c2 - c1)
-
-    # Angle in radians
-    def angle(self, v1, v2):
-        uv1 = v1/ np.linalg.norm(v1)
-        uv2 = v2/ np.linalg.norm(v2)
-        return np.arccos(np.dot(uv1, uv2))
-
-    # radians to degrees
-    def r2d(self, radians):
-        return radians * 360.0 / (np.pi * 2)
-
-    def mprint(self, str):
-        if (self.debug):
-            print(str)
+class AmorGeometry(BaseDetectorGeometry):
 
     def cxy2pix(self, cass, y, x):
         return cass * NW * NS + y * NS + x + 1
 
-    def expect(self, val, expect, precision):
-        if abs(val - expect) > precision:
-            print("value error: {} - {} ({}) > {}".format(val, expect, abs(val - expect), precision))
-            if self.fatal:
-                sys.exit(0)
 
 if __name__ == '__main__':
 
-    ag = AmorGeometry()
+    ag = AmorGeometry("AMOR_nexus_structure.json")
 
     print("Testing distance between x-coordinates for all wires")
     for y in range(352):
