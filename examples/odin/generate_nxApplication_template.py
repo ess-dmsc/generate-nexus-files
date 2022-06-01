@@ -276,6 +276,8 @@ class FileWriterNexusConfigCreator:
                                 }
                             ]
                         }
+                    else:
+                        stream_info = None
                 elif item[KIND] == STATIC_DATA:
                     config = {}
                     if self._item_is_string(DATA_TYPE, item):
