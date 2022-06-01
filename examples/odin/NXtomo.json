@@ -57,6 +57,13 @@
                                                 ]
                                             }
                                         }
+                                    ],
+                                    "attributes": [
+                                        {
+                                            "name": "NX_class",
+                                            "dtype": "string",
+                                            "values": "NXlog"
+                                        }
                                     ]
                                 },
                                 {
@@ -70,6 +77,13 @@
                                                 "topic": "odin_topic",
                                                 "dtype": "int"
                                             }
+                                        }
+                                    ],
+                                    "attributes": [
+                                        {
+                                            "name": "NX_class",
+                                            "dtype": "string",
+                                            "values": "NXlog"
                                         }
                                     ]
                                 }
@@ -107,6 +121,13 @@
                                         "dtype": "double"
                                     }
                                 }
+                            ],
+                            "attributes": [
+                                {
+                                    "name": "NX_class",
+                                    "dtype": "string",
+                                    "values": "NXlog"
+                                }
                             ]
                         },
                         {
@@ -141,6 +162,13 @@
                                         "topic": "odin_topic",
                                         "dtype": "int"
                                     }
+                                }
+                            ],
+                            "attributes": [
+                                {
+                                    "name": "NX_class",
+                                    "dtype": "string",
+                                    "values": "NXlog"
                                 }
                             ]
                         }

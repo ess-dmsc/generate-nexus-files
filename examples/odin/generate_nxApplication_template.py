@@ -268,6 +268,13 @@ class FileWriterNexusConfigCreator:
                             TYPE: GROUP,
                             NAME: item[DATA_NAME],
                             CHILDREN: [stream_info],
+                            ATTRIBUTES: [
+                                {
+                                    NAME: NX_CLASS,
+                                    DATA_TYPE: "string",
+                                    VALUES: "NXlog"
+                                }
+                            ]
                         }
                 elif item[KIND] == STATIC_DATA:
                     config = {}
