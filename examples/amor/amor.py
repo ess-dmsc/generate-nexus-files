@@ -47,6 +47,8 @@ def _get_edges_of_each_strip() -> np.ndarray:
     return res
 
 
+# Potential bug. Consider using the below formula instead
+# np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m - WIRE_PITCH_m/2 , -WIRE_PITCH_m/2, WIRES_PER_BLADE + 1)
 def _midpoint_between_wires_radial_direction() -> np.ndarray:
     return np.linspace(WIRES_PER_BLADE * WIRE_PITCH_m, 0.0, WIRES_PER_BLADE + 1)
 

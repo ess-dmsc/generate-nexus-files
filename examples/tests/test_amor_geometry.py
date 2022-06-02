@@ -5,6 +5,7 @@ import pytest
 
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
+NC = 11 # number of cassettes
 NW = 32 # number of wires
 NS = 32 # number of strips
 
@@ -32,6 +33,38 @@ def amor_geometry():
     script_dir = os.path.join(file_dir, '..', 'amor')
     exec(open(os.path.join(script_dir, 'amor.py')).read())
     return AmorGeometry(os.path.join(script_dir, "AMOR_nexus_structure.json"))
+
+
+def test_max_valid_pixel(amor_geometry):
+    max_valid_pixel = NC * NS * NW
+    try:
+        coord = amor_geometry.p2c(max_valid_pixel)
+    except:
+        assert False
+
+
+def test_first_bad_pixel(amor_geometry):
+    invalid_pixel = NC * NS * NW + 1
+    try:
+        coord = amor_geometry.p2c(invalid_pixel)
+    except:
+        assert True
+
+
+def test_all_pixels_positive_coords(amor_geometry):
+    for pixel in range(NC * NS * NW):
+        coord = amor_geometry.p2c(pixel + 1)
+        assert coord[0] >= -0.065 # because of rotation some pixels are negative
+        assert coord[1] >= 0.0
+        assert coord[2] >= 0.0
+
+
+def test_all_pixels_dist_from_origin(amor_geometry):
+    for pixel in range(NC * NS * NW):
+        coord = amor_geometry.p2c(pixel + 1)
+        r = np.linalg.norm(coord)
+        assert r >= radius
+        assert r <= radius + wl_dist + 0.001
 
 
 def test_distance_between_x_coordinates_for_all_wires(amor_geometry):
@@ -85,8 +118,8 @@ def test_cassette_order(amor_geometry):
         c1 = amor_geometry.p2c(pixy1)
         c2 = amor_geometry.p2c(pixy2)
         amor_geometry.mprint("Cassette {}, py1, py2 ({}, {})".format(cass, pixy1, pixy2))
-        assert not c1[2] >= c2[2]
-        assert not c1[1] <= c2[1]
+        assert not (c1[2] >= c2[2])
+        assert not (c1[1] <= c2[1])
 
 
 def test_relative_positions_within_same_cassette(amor_geometry):
@@ -104,8 +137,8 @@ def test_relative_positions_within_same_cassette(amor_geometry):
                                                                             c2[1]))
         # For two wires w1, w2 where y1 > y2
         # z and y coordinates for w1 must be larger than for w2
-        assert not c1[2] <= c2[2]  # z
-        assert not c1[1] <= c2[1]  # y
+        assert not (c1[2] <= c2[2])  # z
+        assert not (c1[1] <= c2[1])  # y
 
 
 def test_distance_from_first_wire_to_last_wire(amor_geometry):
