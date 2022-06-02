@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pytest
 
+from examples.amor.amor import run_create_geometry
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 NC = 11 # number of cassettes
@@ -29,10 +30,12 @@ class AmorGeometry(BaseDetectorGeometry):
 
 @pytest.fixture(scope='session')
 def amor_geometry():
+    json_file_name = 'AMOR_nexus_structure.json'
     file_dir = os.path.dirname(os.path.abspath(__file__))
     script_dir = os.path.join(file_dir, '..', 'amor')
-    exec(open(os.path.join(script_dir, 'amor.py')).read())
-    return AmorGeometry(os.path.join(script_dir, "AMOR_nexus_structure.json"))
+    json_file_path = os.path.join(script_dir, json_file_name)
+    run_create_geometry(json_file_path)
+    return AmorGeometry(json_file_path)
 
 
 def test_max_valid_pixel(amor_geometry):

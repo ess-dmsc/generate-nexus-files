@@ -2,7 +2,7 @@
 import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
-project = "nexus-constructor"
+project = "generate-nexus-files"
 
 // Set number of old artefacts to keep.
 properties([
