@@ -467,7 +467,7 @@ def create_pixel_offsets():
     return total_x_offsets, total_y_offsets, total_z_offsets
 
 
-if __name__ == "__main__":
+def run_create_geometry(json_file_path="AMOR_nexus_structure.json"):
     total_vertices, total_faces, total_ids = create_detector_shape_info()
 
     write_to_off_file(f"{INSTRUMENT_NAME}_multiblade.off", total_vertices, total_faces)
@@ -482,4 +482,8 @@ if __name__ == "__main__":
         offsets,
     )
 
-    write_to_json_file(nexus_filename, "AMOR_nexus_structure.json")
+    write_to_json_file(nexus_filename, json_file_path)
+
+
+if __name__ == "__main__":
+    run_create_geometry()
