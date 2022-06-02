@@ -71,10 +71,7 @@ class BaseDetectorGeometry:
             print(str)
 
     def expect(self, val, expect, precision):
-        if abs(val - expect) > precision:
-            print("value error: {} - {} ({}) > {}".format(val, expect, abs(val - expect), precision))
-            if self.fatal:
-                sys.exit(0)
+        return abs(val - expect) < precision
 
 
 if __name__ == '__main__':
