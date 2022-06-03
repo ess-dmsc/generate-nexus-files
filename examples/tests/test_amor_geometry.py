@@ -57,7 +57,7 @@ def test_first_bad_pixel(amor_geometry):
 def test_all_pixels_positive_coords(amor_geometry):
     for pixel in range(NC * NS * NW):
         coord = amor_geometry.p2c(pixel + 1)
-        assert coord[0] >= -0.065 # because of rotation some pixels are negative
+        assert coord[0] >= -0.065 # because of rotation some pixels are slightly negative
         assert coord[1] >= 0.0
         assert coord[2] >= 0.0
 
@@ -132,12 +132,9 @@ def test_relative_positions_within_same_cassette(amor_geometry):
             pixy2 = amor_geometry.cxy2pix(cass, y + 1, 0)
             c1 = amor_geometry.p2c(pixy1)
             c2 = amor_geometry.p2c(pixy2)
-            amor_geometry.mprint(
-                "Cass {}, y {}, py1, py2 ({}, {}), c1, c1, ({}, {})".format(cass, y,
-                                                                            pixy1,
-                                                                            pixy2,
-                                                                            c1[1],
-                                                                            c2[1]))
+            amor_geometry \
+              .mprint("Cass {}, y {}, py1, py2 ({}, {}), c1, c1, ({}, {})" \
+              .format(cass, y,pixy1, pixy2, c1[1], c2[1]))
         # For two wires w1, w2 where y1 > y2
         # z and y coordinates for w1 must be larger than for w2
         assert not (c1[2] <= c2[2])  # z
@@ -146,19 +143,19 @@ def test_relative_positions_within_same_cassette(amor_geometry):
 
 def test_distance_from_first_wire_to_last_wire(amor_geometry):
     for cass in range(10):
-        c11 = amor_geometry.cxy2pix(cass, 0, 0)
-        c12 = amor_geometry.cxy2pix(cass, 31, 0)
-        d = amor_geometry.dist(c11, c12)
+        c1 = amor_geometry.cxy2pix(cass, 0, 0)
+        c2 = amor_geometry.cxy2pix(cass, 31, 0)
+        d = amor_geometry.dist(c1, c2)
         amor_geometry.mprint("Cassette {}, wire array length {}".format(cass, d))
         assert amor_geometry.expect(d, wl_dist, precision)
 
 
 def test_blade_angle(amor_geometry):
     for cass in range(10):
-        c11 = amor_geometry.cxy2pix(cass, 31, 0)
-        c12 = amor_geometry.cxy2pix(cass, 0, 0)
-        v1 = amor_geometry.p2v(c11, c12)
-        vz = [0, 0.0, 4.0]
+        c1 = amor_geometry.cxy2pix(cass, 31, 0)
+        c2 = amor_geometry.cxy2pix(cass, 0, 0)
+        v1 = amor_geometry.p2v(c1, c2)
+        vz = [0, 0.0, radius]
         ang = amor_geometry.r2d(amor_geometry.angle(v1, vz))
         exp_ang = 5.0 + blang * (10 - cass)
         amor_geometry.mprint("cass {} angle {} degrees, exp {}".format(cass, ang, exp_ang))
