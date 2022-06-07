@@ -21,6 +21,7 @@ strawresolution = 512 # pixels along straw
 
 pp_dist = strawlen/(strawresolution - 1)  # pixel - pixel distance along a straw [m]
 ss_dist = strawdiam  # straw - straw distance
+tt_il_dist       = 0.0284   # [m] tube tube distance (same layer)
 
 precision        = 0.000001 # general precision aim (1/1000 mm) [m]
 pp_precision     = 0.000008 # [m]
@@ -58,3 +59,14 @@ def test_straw_straw_dist(loki_geometry):
     print("{}, {}".format(c1, c2))
     d = loki_geometry.dist(pix1, pix2)
     assert loki_geometry.expect(d, ss_dist, ss_precision)
+
+
+# Front tubes: Distance from first to second tube
+def test_tube_tube_dist(loki_geometry):
+    pix1 = 1
+    pix2 = 1 + 512 * 7
+    c1 = loki_geometry.p2c(pix1)
+    c2 = loki_geometry.p2c(pix2)
+    print("{}, {}".format(c1, c2))
+    d = loki_geometry.dist(pix1, pix2)
+    assert loki_geometry.expect(d, tt_il_dist, precision)
