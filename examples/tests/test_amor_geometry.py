@@ -1,6 +1,14 @@
-import os
+#
+# Unit tests for generating and validating AMOR instrument geometry
+#
+# These tests are written with reference to
+# 1) Logical geometry definitions from the ICD
+#    https://project.esss.dk/owncloud/index.php/s/CMxvxkXSXyKGxyu
+# 2) Powerpoint sent by Francesco P.
+#    Multi-BladeGeom.pptx (May 9. 2022)
 
 import numpy as np
+import os
 import pytest
 
 from examples.amor.amor import run_create_geometry
@@ -57,7 +65,8 @@ def test_first_bad_pixel(amor_geometry):
 @pytest.mark.parametrize('pixel', [i for i in range(NC * NS * NW)])
 def test_all_pixels_positive_coords(amor_geometry, pixel):
     coord = amor_geometry.p2c(pixel + 1)
-    assert coord[0] >= -0.065 # because of rotation some pixels are negative
+    # x == 0 is center of cassette so half ofthe strips are negative
+    assert coord[0] >= -0.064
     assert coord[1] >= 0.0
     assert coord[2] >= 0.0
 
