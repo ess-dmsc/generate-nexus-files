@@ -15,16 +15,16 @@ import pytest
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 
-strawlen = 1.0        # [m]
-tubediam = 0.00254    # [m]
+strawlen = 1.0       # [m]
+strawdiam = 0.008    # [m]
 strawresolution = 512 # pixels along straw
 
 pp_dist = strawlen/(strawresolution - 1)  # pixel - pixel distance along a straw [m]
-ss_dist = strawdiam = tubediam/3 # straw - straw distance
+ss_dist = strawdiam  # straw - straw distance
 
-precision        = 0.000001 # general precision (1/1000 mm) [m]
+precision        = 0.000001 # general precision aim (1/1000 mm) [m]
 pp_precision     = 0.000008 # [m]
-ss_precision     = 0.001 # [m]
+ss_precision     = 0.0005   # [m]
 
 
 class LokiGeometry(BaseDetectorGeometry):
@@ -53,5 +53,8 @@ def test_pixel_pixel_dist(loki_geometry):
 def test_straw_straw_dist(loki_geometry):
     pix1 = 1
     pix2 = 1 + 512
+    c1 = loki_geometry.p2c(pix1)
+    c2 = loki_geometry.p2c(pix2)
+    print("{}, {}".format(c1, c2))
     d = loki_geometry.dist(pix1, pix2)
     assert loki_geometry.expect(d, ss_dist, ss_precision)
