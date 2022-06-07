@@ -57,7 +57,7 @@ def test_first_bad_pixel(amor_geometry):
 @pytest.mark.parametrize('pixel', [i for i in range(NC * NS * NW)])
 def test_all_pixels_positive_coords(amor_geometry, pixel):
     coord = amor_geometry.p2c(pixel + 1)
-    assert coord[0] >= -0.065 # because of rotation some pixels are negative
+    assert coord[0] >= -0.065  # because of rotation some pixels are negative
     assert coord[1] >= 0.0
     assert coord[2] >= 0.0
 
@@ -71,14 +71,14 @@ def test_all_pixels_dist_from_origin(amor_geometry, pixel):
 
 
 @pytest.mark.parametrize('y', [i for i in range(NC * NS)])
-@pytest.mark.parametrize('x', [i for i in range(NW - 1)])
-def test_distance_between_x_coordinates_for_all_wires(amor_geometry, y, x):
-    pix1 = amor_geometry.cxy2pix(0, y, x)
-    pix2 = amor_geometry.cxy2pix(0, y, x + 1)
-    d = amor_geometry.dist(pix1, pix2)
-    amor_geometry.mprint(
-        "Wire {}, px1, px2 ({}, {}), dist {}".format(y, pix1, pix2, d))
-    assert amor_geometry.expect(d, is_dist, precision)
+def test_distance_between_x_coordinates_for_all_wires(amor_geometry, y):
+    for x in range(NW - 1):
+        pix1 = amor_geometry.cxy2pix(0, y, x)
+        pix2 = amor_geometry.cxy2pix(0, y, x + 1)
+        d = amor_geometry.dist(pix1, pix2)
+        amor_geometry.mprint(
+            "Wire {}, px1, px2 ({}, {}), dist {}".format(y, pix1, pix2, d))
+        assert amor_geometry.expect(d, is_dist, precision)
 
 
 @pytest.mark.parametrize('cass', [i for i in range(NC)])
