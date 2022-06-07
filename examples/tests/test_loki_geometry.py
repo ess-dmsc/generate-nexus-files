@@ -14,9 +14,8 @@ import pytest
 #from examples.amor.amor import run_create_geometry
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
-
-strawlen = 1.0       # [m]
-strawdiam = 0.008    # [m]
+strawlen = 1.0        # [m]
+strawdiam = 0.00775   # [m] - drawing says 8mm
 strawresolution = 512 # pixels along straw
 
 pp_dist = strawlen/(strawresolution - 1)  # pixel - pixel distance along a straw [m]
@@ -25,7 +24,7 @@ tt_il_dist       = 0.0284   # [m] tube tube distance (same layer)
 
 precision        = 0.000001 # general precision aim (1/1000 mm) [m]
 pp_precision     = 0.000008 # [m]
-ss_precision     = 0.0005   # [m]
+ss_precision     = 0.000001   # [m]
 
 
 class LokiGeometry(BaseDetectorGeometry):
@@ -70,3 +69,11 @@ def test_tube_tube_dist(loki_geometry):
     print("{}, {}".format(c1, c2))
     d = loki_geometry.dist(pix1, pix2)
     assert loki_geometry.expect(d, tt_il_dist, precision)
+
+def test_specific_from_drawing(loki_geometry):
+    c1 = np.array([0, -1.14, -7.67])/1000
+    c2 = np.array([0, -7.21, -2.85])/1000
+    d = np.linalg.norm(c2-c1)
+    print("dist {}".format(d))
+    #assert d == ss_dist
+    assert loki_geometry.expect(d, ss_dist, precision)
