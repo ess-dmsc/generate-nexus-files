@@ -82,7 +82,7 @@ class BaseDetectorGeometry:
 
 
     def expect(self, val, expect, precision):
-        if abs(val - expect) < precision:
+        if abs(val - expect) <= precision:
             return True
         else:
             print("expected {} - {} < {} - diff is {}".format(val, expect, precision, abs(val - expect)))

@@ -15,6 +15,7 @@ import pytest
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 
+SPT = 7               # straws per tube
 NL = 4                # number of layers
 NS = 224              # number of straws (per layer)
 SR = 512              # straw resolution (pixels along straw)
@@ -22,21 +23,22 @@ SR = 512              # straw resolution (pixels along straw)
 strawlen = 1.0        # [m]
 strawdiam = 0.00775   # [m] - drawing says 8mm
 
-pp_dist = strawlen/(SR - 1)  # pixel - pixel distance along a straw [m]
-ss_dist = strawdiam          # straw - straw distance
-tt_il_dist       = 0.0284    # [m] tube tube distance (same layer)
-pa_angle = 90 - 76.55        # pack angle [degrees]
+pp_dist = strawlen/(SR - 1)   # pixel - pixel distance along a straw [m]
+ss_dist = strawdiam           # straw - straw distance
+tt_il_dist       = 0.0284     # [m] tube tube distance (same layer)
+tt_z_dist        = 0.02626    # [m] tube-tube distance (between layers)
+pa_angle         = 90 - 76.55 # pack angle [degrees]
 
-precision    = 0.000001 # general precision aim (1/1000 mm) [m]
-pp_precision = 0.000008 # [m]
-ss_precision = 0.000001 # [m]
-pa_precision = 0.000006 # [degree]
-
+precision      = 0.000001  # general precision aim (1/1000 mm) [m]
+pp_precision   = 0.000008  # [m]
+pa_precision   = 0.000006  # [degree]
+tt_z_precision = 0.0000011 # [m]
 
 
 class LokiGeometry(BaseDetectorGeometry):
     def strawtopixel(self, straw, pos):
         return straw * SR + pos + 1
+
 
 @pytest.fixture(scope='session')
 def loki_geometry():
@@ -109,38 +111,63 @@ def test_straw_straw_dist(loki_geometry, tube):
     c1 = loki_geometry.p2c(pix1)
     c2 = loki_geometry.p2c(pix2)
     d = loki_geometry.dist(pix1, pix2)
-    assert loki_geometry.expect(d, ss_dist, ss_precision)
+    assert loki_geometry.expect(d, ss_dist, precision)
 
 
-# Front tubes: Distance from first to second tube
-def test_tube_tube_dist(loki_geometry):
-    pix1 = 1
-    pix2 = 1 + 512 * 7
-    c1 = loki_geometry.p2c(pix1)
-    c2 = loki_geometry.p2c(pix2)
-    #print("{}, {}".format(c1, c2))
-    d = loki_geometry.dist(pix1, pix2)
-    assert loki_geometry.expect(d, tt_il_dist, precision)
+# Distance between tubes (in y-direction, but this is
+# not currently checked)
+# Layer by layer
+@pytest.mark.parametrize('tube', [i for i in range(int(NS/7) - 1)])
+def test_tube_tube_dist(loki_geometry, tube):
+    for layer in range(4):
+        straw_offset = layer * NS
+        pix1 = loki_geometry.strawtopixel(straw_offset + (tube + 0) * SPT, 0)
+        pix2 = loki_geometry.strawtopixel(straw_offset + (tube + 1) * SPT, 0)
+
+        # Calculate Euclidian distance
+        d = loki_geometry.dist(pix1, pix2)
+        assert loki_geometry.expect(d, tt_il_dist, precision)
+
+        # Same test not using Euclidian distance but y coordinates
+        c1 = loki_geometry.p2c(pix1)
+        c2 = loki_geometry.p2c(pix2)
+        dy = np.abs(c2 - c1)[1]
+        assert loki_geometry.expect(dy, tt_il_dist, precision)
 
 
-def test_angle_of_tubes(loki_geometry):
-    # first pixel in first straw of first tube
-    p1 = loki_geometry.strawtopixel(0, 0)
-    # first pixel in first straw of same tube in next layer
-    p2 = loki_geometry.strawtopixel(224, 0)
+# Detector packs are tilted by about 13 degrees
+# in addition we test the distance of the z-projection between tubes
+# in adjacent layers
+@pytest.mark.parametrize('tube', [i for i in range(int(NS/7))])
+def test_angle_of_tubes(loki_geometry, tube):
+    for layer in range(4 - 1):
+        layer_straw_offset = NS * layer
+        first_straw_l1 = layer_straw_offset + tube * SPT
+        first_straw_l2 = layer_straw_offset + tube * SPT + NS
 
-    v1 = loki_geometry.p2v(p1, p2)
-    v2 = np.array([0.0, 0.0, 1.0])
-    angle = loki_geometry.angle(v1, v2)
-    angled = loki_geometry.r2d(angle)
+        # first pixel in first straw of first tube
+        pix1 = loki_geometry.strawtopixel(first_straw_l1, 0)
+        # first pixel in first straw of same tube in next layer
+        pix2 = loki_geometry.strawtopixel(first_straw_l2, 0)
 
-    assert loki_geometry.expect(angled, pa_angle, pa_precision)
+        v1 = loki_geometry.p2v(pix1, pix2)
+        v2 = np.array([0.0, 0.0, 1.0])
+        angle = loki_geometry.angle(v1, v2)
+        angled = loki_geometry.r2d(angle)
 
+        assert loki_geometry.expect(angled, pa_angle, pa_precision)
 
+        c1 = loki_geometry.p2c(pix1)
+        c2 = loki_geometry.p2c(pix2)
+        dz = np.abs(c2 - c1)[2]
+        assert loki_geometry.expect(dz, tt_z_dist, tt_z_precision)
+
+# Just some debugging from table of straw coordinates used to
+# 'determine' the straw-straw distance originally assumred to be 8mm
+# according to the drawing. But was observed to be 7.75mm so the drawing
+# was probably rounding up to nearest mm.
 def test_specific_from_drawing(loki_geometry):
     c1 = np.array([0, -1.14, -7.67])/1000
     c2 = np.array([0, -7.21, -2.85])/1000
     d = np.linalg.norm(c2-c1)
-    #print("dist {}".format(d))
-    #assert d == ss_dist
     assert loki_geometry.expect(d, ss_dist, precision)
