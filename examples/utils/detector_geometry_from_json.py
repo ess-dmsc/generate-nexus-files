@@ -56,6 +56,16 @@ class BaseDetectorGeometry:
         c2 = self.p2c(pix2)
         return np.linalg.norm(c2 - c1)
 
+
+    # angle between two vectors v1 and v2
+    # v1 is defined by pix1 and pix2, similar for v2
+    # return angle in degrees
+    def pix2angle(self, pix1, pix2, pix3, pix4):
+        v1 = self.p2v(pix1, pix2)
+        v2 = self.p2v(pix3, pix4)
+        return self.r2d(self.angle(v1, v2))
+
+
     # Angle in radians
     def angle(self, v1, v2):
         uv1 = v1 / np.linalg.norm(v1)
@@ -70,8 +80,13 @@ class BaseDetectorGeometry:
         if (self.debug):
             print(str)
 
+
     def expect(self, val, expect, precision):
-        return abs(val - expect) < precision
+        if abs(val - expect) < precision:
+            return True
+        else:
+            print("expected {} - {} < {} - diff is {}".format(val, expect, precision, abs(val - expect)))
+            return False
 
 
 if __name__ == '__main__':
