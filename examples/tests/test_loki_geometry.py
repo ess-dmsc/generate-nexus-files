@@ -15,6 +15,7 @@ import pytest
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 
+
 SPT = 7               # straws per tube
 NL = 4                # number of layers
 NS = 224              # number of straws (per layer)
@@ -39,6 +40,24 @@ class LokiGeometry(BaseDetectorGeometry):
     def strawtopixel(self, straw, pos):
         return straw * SR + pos + 1
 
+    # return global straw from bank, tube and local straw
+    def get_straw(self, bank, tube, lstraw):
+        # number of tubes in the
+        loki = [56, 16, 12, 16, 12, 28, 32, 20, 32]
+
+        if (bank > 8) or (lstraw > 6):
+            raise Exception("Invalid bank or lstraw")
+
+        if tube > loki[bank] * 4 - 1:
+            raise Exception("Invalid tube")
+
+        tube_offs = 0
+        for i in range(bank):
+            tube_offs = tube_offs + loki[i]
+        print("tube offset {}".format(tube_offs))
+        return (tube_offs * 4 + tube) * SPT + lstraw
+
+
 
 @pytest.fixture(scope='session')
 def loki_geometry():
@@ -48,6 +67,17 @@ def loki_geometry():
     json_file_path = os.path.join(script_dir, json_file_name)
     #run_create_geometry(json_file_path)
     return LokiGeometry(json_file_path)
+
+
+def test_get_straw(loki_geometry):
+    #assert loki_geometry.get_straw(0, 0, 7) == 0 # raises
+    #assert loki_geometry.get_straw(9, 0, 0) == 0 # raises
+    #assert loki_geometry.get_straw(0, 56 * 4, 0) == 0 # raises
+    assert loki_geometry.get_straw(0, 0, 0) == 0
+    assert loki_geometry.get_straw(0, 1, 6) == 13
+    assert loki_geometry.get_straw(0, 56 * 4 - 1, 6) == 1567
+    assert loki_geometry.get_straw(1, 0, 0) == 1568
+    assert loki_geometry.get_straw(2, 0, 0) == 2016
 
 
 def test_max_valid_pixel(loki_geometry):
@@ -169,5 +199,5 @@ def test_angle_of_tubes(loki_geometry, tube):
 def test_specific_from_drawing(loki_geometry):
     c1 = np.array([0, -1.14, -7.67])/1000
     c2 = np.array([0, -7.21, -2.85])/1000
-    d = np.linalg.norm(c2-c1)
+    d = np.linalg.norm(c2 - c1)
     assert loki_geometry.expect(d, ss_dist, precision)
