@@ -65,6 +65,13 @@ class BaseDetectorGeometry:
         v2 = self.p2v(pix3, pix4)
         return self.r2d(self.angle(v1, v2))
 
+    # angle between two vectors v1 and v2
+    # v1 is defined by pix1 and pix2, v2 is specified directly
+    # return angle in degrees
+    def pixandv2angle(self, pix1, pix2, v2):
+        v1 = self.p2v(pix1, pix2)
+        return self.r2d(self.angle(v1, v2))
+
 
     # Angle in radians
     def angle(self, v1, v2):
