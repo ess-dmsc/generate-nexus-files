@@ -6,6 +6,9 @@
 #    https://project.esss.dk/owncloud/index.php/s/CMxvxkXSXyKGxyu
 # 2) Technical drawings
 #    ISIS: SI-7615-097
+#
+#    BE AWARE that 2) doesn't appear to be entirely precise and that not
+#    all relevant parameters are defined there
 
 import numpy as np
 import os
@@ -13,8 +16,6 @@ import pytest
 
 #from examples.amor.amor import run_create_geometry
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
-
-
 
 SPT = 7               # straws per tube
 NL = 4                # number of layers
@@ -89,20 +90,34 @@ def test_get_straw(geom):
     assert geom.get_straw(2, 0, 0) == 2016
 
 
-def test_max_valid_pixel(geom):
-    max_valid_pixel = NS * SR
+def test_max_valid_pixel(geom, bank = 0):
+    max_valid_pixel = geom.get_pixel(bank, 127, 6, 511)
+    assert max_valid_pixel == 458752
     try:
         coord = geom.p2c(max_valid_pixel)
     except:
         assert False
+        return
+    assert True
 
 
-def test_first_bad_pixel(geom):
-    invalid_pixel = NS * SR + 1
+def test_first_bad_pixel(geom, bank = 0):
+    invalid_pixel = geom.get_pixel(bank, 127, 6, 511) + 1
     try:
-        coord = amor_geometry.p2c(invalid_pixel)
+        coord = geom.p2c(invalid_pixel)
     except:
         assert True
+        return
+    assert False
+
+
+def test_all_pixels_positive_z(geom, bank = 0):
+    max_valid_pixel = geom.get_pixel(bank, 127, 6, 511)
+    for pixel in range(max_valid_pixel):
+        coord = geom.p2c(pixel + 1)
+        # assert coord[0] >= 0.0
+        # assert coord[1] >= 0.0
+        assert coord[2] >= -0.008
 
 
 # Testing that corner pixels in same layer are at right angles
@@ -128,6 +143,7 @@ def test_some_icd_values(geom, layer):
 
         a = geom.pix2angle(bottom_left, top_left, bottom_left, bottom_right)
         assert geom.expect(a, 90.0, precision)
+
 
 
 # All straws: distance between neighbouring pixels
