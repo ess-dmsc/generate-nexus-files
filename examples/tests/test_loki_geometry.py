@@ -76,10 +76,10 @@ class ICDGeometry():
         return (tube_offset + tube) * self.SPT + lstraw
 
 
-
 class LokiGeometry(BaseDetectorGeometry):
-    def null():
-        return
+    def __init__(self, path):
+        self.icd = ICDGeometry()
+        BaseDetectorGeometry.__init__(self,path)
 
 
 @pytest.fixture(scope='session')
@@ -94,32 +94,29 @@ def geom(): # formerly known as loki_geometry
 
 ## @todo use final geometry and change test accordingly
 def test_get_tube(geom):
-    icd = ICDGeometry()
-    assert icd.tube_id(0) == 0
-    assert icd.tube_id(1) == 128
-    assert icd.tube_id(2) == 128
-    assert icd.tube_id(3) == 128
-    assert icd.tube_id(4) == 128
-    assert icd.tube_id(5) == 128
-    assert icd.tube_id(6) == 128
-    assert icd.tube_id(7) == 128
-    assert icd.tube_id(8) == 128
+    assert geom.icd.tube_id(0) == 0
+    assert geom.icd.tube_id(1) == 128
+    assert geom.icd.tube_id(2) == 128
+    assert geom.icd.tube_id(3) == 128
+    assert geom.icd.tube_id(4) == 128
+    assert geom.icd.tube_id(5) == 128
+    assert geom.icd.tube_id(6) == 128
+    assert geom.icd.tube_id(7) == 128
+    assert geom.icd.tube_id(8) == 128
 
 
 ## @todo use final geometry and change test accordingly
 def test_get_straw(geom):
-    icd = ICDGeometry()
     #assert geom.get_straw(0, 0, 7) == 0 # raises
     #assert geom.get_straw(9, 0, 0) == 0 # raises
     #assert geom.get_straw(0, 56 * 4, 0) == 0 # raises
-    assert icd.straw(0, 0, 0) == 0
-    assert icd.straw(0, 1, 6) == 13
-    assert icd.straw(0, 32 * 4 - 1, 6) == 895
+    assert geom.icd.straw(0, 0, 0) == 0
+    assert geom.icd.straw(0, 1, 6) == 13
+    assert geom.icd.straw(0, 32 * 4 - 1, 6) == 895
 
 
 def test_max_valid_pixel(geom, bank = 0):
-    icd = ICDGeometry()
-    max_valid_pixel = icd.pixel(bank, 127, 6, 511)
+    max_valid_pixel = geom.icd.pixel(bank, 127, 6, 511)
     assert max_valid_pixel == 458752
     try:
         coord = geom.p2c(max_valid_pixel)
@@ -130,8 +127,7 @@ def test_max_valid_pixel(geom, bank = 0):
 
 
 def test_first_bad_pixel(geom, bank = 0):
-    icd = ICDGeometry()
-    invalid_pixel = icd.pixel(bank, 127, 6, 511) + 1
+    invalid_pixel = geom.icd.pixel(bank, 127, 6, 511) + 1
     try:
         coord = geom.p2c(invalid_pixel)
     except:
@@ -141,8 +137,7 @@ def test_first_bad_pixel(geom, bank = 0):
 
 
 def test_all_pixels_positive_z(geom, bank = 0):
-    icd = ICDGeometry()
-    max_valid_pixel = icd.pixel(bank, 127, 6, 511)
+    max_valid_pixel = geom.icd.pixel(bank, 127, 6, 511)
     for pixel in range(max_valid_pixel):
         coord = geom.p2c(pixel + 1)
         # assert coord[0] >= 0.0
@@ -154,8 +149,7 @@ def test_all_pixels_positive_z(geom, bank = 0):
 # so far bank 0 only
 @pytest.mark.parametrize('layer', [i for i in range(4)])
 def test_some_icd_values(geom, layer, bank = 0):
-        icd = ICDGeometry()
-        pixels_per_layer = icd.tubes_per_layer[bank] * icd.SPT * icd.SR
+        pixels_per_layer = geom.icd.tubes_per_layer[bank] * geom.icd.SPT * geom.icd.SR
 
         pixel_offset = pixels_per_layer * layer
 
@@ -177,13 +171,11 @@ def test_some_icd_values(geom, layer, bank = 0):
         assert geom.expect(a, 90.0, precision)
 
 
-
 # All straws: distance between neighbouring pixels
 def test_pixel_pixel_dist(geom, bank = 0):
-    icd = ICDGeometry()
-    for straw in range(icd.tubes_per_layer[bank] * icd.NL * icd.SPT):
-        offset = straw * icd.SR
-        pp_dist = strawlen / (icd.SR - 1)
+    for straw in range(geom.icd.tubes_per_layer[bank] * geom.icd.NL * geom.icd.SPT):
+        offset = straw * geom.icd.SR
+        pp_dist = strawlen / (geom.icd.SR - 1)
         for i in range(511):
             pix1 = offset + i + 1
             pix2 = offset + i + 2
@@ -195,9 +187,8 @@ def test_pixel_pixel_dist(geom, bank = 0):
 # Currently assumes only bank 0 and pos 0, but can be extended
 @pytest.mark.parametrize('tube', [i for i in range(128)])
 def test_straw_straw_dist(geom, tube, bank = 0):
-    icd = ICDGeometry()
-    pix1 = icd.pixel(bank, tube, 0, 0)
-    pix2 = icd.pixel(bank, tube, 1, 0)
+    pix1 = geom.icd.pixel(bank, tube, 0, 0)
+    pix2 = geom.icd.pixel(bank, tube, 1, 0)
     d = geom.dist(pix1, pix2)
     assert geom.expect(d, ss_dist, precision)
 
@@ -206,10 +197,9 @@ def test_straw_straw_dist(geom, tube, bank = 0):
 # Currently assumes only bank 0 and pos 0, but can be extended
 @pytest.mark.parametrize('tube', [i for i in range(128)])
 def test_straw_straw_angle(geom, tube, bank = 0):
-    icd = ICDGeometry()
-    pix1 = icd.pixel(bank, tube, 3, 0) # centre straw
-    pix2 = icd.pixel(bank, tube, 0, 0) # lstraw 0
-    pix3 = icd.pixel(bank, tube, 1, 0) # lstraw 1
+    pix1 = geom.icd.pixel(bank, tube, 3, 0) # centre straw
+    pix2 = geom.icd.pixel(bank, tube, 0, 0) # lstraw 0
+    pix3 = geom.icd.pixel(bank, tube, 1, 0) # lstraw 1
     angle = geom.pix2angle(pix1, pix2, pix1, pix3)
     assert geom.expect(angle, sa_angle, sa_precision)
 
@@ -217,13 +207,12 @@ def test_straw_straw_angle(geom, tube, bank = 0):
 # Distance between adjacent tubes in same layer (Euclidian and y-projection)
 # Currently assumes only bank 0 and pos 0, but can be extended
 def test_tube_tube_dist(geom, bank = 0):
-    icd = ICDGeometry()
-    tpl = icd.tubes_per_layer[bank]
+    tpl = geom.icd.tubes_per_layer[bank]
     for tube in range(tpl - 1):
         for layer in range(4):
             tubeone = layer * tpl + tube
-            pix1 = icd.pixel(bank, tubeone, 0, 0)
-            pix2 = icd.pixel(bank, tubeone + 1, 0, 0)
+            pix1 = geom.icd.pixel(bank, tubeone, 0, 0)
+            pix2 = geom.icd.pixel(bank, tubeone + 1, 0, 0)
 
             # Calculate Euclidian distance
             d = geom.dist(pix1, pix2)
@@ -239,16 +228,14 @@ def test_tube_tube_dist(geom, bank = 0):
 # Detector packs are tilted by about 13 degrees
 # in addition we test the distance of the z-projection between tubes
 # in adjacent layers
-
 def test_angle_of_tubes(geom, bank = 0):
-    icd = ICDGeometry()
-    tpl = icd.tubes_per_layer[bank]
+    tpl = geom.icd.tubes_per_layer[bank]
     for tube in range(tpl):
         for layer in range(4 - 1):
             tube1 = layer       * tpl + tube
             tube2 = (layer + 1) * tpl + tube
-            pix1 = icd.pixel(bank, tube1, 0, 0)
-            pix2 = icd.pixel(bank, tube2, 0, 0)
+            pix1 = geom.icd.pixel(bank, tube1, 0, 0)
+            pix2 = geom.icd.pixel(bank, tube2, 0, 0)
 
             angle = geom.pixandv2angle(pix1, pix2, np.array([0.0, 0.0, 1.0]))
             assert geom.expect(angle, pa_angle, pa_precision)
@@ -257,6 +244,7 @@ def test_angle_of_tubes(geom, bank = 0):
             c2 = geom.p2c(pix2)
             dz = np.abs(c2 - c1)[2]
             assert geom.expect(dz, tt_z_dist, tt_z_precision)
+
 
 # Just some debugging from table of straw coordinates used to
 # 'determine' the straw-straw distance originally assumred to be 8mm
