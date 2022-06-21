@@ -82,6 +82,7 @@ class LokiGeometry(BaseDetectorGeometry):
         BaseDetectorGeometry.__init__(self,path)
 
 
+# TODO: create geometry
 @pytest.fixture(scope='session')
 def geom(): # formerly known as loki_geometry
     json_file_name = 'config_larmor.json'
@@ -92,7 +93,7 @@ def geom(): # formerly known as loki_geometry
     return LokiGeometry(json_file_path)
 
 
-## @todo use final geometry and change test accordingly
+# TODO: use final geometry and change test accordingly
 def test_get_tube(geom):
     assert geom.icd.tube_parms(0)[0] == 0
     assert geom.icd.tube_parms(1)[0] == 128
@@ -105,7 +106,7 @@ def test_get_tube(geom):
     assert geom.icd.tube_parms(8)[0] == 128
 
 
-## @todo use final geometry and change test accordingly
+# TODO: use final geometry and change test accordingly
 def test_get_straw(geom):
     #assert geom.get_straw(0, 0, 7) == 0 # raises
     #assert geom.get_straw(9, 0, 0) == 0 # raises
@@ -127,7 +128,7 @@ def test_max_valid_pixel(geom, bank = 0):
     assert True
 
 
-## @todo use final geometry and change test accordingly
+# TODO: use final geometry and change test accordingly
 def test_first_bad_pixel(geom, bank = 0):
     invalid_pixel = geom.icd.pixel(bank, 127, 6, 511) + 1
     try:
@@ -138,7 +139,7 @@ def test_first_bad_pixel(geom, bank = 0):
     assert False
 
 
-## @todo extend test to all banks
+# TODO: extend test to all banks
 def test_all_pixels_positive_z(geom, bank = 0):
     max_valid_pixel = geom.icd.pixel(bank, 127, 6, 511)
     for pixel in range(max_valid_pixel):
@@ -150,7 +151,7 @@ def test_all_pixels_positive_z(geom, bank = 0):
 
 # Testing that corner pixels in same layer are at right angles
 # so far bank 0 only
-## @todo extend test to all banks
+# TODO: extend test to all banks
 @pytest.mark.parametrize('layer', [i for i in range(4)])
 def test_some_icd_values(geom, layer, bank = 0):
         pixels_per_layer = geom.icd.tubes_per_layer[bank] * geom.icd.SPT * geom.icd.SR
@@ -176,7 +177,8 @@ def test_some_icd_values(geom, layer, bank = 0):
 
 
 # All straws: distance between neighbouring pixels
-## @todo extend test to all banks
+# TODO: extend test to all banks
+# TODO: check/fix precision
 def test_pixel_pixel_dist(geom, bank = 0):
     for straw in range(geom.icd.tubes_per_layer[bank] * geom.icd.NL * geom.icd.SPT):
         offset = straw * geom.icd.SR
@@ -190,7 +192,7 @@ def test_pixel_pixel_dist(geom, bank = 0):
 
 # All tubes: distance between first and second straw
 # Currently assumes only bank 0 and pos 0, but can be extended
-## @todo extend test to all banks
+# TODO: extend test to all banks
 @pytest.mark.parametrize('tube', [i for i in range(128)])
 def test_straw_straw_dist(geom, tube, bank = 0):
     pix1 = geom.icd.pixel(bank, tube, 0, 0)
@@ -201,7 +203,8 @@ def test_straw_straw_dist(geom, tube, bank = 0):
 
 # All tubes: test angle between adjacent straws with center straw as origin
 # Currently assumes only bank 0 and pos 0, but can be extended
-## @todo extend test to all banks
+# TODO: extend test to all banks
+# TODO: check/fix precision
 @pytest.mark.parametrize('tube', [i for i in range(128)])
 def test_straw_straw_angle(geom, tube, bank = 0):
     pix1 = geom.icd.pixel(bank, tube, 3, 0) # centre straw
@@ -213,6 +216,8 @@ def test_straw_straw_angle(geom, tube, bank = 0):
 
 # Distance between adjacent tubes in same layer (Euclidian and y-projection)
 # Currently assumes only bank 0 and pos 0, but can be extended
+# TODO: extend test to all banks
+# TODO: check/fix precision
 def test_tube_tube_dist(geom, bank = 0):
     tpl = geom.icd.tubes_per_layer[bank]
     for tube in range(tpl - 1):
@@ -235,7 +240,8 @@ def test_tube_tube_dist(geom, bank = 0):
 # Detector packs are tilted by about 13 degrees
 # in addition we test the distance of the z-projection between tubes
 # in adjacent layers
-## @todo extend test to all banks
+# TODO: extend test to all banks
+# TODO: check/fix precision
 def test_angle_of_tubes(geom, bank = 0):
     tube_offset, tpl = geom.icd.tube_parms(bank)
     for tube in range(tpl):
