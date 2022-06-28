@@ -492,19 +492,17 @@ class Straw:
                     [[1, 0, 0],
                      [0, np.cos(theta), np.sin(theta)],
                      [0, -np.sin(theta), np.cos(theta)]])
-            base_vec_1 = np.array([0, 0, 1])
         else:
             def rotation(theta):
                 return np.array(
                     [[np.cos(theta), 0, np.sin(theta)],
                      [0, 1, 0],
                      [-np.sin(theta), 0, np.cos(theta)]])
-            base_vec_1 = np.array([0, 1, 0])
         rotation_angle = np.deg2rad(360 / (NUM_STRAWS_PER_TUBE - 1))
         for straw_idx in range(NUM_STRAWS_PER_TUBE - 1):
             tmp_angle = rotation_angle * straw_idx + \
                         STRAW_ALIGNMENT_OFFSET_ANGLE
-            rotated_vector = np.dot(rotation(tmp_angle), base_vec_1)
+            rotated_vector = np.dot(rotation(tmp_angle), base_vector)
             inter_res = \
                 (rotated_vector * TUBE_OUTER_STRAW_DIST_FROM_CP).tolist()
             for count, _ in enumerate(inter_res):
@@ -625,7 +623,12 @@ class Tube:
                             tuple(point_radial),
                             self._point_end,
                             detector_bank_id)
-        self._straw.set_straw_offsets(self._alignment, base_vec_1)
+        # TODO: FIX THIS.
+        # self._straw.set_straw_offsets(self._alignment, base_vec_1, True)
+        base_vec_norm = base_vec_1 / np.linalg.norm(base_vec_1)
+        self._straw.set_straw_offsets(self._alignment,
+                                      base_vec_norm,
+                                      True)
         self._straw.populate_with_pixels()
 
     def compound_data_in_dict(self) -> Dict:
