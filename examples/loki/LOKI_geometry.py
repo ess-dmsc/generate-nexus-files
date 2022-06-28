@@ -13,7 +13,7 @@ from nurf_data import load_one_spectro_file, nurf_file_creator
 IMPORT_LARMOR = True  # Change depending on what data set should be used.
 DEBUG_LARMOR_DET = False  #
 if IMPORT_LARMOR:
-    from larmor_data import FRACTIONAL_PRECISION, \
+    from examples.loki.larmor_data import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
@@ -22,7 +22,7 @@ if IMPORT_LARMOR:
         axis_1_size, axis_2_size, detector_data_filepath, \
         isis_larmor_data_filepath, json_filename
 else:
-    from detector_banks_geo import FRACTIONAL_PRECISION, \
+    from examples.loki.detector_banks_geo import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
         STRAW_ALIGNMENT_OFFSET_ANGLE, TUBE_OUTER_STRAW_DIST_FROM_CP, \
         STRAW_RESOLUTION, SCALE_FACTOR, LENGTH_UNIT, det_banks_data, \
@@ -623,12 +623,10 @@ class Tube:
                             tuple(point_radial),
                             self._point_end,
                             detector_bank_id)
-        # TODO: FIX THIS.
-        # self._straw.set_straw_offsets(self._alignment, base_vec_1, True)
         base_vec_norm = base_vec_1 / np.linalg.norm(base_vec_1)
         self._straw.set_straw_offsets(self._alignment,
                                       base_vec_norm,
-                                      True)
+                                      False)
         self._straw.populate_with_pixels()
 
     def compound_data_in_dict(self) -> Dict:
@@ -1270,8 +1268,7 @@ class JsonConfigTranslator:
             # json.dump(self._json_config, file, indent=4)
             json.dump(self._json_config, file, separators=(',', ':'))
 
-
-if __name__ == '__main__':
+def run_create_geometry():
     plot_tube_locations = False
     plot_endpoint_locations = False
     generate_nexus_content_into_nxs = True
@@ -1304,9 +1301,9 @@ if __name__ == '__main__':
             event_time_offset = nexus_loader.get_data(event_data_nx +
                                                       'event_time_offset')
             event_time_zero = nexus_loader.get_data(event_data_nx +
-                                                      'event_time_zero')
+                                                    'event_time_zero')
             # event id readout
-            arr = np.zeros((3095936, ), dtype='uint')
+            arr = np.zeros((3095936,), dtype='uint')
             event_id.read_direct(arr)
             event_id = arr
             # event index readout
@@ -1329,11 +1326,11 @@ if __name__ == '__main__':
             nexus_loader.load_file()
             detector_data = \
                 nexus_loader.get_data('mantid_workspace_1.workspace.'
-                                                  'values')
+                                      'values')
             monitor_data = \
                 nexus_loader.get_data('mantid_workspace_1.instrument.'
-                                                 'detector.'
-                                                 'detector_count')
+                                      'detector.'
+                                      'detector_count')
 
             # detector count data
             monitor_count = 10
@@ -1349,13 +1346,13 @@ if __name__ == '__main__':
 
             # time of flight data
             tof_data = nexus_loader.get_data('mantid_workspace_1.workspace.'
-                                                  'axis1')
+                                             'axis1')
             arr = np.zeros((axis_1_size + 1,), dtype='int32')
             tof_data.read_direct(arr)
             tof_data = arr
 
             # pixel id data
-            pixel_id_data = nexus_loader.\
+            pixel_id_data = nexus_loader. \
                 get_data('mantid_workspace_1.workspace.axis2')
             arr = np.zeros((axis_2_size + monitor_count,), dtype='int32')
             pixel_id_data.read_direct(arr)
@@ -1496,7 +1493,8 @@ if __name__ == '__main__':
             data[ENTRY][VALUES][INSTRUMENT][VALUES][loki_slit[NAME]] = \
                 slit.compound_geometry_extended(
                     trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
-                    loki_slit['y_gap'] * SCALE_FACTOR, gap_unit=LENGTH_UNIT)
+                                loki_slit['y_gap'] * SCALE_FACTOR,
+                    gap_unit=LENGTH_UNIT)
             print(f'Slit {loki_slit[NAME]} is done!')
 
         # Create users.
@@ -1507,11 +1505,13 @@ if __name__ == '__main__':
 
         # Throw everything into event data.
         for bank in det_banks_data:
-            data[ENTRY][VALUES][INSTRUMENT][VALUES][det_banks_data[bank][NAME]][VALUES]['larmor_detector_events'] = \
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][det_banks_data[bank][NAME]][
+                VALUES]['larmor_detector_events'] = \
                 event_data.get_nx_event_data(det_banks_data[bank][TOPIC],
                                              det_banks_data[bank][SOURCE])
         for c, monitor in enumerate(data_monitors):
-            data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][f'monitor_{c + 1}_events'] = \
+            data[ENTRY][VALUES][INSTRUMENT][VALUES][monitor[NAME]][VALUES][
+                f'monitor_{c + 1}_events'] = \
                 EventData().get_nx_event_data(monitor[TOPIC], monitor[SOURCE])
 
         translator = JsonConfigTranslator(data, json_filename=json_filename)
@@ -1531,3 +1531,7 @@ if __name__ == '__main__':
                                                path_to_dummy_nxs_file)
             # append to data to Loki Nurf
             nurf_file_creator(file_name, '.', dummy_data)
+
+
+if __name__ == '__main__':
+    run_create_geometry()
