@@ -1,4 +1,4 @@
--e git+https://github.com/ess-dmsc/python-nexus-utilities@7b70b75f406485ac43d692886f88560e0fcc03b1#egg=nexusutils
+-e git+https://github.com/ess-dmsc/python-nexus-utilities#egg=nexusutils
 -e git+https://github.com/ess-dmsc/nexus-json.git#egg=nexusjson
 -e git+https://github.com/ess-dmsc/python-streaming-data-types.git#egg=ess-streaming-data-types
 alive-progress

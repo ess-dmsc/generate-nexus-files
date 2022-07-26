@@ -24,15 +24,15 @@ strawdiam = 0.00775   # [m] - drawing says 8mm
 ss_dist = strawdiam           # straw - straw distance
 tt_il_dist       = 0.0284     # [m] tube tube distance (same layer)
 tt_z_dist        = 0.02626    # [m] tube-tube distance (between layers)
-pa_angle         = 90 - 76.55 # pack angle [deg]
-sa_angle         = 60         # angle between adjacent outer straws [deg]
+pa_angle         = np.deg2rad(90 - 76.55)  # pack angle [rad]
+sa_angle         = np.deg2rad(60)          # angle between adjacent outer straws [rad]
 
 precision      = 0.000001  # general precision aim (1/1000 mm) [m]
 
 # deviations from general precision (minimum value for passing test)
 pp_precision   = 0.000008  # [m]
 pa_precision   = 0.000006  # [deg]
-sa_precision   = 0.03      # straw rotation angle [deg]
+sa_precision   = 0.0005      # straw rotation angle [rad]
 tt_z_precision = 0.0000011 # [m]
 
 
@@ -162,18 +162,19 @@ def test_some_icd_values(geom, layer, bank = 0):
         top_right = 512 + pixel_offset
         bottom_left = 99841 + pixel_offset
         bottom_right = 100352 + pixel_offset
+        angle_rad = np.deg2rad(90.0)
 
         a = geom.pix2angle(top_left, top_right, top_left, bottom_left)
-        assert geom.expect(a, 90.0, precision)
+        assert geom.expect(a, angle_rad, precision)
 
         a = geom.pix2angle(top_right, bottom_right, top_right, top_left)
-        assert geom.expect(a, 90.0, precision)
+        assert geom.expect(a, angle_rad, precision)
 
         a = geom.pix2angle(bottom_right, bottom_left, bottom_right, top_right)
-        assert geom.expect(a, 90.0, precision)
+        assert geom.expect(a, angle_rad, precision)
 
         a = geom.pix2angle(bottom_left, top_left, bottom_left, bottom_right)
-        assert geom.expect(a, 90.0, precision)
+        assert geom.expect(a, angle_rad, precision)
 
 
 # All straws: distance between neighbouring pixels

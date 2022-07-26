@@ -50,6 +50,9 @@ class BaseDetectorGeometry:
         c2 = self.p2c(pix2)
         return c2 - c1
 
+    def r2d(self, angle):
+        return np.rad2deg(angle)
+
     # distance between two pixels
     def dist(self, pix1, pix2):
         c1 = self.p2c(pix1)
@@ -63,14 +66,14 @@ class BaseDetectorGeometry:
     def pix2angle(self, pix1, pix2, pix3, pix4):
         v1 = self.p2v(pix1, pix2)
         v2 = self.p2v(pix3, pix4)
-        return self.r2d(self.angle(v1, v2))
+        return self.angle(v1, v2)
 
     # angle between two vectors v1 and v2
     # v1 is defined by pix1 and pix2, v2 is specified directly
     # return angle in degrees
     def pixandv2angle(self, pix1, pix2, v2):
         v1 = self.p2v(pix1, pix2)
-        return self.r2d(self.angle(v1, v2))
+        return self.angle(v1, v2)
 
 
     # Angle in radians
@@ -78,10 +81,6 @@ class BaseDetectorGeometry:
         uv1 = v1 / np.linalg.norm(v1)
         uv2 = v2 / np.linalg.norm(v2)
         return np.arccos(np.dot(uv1, uv2))
-
-    # radians to degrees
-    def r2d(self, radians):
-        return radians * 360.0 / (np.pi * 2)
 
     def mprint(self, str):
         if (self.debug):
@@ -97,4 +96,4 @@ class BaseDetectorGeometry:
 
 
 if __name__ == '__main__':
-    ag = BaseDetectorGeometry("AMOR_nexus_structure.json")
+    ag = BaseDetectorGeometry("../amor/AMOR_nexus_structure.json")
