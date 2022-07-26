@@ -14,7 +14,7 @@ import numpy as np
 import os
 import pytest
 
-#from examples.amor.amor import run_create_geometry
+from examples.loki.LOKI_geometry import run_create_geometry
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 strawlen = 1.0        # [m]
@@ -84,12 +84,12 @@ class LokiGeometry(BaseDetectorGeometry):
 
 # TODO: create geometry
 @pytest.fixture(scope='session')
-def geom(): # formerly known as loki_geometry
+def geom():  # formerly known as loki_geometry
     json_file_name = 'config_larmor.json'
     file_dir = os.path.dirname(os.path.abspath(__file__))
     script_dir = os.path.join(file_dir, '..', 'loki')
     json_file_path = os.path.join(script_dir, json_file_name)
-    #run_create_geometry(json_file_path)
+    run_create_geometry()
     return LokiGeometry(json_file_path)
 
 

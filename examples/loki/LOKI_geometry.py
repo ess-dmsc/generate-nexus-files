@@ -9,9 +9,9 @@ import numpy as np
 import random
 from enum import Enum
 from typing import Dict, List, Optional
-from nurf_data import load_one_spectro_file, nurf_file_creator
+from examples.loki.nurf_data import load_one_spectro_file, nurf_file_creator
 IMPORT_LARMOR = True  # Change depending on what data set should be used.
-DEBUG_LARMOR_DET = False  #
+DEBUG_LARMOR_DET = False  # Use larmor or loki full system.
 if IMPORT_LARMOR:
     from examples.loki.larmor_data import FRACTIONAL_PRECISION, \
         NUM_STRAWS_PER_TUBE, IMAGING_TUBE_D, STRAW_DIAMETER, TUBE_DEPTH, \
