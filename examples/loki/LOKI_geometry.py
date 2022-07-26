@@ -1202,8 +1202,12 @@ class JsonConfigTranslator:
             dtype = FLOAT
         return dtype
 
-    def _flatten_list(self, t):
-        if isinstance(t, str):
+    def _extract_value_and_dtype(self, t):
+        if isinstance(t, float):
+            return t, FLOAT
+        elif isinstance(t, int):
+            return t, INTEGER
+        elif isinstance(t, str):
             return t, STRING
         elif np.isscalar(t[0]) and len(t) == 1:
             return t[0], self._check_type(t[0])
@@ -1232,7 +1236,7 @@ class JsonConfigTranslator:
 
         # Populate children.
         if not isinstance(nexus_dict[VALUES], dict):
-            nxs_data, dtype = self._flatten_list(nexus_dict[VALUES])
+            nxs_data, dtype = self._extract_value_and_dtype(nexus_dict[VALUES])
             child = {MODULE: DATASET, CONFIG: {
                 NAME: object_name,
                 VALUES: nxs_data,
