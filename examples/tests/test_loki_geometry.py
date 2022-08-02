@@ -16,13 +16,13 @@ import pytest
 
 from examples.loki.LOKI_geometry import run_create_geometry
 from examples.loki.detector_banks_geo import STRAW_RESOLUTION, \
-    NUM_STRAWS_PER_TUBE, TUBE_DEPTH
+    NUM_STRAWS_PER_TUBE, TUBE_DEPTH, det_banks_data
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 strawlen = 1.0        # [m]
 strawdiam = 0.00775   # [m] - drawing says 8mm
 
-#pp_dist = strawlen/(SR - 1)   # pixel - pixel distance along a straw [m]
+#pp_dist = strawlen/(STRAW_RESOLUTION - 1)   # pixel - pixel distance along a straw [m]
 ss_dist = strawdiam           # straw - straw distance
 tt_il_dist       = 0.0284     # [m] tube tube distance (same layer)
 tt_z_dist        = 0.02626    # [m] tube-tube distance (between layers)
@@ -39,14 +39,14 @@ tt_z_precision = 0.0000011 # [m]
 
 
 # Now in a separate class
-class ICDGeometry():
-    SPT = 7    # straws per tube
-    NL = 4     # number of layers
-    SR = 512   # straw resolution (pixels along straw)
+class ICDGeometry:
 
     # number of tubes per layer in a bank for the final instrument
-    tubes_per_layer = [56, 16, 12, 16, 12, 28, 32, 20, 32] # full instrument
-    #tubes_per_layer = [32, 0, 0, 0, 0, 0, 0, 0, 0] # current implementation?
+    def __init__(self, banks):
+        self._banks = banks
+        self.tubes_per_layer = []
+        for idx in range(len(banks)):
+            self.tubes_per_layer.append(int(banks[idx]['num_tubes'] / TUBE_DEPTH))
 
     def pixel(self, bank, tube, lstraw, pos):
         return self.straw_to_pixel(self.straw(bank, tube, lstraw), pos)
@@ -68,7 +68,7 @@ class ICDGeometry():
     # return global straw from bank, tube and local straw
     # helper function, may not need to be called directly
     def straw(self, bank, tube, lstraw):
-        if (bank > 8) or (lstraw > NUM_STRAWS_PER_TUBE - 1):
+        if (bank > len(self._banks) - 1) or (lstraw > NUM_STRAWS_PER_TUBE - 1):
             raise Exception("Invalid bank or lstraw")
 
         if tube > self.tubes_per_layer[bank] * TUBE_DEPTH - 1:
@@ -80,7 +80,7 @@ class ICDGeometry():
 
 class LokiGeometry(BaseDetectorGeometry):
     def __init__(self, path):
-        self.icd = ICDGeometry()
+        self.icd = ICDGeometry(det_banks_data)
         BaseDetectorGeometry.__init__(self,path)
 
 
