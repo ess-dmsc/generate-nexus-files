@@ -50,7 +50,7 @@ class ICDGeometry:
         for idx in range(NUM_BANKS):
             self.tubes_per_layer.append(int(banks[idx]['num_tubes'] / TUBE_DEPTH))
             number_of_tubes.append(banks[idx]['num_tubes'])
-        self._cumulative_tubes = list(np.cumsum(number_of_tubes))
+        self.cumulative_tubes = list(np.cumsum(number_of_tubes))
 
     def pixel(self, bank, tube, lstraw, pos):
         return self.straw_to_pixel(self.straw(bank, tube, lstraw), pos)
@@ -73,9 +73,9 @@ class ICDGeometry:
     def straw(self, bank, tube, lstraw):
         if (bank > NUM_BANKS - 1) or (lstraw > NUM_STRAWS_PER_TUBE - 1):
             raise Exception("Invalid bank or lstraw")
-        if tube > self._cumulative_tubes[bank] - 1:
+        if tube > self.cumulative_tubes[bank] - 1:
             raise Exception(f"Invalid tube {tube}, "
-                            f"max is {self._cumulative_tubes - 1}")
+                            f"max is {self.cumulative_tubes - 1}")
         tube_offset, tubes_per_layer = self.tube_parms(bank)
         return (tube_offset + tube) * NUM_STRAWS_PER_TUBE + lstraw
 
@@ -188,7 +188,12 @@ def test_some_icd_values(geom, layer, bank):
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
 def test_pixel_pixel_dist(geom, bank):
     pp_dist = strawlen[bank] / (STRAW_RESOLUTION - 1)
-    for straw in range(geom.icd.tubes_per_layer[bank] * TUBE_DEPTH * NUM_STRAWS_PER_TUBE):
+    if bank == 0:
+        first_straw = 0
+    else:
+        first_straw = geom.icd.cumulative_tubes[bank - 1] * NUM_STRAWS_PER_TUBE + 1
+    last_straw = geom.icd.cumulative_tubes[bank] * NUM_STRAWS_PER_TUBE
+    for straw in range(first_straw, last_straw):
         offset = straw * STRAW_RESOLUTION
         for i in range(STRAW_RESOLUTION - 1):
             pix1 = offset + i + 1
