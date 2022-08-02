@@ -29,12 +29,12 @@ tt_z_dist        = 0.02626    # [m] tube-tube distance (between layers)
 pa_angle         = np.deg2rad(90 - 76.55)  # pack angle [rad]
 sa_angle         = np.deg2rad(60)          # angle between adjacent outer straws [rad]
 
-precision      = 0.00001  # general precision aim (1/100 mm) [m]
+precision      = 0.00005  # general precision aim (5/100 mm) [m]
 
 # deviations from general precision (minimum value for passing test)
 pp_precision   = 0.000008  # [m]
 pa_precision   = 0.000012  # [deg]
-sa_precision   = 0.001      # straw rotation angle [rad]
+sa_precision   = 0.002      # straw rotation angle [rad]
 tt_z_precision = 0.0000011 # [m]
 
 
