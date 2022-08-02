@@ -114,7 +114,8 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims), z_n(tube_dims - tube_dim_1 
                       'bank_offset': (0, 0, 4099 - z_n(tube_dims - tube_dim_1 + 1)),
                       'name': 'larmor_detector',
                       'topic': 'loki_detector',
-                      'source': 'loki'
+                      'source': 'loki',
+                      'tube_length': 1.0
                       },
                   }
 

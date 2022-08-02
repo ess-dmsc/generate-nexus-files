@@ -91,7 +91,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_0',
                       'topic': 'loki_detector',
-                      'source': 'loki_0'
+                      'source': 'loki_0',
+                      'tube_length': 1.0
                       },
                   1: {'A': [(-500, -710.24, 2899.18),
                             (-500, -699.24, 2979.43),
@@ -105,7 +106,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_1',
                       'topic': 'loki_detector',
-                      'source': 'loki_1'
+                      'source': 'loki_1',
+                      'tube_length': 1.0
                       },
                   2: {'A': [(-535.94, -250, 3328.75),
                             (-523.26, -250, 3408.75),
@@ -119,7 +121,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_2',
                       'topic': 'loki_detector',
-                      'source': 'loki_2'
+                      'source': 'loki_2',
+                      'tube_length': 0.5
                       },
                   3: {'A': [(-500, 286.33, 2941.34),
                             (-500, 275.34, 3021.59),
@@ -133,7 +136,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_3',
                       'topic': 'loki_detector',
-                      'source': 'loki_3'
+                      'source': 'loki_3',
+                      'tube_length': 1.0
                       },
                   4: {'A': [(224.49, -250, 3353.11),
                             (211.82, -250, 3433.11),
@@ -147,7 +151,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_4',
                       'topic': 'loki_detector',
-                      'source': 'loki_4'
+                      'source': 'loki_4',
+                      'tube_length': 0.5
                       },
                   5: {'A': [(-700, -1096.67, 1051.39),
                             (-700, -1102.32, 1132.19),
@@ -161,7 +166,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_5',
                       'topic': 'loki_detector',
-                      'source': 'loki_5'
+                      'source': 'loki_5',
+                      'tube_length': 1.2
                       },
                   6: {'A': [(-1191.15, -585, 1509.59),
                             (-1187.05, -585, 1590.49),
@@ -175,7 +181,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_6',
                       'topic': 'loki_detector',
-                      'source': 'loki_6'
+                      'source': 'loki_6',
+                      'tube_length': 1.2
                       },
                   7: {'A': [(-500, 365.36, 1281.97),
                             (-500, 371.01, 1362.77),
@@ -189,7 +196,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_7',
                       'topic': 'loki_detector',
-                      'source': 'loki_7'
+                      'source': 'loki_7',
+                      'tube_length': 1.2
                       },
                   8: {'A': [(325.62, -650, 1670.71),
                             (321.52, -650, 1751.61),
@@ -203,7 +211,8 @@ det_banks_data = {0: {'A': [(-500, -781, 5012.5),
                       'bank_offset': (0, 0, 0),
                       'name': 'loki_detector_8',
                       'topic': 'loki_detector',
-                      'source': 'loki_8'
+                      'source': 'loki_8',
+                      'tube_length': 1.2
                       },
                   }
 

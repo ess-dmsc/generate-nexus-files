@@ -517,7 +517,7 @@ class Straw:
                                  value[2] * 1000)
                 ax_tmp.text(value[0] * 1000, value[1] * 1000, value[2] * 1000,
                             '%s' % (str(count)), size=20, zorder=1, color='k')
-                print(count, ':', value * 1000)
+                # print(count, ':', value * 1000)
                 ax_tmp.set_xlabel('X')
                 ax_tmp.set_ylabel('Y')
                 ax_tmp.set_zlabel('Z')
@@ -529,7 +529,8 @@ class Straw:
         Populates the tube straw with pixels according to its pixel resolution.
         """
         vector_along_straw = np.array(self._point_c) - np.array(self._point_a)
-        vector_along_straw /= STRAW_RESOLUTION
+        vector_along_straw /= (STRAW_RESOLUTION - 1)
+        print("vector along straw", vector_along_straw)
         pixel_end_point = tuple(np.array(self._point_a) + vector_along_straw)
         vertices_first_pixel = [self._point_a, self._point_b, pixel_end_point]
         self._pixel = Pixel(vertices_first_pixel)
@@ -599,8 +600,8 @@ class Tube:
         self._straw: Optional[Straw] = None
 
     def set_xyz_offsets(self, xyz_offsets):
-        for c, item in enumerate(xyz_offsets):
-            print(f'x_{c + 1}, y_{c + 1}, z_{c + 1}: ', item)
+        # for c, item in enumerate(xyz_offsets):
+        #     print(f'x_{c + 1}, y_{c + 1}, z_{c + 1}: ', item)
         self._xyz_offsets = xyz_offsets
 
     def get_xyz_offsets(self):

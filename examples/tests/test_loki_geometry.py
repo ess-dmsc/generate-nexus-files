@@ -19,7 +19,8 @@ from examples.loki.detector_banks_geo import STRAW_RESOLUTION, \
     NUM_STRAWS_PER_TUBE, TUBE_DEPTH, det_banks_data, NUM_BANKS
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
-strawlen = 1.0        # [m]
+strawlen = [i for i in [det_banks_data[x]["tube_length"]
+                        for x in range(NUM_BANKS)]] # [m]
 strawdiam = 0.00775   # [m] - drawing says 8mm
 
 #pp_dist = strawlen/(STRAW_RESOLUTION - 1)   # pixel - pixel distance along a straw [m]
@@ -186,9 +187,9 @@ def test_some_icd_values(geom, layer, bank):
 # TODO: check/fix precision
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
 def test_pixel_pixel_dist(geom, bank):
+    pp_dist = strawlen[bank] / (STRAW_RESOLUTION - 1)
     for straw in range(geom.icd.tubes_per_layer[bank] * TUBE_DEPTH * NUM_STRAWS_PER_TUBE):
         offset = straw * STRAW_RESOLUTION
-        pp_dist = strawlen / (STRAW_RESOLUTION - 1)  # TODO: 1.0 m or 1.2 m length
         for i in range(STRAW_RESOLUTION - 1):
             pix1 = offset + i + 1
             pix2 = offset + i + 2
