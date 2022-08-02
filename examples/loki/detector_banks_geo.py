@@ -44,12 +44,19 @@ data_source = {
     'name': 'moderator'
 }
 
-data_disk_choppers = [{'name': 'chopper_1', 'location': (0, 0, -17100),
+data_disk_choppers = [{'name': 'chopper_1A', 'location': (0, 0, -17100),
                        'rotation_speed': 14.0, 'slits': 2,
                        'disk_rad': 700.0 / 2},
-                      {'name': 'chopper_2', 'location': (0, 0, -8570),
+                      {'name': 'chopper_1B', 'location': (0, 0, -8570),
                        'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2}]
+                       'disk_rad': 700.0 / 2},
+                      {'name': 'chopper_2A', 'location': (0, 0, -17100),
+                       'rotation_speed': 14.0, 'slits': 2,
+                       'disk_rad': 700.0 / 2},
+                      {'name': 'chopper_2B', 'location': (0, 0, -8570),
+                       'rotation_speed': 14.0, 'slits': 2,
+                       'disk_rad': 700.0 / 2}
+                      ]
 
 data_monitors = [{'location': (0, 0, -16800), 'name': 'monitor_0',
                   'topic': 'monitor_channel_1', 'source': 'ttlmon'},
