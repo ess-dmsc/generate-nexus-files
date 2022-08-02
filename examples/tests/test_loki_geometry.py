@@ -16,7 +16,7 @@ import pytest
 
 from examples.loki.LOKI_geometry import run_create_geometry
 from examples.loki.detector_banks_geo import STRAW_RESOLUTION, \
-    NUM_STRAWS_PER_TUBE, TUBE_DEPTH, det_banks_data
+    NUM_STRAWS_PER_TUBE, TUBE_DEPTH, det_banks_data, NUM_BANKS
 from examples.utils.detector_geometry_from_json import BaseDetectorGeometry
 
 strawlen = 1.0        # [m]
@@ -45,8 +45,11 @@ class ICDGeometry:
     def __init__(self, banks):
         self._banks = banks
         self.tubes_per_layer = []
-        for idx in range(len(banks)):
+        number_of_tubes = []
+        for idx in range(NUM_BANKS):
             self.tubes_per_layer.append(int(banks[idx]['num_tubes'] / TUBE_DEPTH))
+            number_of_tubes.append(banks[idx]['num_tubes'])
+        self._cumulative_tubes = list(np.cumsum(number_of_tubes))
 
     def pixel(self, bank, tube, lstraw, pos):
         return self.straw_to_pixel(self.straw(bank, tube, lstraw), pos)
@@ -64,16 +67,14 @@ class ICDGeometry:
             offset = offset + self.tubes_per_layer[i] * TUBE_DEPTH
         return [offset, self.tubes_per_layer[bank]]
 
-
     # return global straw from bank, tube and local straw
     # helper function, may not need to be called directly
     def straw(self, bank, tube, lstraw):
-        if (bank > len(self._banks) - 1) or (lstraw > NUM_STRAWS_PER_TUBE - 1):
+        if (bank > NUM_BANKS - 1) or (lstraw > NUM_STRAWS_PER_TUBE - 1):
             raise Exception("Invalid bank or lstraw")
-
-        if tube > self.tubes_per_layer[bank] * TUBE_DEPTH - 1:
-            raise Exception("Invalid tube")
-
+        if tube > self._cumulative_tubes[bank] - 1:
+            raise Exception(f"Invalid tube {tube}, "
+                            f"max is {self._cumulative_tubes - 1}")
         tube_offset, tubes_per_layer = self.tube_parms(bank)
         return (tube_offset + tube) * NUM_STRAWS_PER_TUBE + lstraw
 
@@ -154,8 +155,9 @@ def geom():  # formerly known as loki_geometry
 # Testing that corner pixels in same layer are at right angles
 # so far bank 0 only
 # TODO: extend test to all banks
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
 @pytest.mark.parametrize('layer', [i for i in range(TUBE_DEPTH)])
-def test_some_icd_values(geom, layer, bank = 0):
+def test_some_icd_values(geom, layer, bank):
         pixels_per_layer = geom.icd.tubes_per_layer[bank] * STRAW_RESOLUTION * NUM_STRAWS_PER_TUBE
 
         pixel_offset = pixels_per_layer * layer
@@ -182,7 +184,8 @@ def test_some_icd_values(geom, layer, bank = 0):
 # All straws: distance between neighbouring pixels
 # TODO: extend test to all banks
 # TODO: check/fix precision
-def test_pixel_pixel_dist(geom, bank = 0):
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
+def test_pixel_pixel_dist(geom, bank):
     for straw in range(geom.icd.tubes_per_layer[bank] * TUBE_DEPTH * NUM_STRAWS_PER_TUBE):
         offset = straw * STRAW_RESOLUTION
         pp_dist = strawlen / (STRAW_RESOLUTION - 1)  # TODO: 1.0 m or 1.2 m length
@@ -196,8 +199,10 @@ def test_pixel_pixel_dist(geom, bank = 0):
 # All tubes: distance between first and second straw
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
-@pytest.mark.parametrize('tube', [i for i in range(128)]) # NUMBER OF TUBES IN BANK
-def test_straw_straw_dist(geom, tube, bank = 0):
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
+@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] for
+                                              x in range(NUM_BANKS)]]) # NUMBER OF TUBES IN BANK
+def test_straw_straw_dist(geom, tube, bank):
     pix1 = geom.icd.pixel(bank, tube, 0, 0)
     pix2 = geom.icd.pixel(bank, tube, 1, 0)
     d = geom.dist(pix1, pix2)
@@ -208,8 +213,10 @@ def test_straw_straw_dist(geom, tube, bank = 0):
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
 # TODO: check/fix precision
-@pytest.mark.parametrize('tube', [i for i in range(128)]) # NUMBER OF TUBES IN BANK
-def test_straw_straw_angle(geom, tube, bank = 0):
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
+@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] for
+                                              x in range(NUM_BANKS)]]) # NUMBER OF TUBES IN BANK
+def test_straw_straw_angle(geom, tube, bank):
     pix1 = geom.icd.pixel(bank, tube, 3, 0) # centre straw
     pix2 = geom.icd.pixel(bank, tube, 0, 0) # lstraw 0
     pix3 = geom.icd.pixel(bank, tube, 1, 0) # lstraw 1
@@ -221,7 +228,8 @@ def test_straw_straw_angle(geom, tube, bank = 0):
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
 # TODO: check/fix precision
-def test_tube_tube_dist(geom, bank = 0):
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
+def test_tube_tube_dist(geom, bank):
     tpl = geom.icd.tubes_per_layer[bank]
     for tube in range(tpl - 1):
         for layer in range(TUBE_DEPTH):
@@ -245,7 +253,8 @@ def test_tube_tube_dist(geom, bank = 0):
 # in adjacent layers
 # TODO: extend test to all banks
 # TODO: check/fix precision
-def test_angle_of_tubes(geom, bank = 0):
+@pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
+def test_angle_of_tubes(geom, bank):
     tube_offset, tpl = geom.icd.tube_parms(bank)
     for tube in range(tpl):
         for layer in range(TUBE_DEPTH - 1):
