@@ -202,30 +202,28 @@ def test_pixel_pixel_dist(geom, bank):
             assert geom.expect(d, pp_dist, pp_precision)
 
 
-# All tubes: distance between first and second straw
+# A tube in each bank: distance between first and second straw
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
-@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] - 1 for
-                                              x in range(NUM_BANKS)]])
-def test_straw_straw_dist(geom, tube, bank):
-    pix1 = geom.icd.pixel(bank, tube - 1, 0, 0)
-    pix2 = geom.icd.pixel(bank, tube - 1, 1, 0)
+def test_straw_straw_dist(geom, bank):
+    pix1 = geom.icd.pixel(bank, 0, 0, 0)
+    pix2 = geom.icd.pixel(bank, 0, 1, 0)
     d = geom.dist(pix1, pix2)
     assert geom.expect(d, ss_dist, precision)
 
 
-# All tubes: test angle between adjacent straws with center straw as origin
+# A tube in each bank: test angle between adjacent straws with center straw as origin
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
 # TODO: check/fix precision
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
-@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] - 1 for
-                                              x in range(NUM_BANKS)]])
-def test_straw_straw_angle(geom, tube, bank):
-    pix1 = geom.icd.pixel(bank, tube, 3, 0) # centre straw
-    pix2 = geom.icd.pixel(bank, tube, 0, 0) # lstraw 0
-    pix3 = geom.icd.pixel(bank, tube, 1, 0) # lstraw 1
+# @pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] - 1 for
+#                                               x in range(NUM_BANKS)]])
+def test_straw_straw_angle(geom, bank):
+    pix1 = geom.icd.pixel(bank, 0, 3, 0) # centre straw
+    pix2 = geom.icd.pixel(bank, 0, 0, 0) # lstraw 0
+    pix3 = geom.icd.pixel(bank, 0, 1, 0) # lstraw 1
     angle = geom.pix2angle(pix1, pix2, pix1, pix3)
     assert geom.expect(angle, sa_angle, sa_precision)
 
