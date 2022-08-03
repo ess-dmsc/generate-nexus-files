@@ -75,7 +75,7 @@ class ICDGeometry:
             raise Exception("Invalid bank or lstraw")
         if tube > self.cumulative_tubes[bank] - 1:
             raise Exception(f"Invalid tube {tube}, "
-                            f"max is {self.cumulative_tubes - 1}")
+                            f"max is {self.cumulative_tubes[bank] - 1}")
         tube_offset, tubes_per_layer = self.tube_parms(bank)
         return (tube_offset + tube) * NUM_STRAWS_PER_TUBE + lstraw
 
@@ -206,11 +206,11 @@ def test_pixel_pixel_dist(geom, bank):
 # Currently assumes only bank 0 and pos 0, but can be extended
 # TODO: extend test to all banks
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
-@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] for
-                                              x in range(NUM_BANKS)]]) # NUMBER OF TUBES IN BANK
+@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] - 1 for
+                                              x in range(NUM_BANKS)]])
 def test_straw_straw_dist(geom, tube, bank):
-    pix1 = geom.icd.pixel(bank, tube, 0, 0)
-    pix2 = geom.icd.pixel(bank, tube, 1, 0)
+    pix1 = geom.icd.pixel(bank, tube - 1, 0, 0)
+    pix2 = geom.icd.pixel(bank, tube - 1, 1, 0)
     d = geom.dist(pix1, pix2)
     assert geom.expect(d, ss_dist, precision)
 
@@ -220,8 +220,8 @@ def test_straw_straw_dist(geom, tube, bank):
 # TODO: extend test to all banks
 # TODO: check/fix precision
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
-@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] for
-                                              x in range(NUM_BANKS)]]) # NUMBER OF TUBES IN BANK
+@pytest.mark.parametrize('tube', [i for i in [det_banks_data[x]["num_tubes"] - 1 for
+                                              x in range(NUM_BANKS)]])
 def test_straw_straw_angle(geom, tube, bank):
     pix1 = geom.icd.pixel(bank, tube, 3, 0) # centre straw
     pix2 = geom.icd.pixel(bank, tube, 0, 0) # lstraw 0
