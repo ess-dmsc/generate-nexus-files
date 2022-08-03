@@ -30,7 +30,7 @@ tt_z_dist        = 0.02626    # [m] tube-tube distance (between layers)
 pa_angle         = np.deg2rad(90 - 76.55)  # pack angle [rad]
 sa_angle         = np.deg2rad(60)          # angle between adjacent outer straws [rad]
 
-precision      = 0.00005  # general precision aim (5/100 mm) [m]
+precision      = 0.00002  # general precision aim (2/100 mm) [m]
 
 # deviations from general precision (minimum value for passing test)
 pp_precision   = 0.000008  # [m]
@@ -245,11 +245,12 @@ def test_tube_tube_dist(geom, bank):
             d = geom.dist(pix1, pix2)
             assert geom.expect(d, tt_il_dist, precision)
 
-            # Same test not using Euclidian distance but y coordinates
-            c1 = geom.p2c(pix1)
-            c2 = geom.p2c(pix2)
-            dy = np.abs(c2 - c1)[1]
-            assert geom.expect(dy, tt_il_dist, precision)
+            # # Same test not using Euclidian distance but y coordinates
+            if bank == 0:
+                c1 = geom.p2c(pix1)
+                c2 = geom.p2c(pix2)
+                dy = np.abs(c2 - c1)[1]
+                assert geom.expect(dy, tt_il_dist, precision)
 
 
 # Detector packs are tilted by about 13 degrees
