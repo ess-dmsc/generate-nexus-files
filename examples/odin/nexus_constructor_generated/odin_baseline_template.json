@@ -1,0 +1,2419 @@
+{
+  "children": [
+    {
+      "name": "entry",
+      "type": "group",
+      "attributes": [
+        {
+          "name": "NX_class",
+          "dtype": "string",
+          "values": "NXentry"
+        }
+      ],
+      "children": [
+        {
+          "module": "dataset",
+          "config": {
+            "name": "definition",
+            "values": "NXtomo",
+            "type": "string"
+          }
+        },
+        {
+          "module": "dataset",
+          "config": {
+            "name": "experiment_identifier",
+            "values": "$EXP_ID$",
+            "type": "string"
+          }
+        },
+        {
+          "module": "dataset",
+          "config": {
+            "name": "title",
+            "values": "$TITLE$",
+            "type": "string"
+          }
+        },
+        {
+          "name": "instrument",
+          "type": "group",
+          "attributes": [
+            {
+              "name": "NX_class",
+              "dtype": "string",
+              "values": "NXinstrument"
+            }
+          ],
+          "children": [
+            {
+              "name": "beam_monitor_1",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXmonitor"
+                }
+              ],
+              "children": [
+                {
+                  "name": "monitor_1_events",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXevent_data"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "ev42",
+                      "config": {
+                        "source": "monitor_1_events",
+                        "topic": "topic"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "beam_monitor_2",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXmonitor"
+                }
+              ],
+              "children": [
+                {
+                  "name": "monitor_2_events",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXevent_data"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "ev42",
+                      "config": {
+                        "source": "monitor_2_events",
+                        "topic": "topic"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "beam_monitor_3",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXmonitor"
+                }
+              ],
+              "children": [
+                {
+                  "name": "monitor_3_events",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXevent_data"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "ev42",
+                      "config": {
+                        "source": "monitor_3_events",
+                        "topic": "topic"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "beam_monitor_4",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXmonitor"
+                }
+              ],
+              "children": [
+                {
+                  "name": "monitor_4_events",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXevent_data"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "ev42",
+                      "config": {
+                        "source": "monitor_4_events",
+                        "topic": "topic"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "foc1",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.075,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.5,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      75.59,
+                      86.65,
+                      121.28999999999999,
+                      134.35,
+                      164.13,
+                      179.07,
+                      204.305,
+                      221.015,
+                      241.98,
+                      260.34,
+                      280.49,
+                      297.21000000000004
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 8.4,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/foc1/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "bpc1",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.075,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.5,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 1,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      7.375,
+                      54.085
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "bpc1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 8.45,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/bpc1/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "t0",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.085,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.32,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 1,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      31.97,
+                      326.71000000000004
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "t0"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 13.6,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/t0/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "foc2",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.08,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.5,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      29.495,
+                      63.805,
+                      90.12,
+                      123.02,
+                      157.65,
+                      191.19,
+                      220.965,
+                      255.115,
+                      280.345,
+                      314.715,
+                      336.03,
+                      370.93
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 12.2,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/foc2/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "bpc2",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.08,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.5,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 1,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      9.655,
+                      77.145
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "bpc2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 12.25,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/bpc2/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "foc3",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.085,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.6,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      72.31,
+                      112.63,
+                      135.715,
+                      175.32500000000002,
+                      195.18,
+                      234.12,
+                      250.93499999999997,
+                      289.245,
+                      303.21999999999997,
+                      340.94,
+                      353.365,
+                      389.41499999999996
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc3"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 17.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/foc3/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "foc4",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.085,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.75,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      44.68000000000001,
+                      77.66,
+                      89.2,
+                      121.02,
+                      130.95,
+                      161.69,
+                      170.10000000000002,
+                      199.82,
+                      206.805,
+                      235.575,
+                      242.34,
+                      269.1
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc4"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 23.69,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/foc4/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "foc5",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.085,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.75,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      56.535,
+                      107.345,
+                      118.9,
+                      167.44,
+                      177.365,
+                      222.855,
+                      233.53,
+                      274.85,
+                      285.745,
+                      323.195,
+                      334.89,
+                      372.63
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc5"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 33.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/foc5/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "polarizer",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXpolarizer"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "name",
+                    "values": "polarizer_name",
+                    "type": "string"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "id",
+                    "values": 0.0,
+                    "type": "double"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "size",
+                    "values": 0.0,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "state",
+                    "values": "ON or OFF",
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "analyzer",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXpolarizer"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "name",
+                    "values": "analyzer",
+                    "type": "string"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "id",
+                    "values": 0,
+                    "type": "int16"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "size",
+                    "values": 0.0,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "state",
+                    "values": "ON or OFF",
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "source",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXsource"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "probe",
+                    "values": "$PROBE$",
+                    "type": "string"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "mode",
+                    "values": "$MODE$",
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "current",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source_current",
+                        "topic": "topic_accelerator",
+                        "value_units": "mA"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "energy",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source_voltage",
+                        "topic": "topic_xray",
+                        "value_units": "kV"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "power",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source_power",
+                        "topic": "topic_accelerator"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "source_pulse",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXdata"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "title",
+                        "values": "long or short pulse",
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": -60.5,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/source/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "wfm1",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.07,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.35,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      89.08,
+                      94.78,
+                      137.73,
+                      146.73,
+                      183.4,
+                      195.4,
+                      226.18,
+                      241.08,
+                      266.35,
+                      283.85,
+                      303.99,
+                      323.99
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "wfm1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 6.775,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/wfm1/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "translation1",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "rel_pos",
+                            "topic": "wfm1",
+                            "dtype": "double"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/wfm1/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "wfm2",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_height",
+                    "values": 0.07,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "radius",
+                    "values": 0.35,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slits",
+                    "values": 6,
+                    "type": "int64"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "slit_edges",
+                    "values": [
+                      94.82,
+                      100.52,
+                      146.71,
+                      155.71,
+                      195.41,
+                      207.41,
+                      241.03,
+                      255.93,
+                      283.87,
+                      301.37,
+                      324.01,
+                      344.01
+                    ],
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                },
+                {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "wfm2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 7.225,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/wfm2/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "translation1",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "rel_pos",
+                            "topic": "wfm2",
+                            "dtype": "double"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/wfm2/transformations/translation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "event_mode_detectors",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdetector_group"
+                }
+              ],
+              "children": [
+                {
+                  "name": "timepix3",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXdetector"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "timepix3_events",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXevent_data"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "ev44",
+                          "config": {
+                            "source": "event_data_1",
+                            "topic": "event_detector_1"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "description",
+                        "values": "Field of view, position with some reference point on the detector, scintillator type and other data related to conversion from photons to neutrons.",
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "histogram_mode_detectors",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXdetector_group"
+                }
+              ],
+              "children": [
+                {
+                  "name": "ORCA",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXdetector"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "image_key",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "image_key",
+                            "topic": "odin_topic"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "data",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "ADAr",
+                          "config": {
+                            "source": "image_source",
+                            "topic": "odin_topic",
+                            "array_size": "$AREADET$"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "module": "link",
+                      "config": {
+                        "name": "current",
+                        "source": "/entry/instrument/source/current"
+                      }
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "x_pixel_size",
+                        "values": "$X_PIXEL_SIZE$",
+                        "type": "string"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "y_pixel_size",
+                        "values": "$Y_PIXEL_SIZE$",
+                        "type": "string"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "description",
+                        "values": "ODIN camera for neutron tomography",
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "magnetic_guide_field",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXflipper"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "name",
+                    "values": "guide_field",
+                    "type": "string"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "id",
+                    "values": 0,
+                    "type": "uint16"
+                  }
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "size",
+                    "values": 0.0,
+                    "type": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "m"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "state",
+                    "values": "ON or OFF",
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "guide_current",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "guide_current_source",
+                        "topic": "topic_guide",
+                        "value_units": "mA"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "slit1",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXslit"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "description",
+                    "values": "dimensions needed and location",
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "slit2",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXslit"
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "data",
+          "type": "group",
+          "attributes": [
+            {
+              "name": "NX_class",
+              "dtype": "string",
+              "values": "NXdata"
+            }
+          ],
+          "children": [
+            {
+              "module": "link",
+              "config": {
+                "name": "data",
+                "source": "/entry/instrument/detector/data"
+              }
+            },
+            {
+              "module": "link",
+              "config": {
+                "name": "rotation_angle",
+                "source": "/entry/sample/rotation_angle"
+              }
+            },
+            {
+              "module": "link",
+              "config": {
+                "name": "image_key",
+                "source": "/entry/instrument/detector/image_key"
+              }
+            }
+          ]
+        },
+        "$SAMPLE$",
+        "$USERS$"
+      ]
+    }
+  ]
+}
