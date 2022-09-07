@@ -73,15 +73,10 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": -8.0,
+                        "values": -2.0,
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -146,9 +141,9 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "image_key",
-                        "topic": "ymir_camera",
-                        "dtype": "uint"
+                        "source": "flir_image_type",
+                        "topic": "ymir_nicos_devices",
+                        "dtype": "int16"
                       }
                     }
                   ]
@@ -175,6 +170,48 @@
                   ]
                 },
                 {
+                  "name": "x_pixel_size",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "x_pixel_size_pv",
+                        "topic": "ymir_camera",
+                        "dtype": "double"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "y_pixel_size",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "y_pixel_size",
+                        "topic": "ymir_camera",
+                        "dtype": "double"
+                      }
+                    }
+                  ]
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -182,15 +219,10 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 1.0,
+                        "values": 2.0,
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -270,6 +302,27 @@
                   ]
                 },
                 {
+                  "name": "delay",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "delay_source_chopper",
+                        "topic": "ymir_motion",
+                        "dtype": "double"
+                      }
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slits",
@@ -328,14 +381,55 @@
                   ]
                 },
                 {
+                  "module": "tdct",
+                  "config": {
+                    "source": "chopper_source",
+                    "topic": "ymir_motion"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
                     {
                       "module": "dataset",
                       "config": {
+                        "name": "rotation",
+                        "values": 90.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "rotation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/mini_chopper/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
                         "name": "translation",
-                        "values": -5.0,
+                        "values": 4.0,
                         "type": "double"
                       },
                       "attributes": [
@@ -357,6 +451,40 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/mini_chopper/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation1",
+                        "values": 3.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            1.0,
+                            0.0,
+                            0.0
+                          ]
                         }
                       ]
                     }
@@ -373,7 +501,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/mini_chopper/transformations/translation"
+                    "values": "/entry/instrument/mini_chopper/transformations/rotation"
                   }
                 }
               ]
@@ -401,11 +529,10 @@
                   ],
                   "children": [
                     {
-                      "module": "f142",
+                      "module": "senv",
                       "config": {
                         "source": "plc-ts:PLC:value",
-                        "topic": "ymir_nicos_devices",
-                        "dtype": "double"
+                        "topic": "ymir_motion"
                       }
                     }
                   ]
@@ -418,15 +545,44 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 1.0,
+                        "values": 5.0,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
                         {
                           "name": "units",
                           "dtype": "string",
                           "values": "m"
                         },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            1.0,
+                            0.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/laser_monitor/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation1",
+                        "values": 4.0,
+                        "type": "double"
+                      },
+                      "attributes": [
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -492,16 +648,45 @@
                     {
                       "module": "dataset",
                       "config": {
-                        "name": "translation",
-                        "values": -8.0,
+                        "name": "rotation",
+                        "values": 90.0,
                         "type": "double"
                       },
                       "attributes": [
                         {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "rotation"
+                        },
+                        {
                           "name": "units",
                           "dtype": "string",
-                          "values": "m"
+                          "values": "degrees"
                         },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/laser_source/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 4.0,
+                        "type": "double"
+                      },
+                      "attributes": [
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -520,6 +705,40 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/laser_source/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation1",
+                        "values": -2.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            1.0,
+                            0.0,
+                            0.0
+                          ]
                         }
                       ]
                     }
@@ -536,7 +755,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/laser_source/transformations/translation"
+                    "values": "/entry/instrument/laser_source/transformations/rotation"
                   }
                 }
               ]
@@ -563,54 +782,37 @@
               }
             },
             {
+              "name": "rotation_angle",
               "type": "group",
-              "name": "transformations",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXlog"
+                }
+              ],
               "children": [
                 {
-                  "name": "rotation",
-                  "type": "group",
+                  "module": "f142",
+                  "config": {
+                    "source": "YMIR-SpRot:MC-Rz-01:m.RBV",
+                    "topic": "ymir_motion",
+                    "dtype": "double"
+                  },
                   "attributes": [
-                    {
-                      "name": "NX_class",
-                      "dtype": "string",
-                      "values": "NXlog"
-                    },
-                    {
-                      "name": "transformation_type",
-                      "dtype": "string",
-                      "values": "rotation"
-                    },
                     {
                       "name": "units",
                       "dtype": "string",
-                      "values": "degrees"
-                    },
-                    {
-                      "name": "vector",
-                      "dtype": "string",
-                      "values": [
-                        0.0,
-                        1.0,
-                        0.0
-                      ]
-                    },
-                    {
-                      "name": "depends_on",
-                      "values": "/entry/sample/transformations/x_translation",
-                      "dtype": "string"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "module": "f142",
-                      "config": {
-                        "source": "YMIR-SpRot:MC-Rz-01:m.RBV",
-                        "topic": "ymir_motion",
-                        "dtype": "double"
-                      }
+                      "values": "deg"
                     }
                   ]
-                },
+                }
+              ]
+            },
+            {
+              "type": "group",
+              "name": "transformations",
+              "children": [
                 {
                   "name": "x_translation",
                   "type": "group",
@@ -754,7 +956,7 @@
               "config": {
                 "name": "depends_on",
                 "dtype": "string",
-                "values": "/entry/sample/transformations/rotation"
+                "values": "/entry/sample/transformations/x_translation"
               }
             }
           ]
