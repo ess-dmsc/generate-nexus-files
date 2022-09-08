@@ -2963,7 +2963,47 @@
             }
           ]
         },
-        "$SAMPLE$",
+        {
+          "name": "sample",
+          "type": "group",
+          "attributes": [
+            {
+              "name": "NX_class",
+              "dtype": "string",
+              "values": "NXsample"
+            }
+          ],
+          "children": [
+            {
+              "name": "rotation_angle",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXlog"
+                }
+              ],
+              "children": [
+                {
+                  "module": "f142",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic",
+                    "dtype": "double"
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": "deg"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
         "$USERS$"
       ]
     }
