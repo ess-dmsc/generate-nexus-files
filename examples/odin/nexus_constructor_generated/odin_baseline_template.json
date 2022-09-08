@@ -190,6 +190,61 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delay",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "ns"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -256,31 +311,11 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
-                  "type": "group",
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "dtype": "string",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "module": "f142",
-                      "config": {
-                        "source": "rotation_speed",
-                        "topic": "foc1"
-                      },
-                      "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "Hz"
-                        }
-                      ]
-                    }
-                  ]
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
                 },
                 {
                   "type": "group",
@@ -350,6 +385,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "bpc1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -406,7 +468,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -419,14 +488,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "bpc1"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -500,6 +570,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "t0"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -556,7 +653,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -569,14 +673,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "t0"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -650,6 +755,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -716,7 +848,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -729,14 +868,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "foc2"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -810,6 +950,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "bpc2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -866,7 +1033,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -877,16 +1051,16 @@
                   ],
                   "children": [
                     {
-                      "module": "f142",
+                      "module": "tdct",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "bpc2"
+                        "source": "source",
+                        "topic": "odin_topic"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -960,6 +1134,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc3"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -1026,7 +1227,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -1039,14 +1247,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "foc3"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -1120,6 +1329,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc4"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -1186,7 +1422,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -1199,14 +1442,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "foc4"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -1280,6 +1524,33 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "foc5"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -1346,7 +1617,14 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
+                },
+                {
+                  "name": "delay",
                   "type": "group",
                   "attributes": [
                     {
@@ -1359,14 +1637,15 @@
                     {
                       "module": "f142",
                       "config": {
-                        "source": "rotation_speed",
-                        "topic": "foc5"
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
                       },
                       "attributes": [
                         {
                           "name": "units",
                           "dtype": "string",
-                          "values": "Hz"
+                          "values": "ns"
                         }
                       ]
                     }
@@ -1705,6 +1984,61 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "wfm1"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delay",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "ns"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -1771,31 +2105,11 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
-                  "type": "group",
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "dtype": "string",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "module": "f142",
-                      "config": {
-                        "source": "rotation_speed",
-                        "topic": "wfm1"
-                      },
-                      "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "Hz"
-                        }
-                      ]
-                    }
-                  ]
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
                 },
                 {
                   "type": "group",
@@ -1910,6 +2224,61 @@
               ],
               "children": [
                 {
+                  "name": "rotation_speed",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "rotation_speed",
+                        "topic": "wfm2"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "Hz"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delay",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "ns"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "slit_height",
@@ -1976,31 +2345,11 @@
                   ]
                 },
                 {
-                  "name": "rotation_speed",
-                  "type": "group",
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "dtype": "string",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "module": "f142",
-                      "config": {
-                        "source": "rotation_speed",
-                        "topic": "wfm2"
-                      },
-                      "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "Hz"
-                        }
-                      ]
-                    }
-                  ]
+                  "module": "tdct",
+                  "config": {
+                    "source": "source",
+                    "topic": "odin_topic"
+                  }
                 },
                 {
                   "type": "group",
@@ -2152,6 +2501,62 @@
                         "values": "Field of view, position with some reference point on the detector, scintillator type and other data related to conversion from photons to neutrons.",
                         "type": "string"
                       }
+                    },
+                    {
+                      "name": "x_pixel_size",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "x_pixel_size",
+                            "topic": "odin_topic",
+                            "dtype": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "mm"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "y_pixel_size",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "y_pixel_size",
+                            "topic": "odin_topic",
+                            "dtype": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "mm"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -2169,7 +2574,7 @@
               ],
               "children": [
                 {
-                  "name": "ORCA",
+                  "name": "orca",
                   "type": "group",
                   "attributes": [
                     {
@@ -2230,40 +2635,66 @@
                     {
                       "module": "dataset",
                       "config": {
-                        "name": "x_pixel_size",
-                        "values": "$X_PIXEL_SIZE$",
-                        "type": "string"
-                      },
-                      "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "y_pixel_size",
-                        "values": "$Y_PIXEL_SIZE$",
-                        "type": "string"
-                      },
-                      "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
                         "name": "description",
                         "values": "ODIN camera for neutron tomography",
                         "type": "string"
                       }
+                    },
+                    {
+                      "name": "x_pixel_size",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "x_pixel_size",
+                            "topic": "odin_topic",
+                            "dtype": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "mm"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "y_pixel_size",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXlog"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "f142",
+                          "config": {
+                            "source": "y_pixel_size",
+                            "topic": "odin_topic",
+                            "dtype": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "mm"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
@@ -2354,10 +2785,66 @@
               ],
               "children": [
                 {
+                  "name": "x_gap",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "x_opening",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "mm"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "y_gap",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "source",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "mm"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "module": "dataset",
                   "config": {
                     "name": "description",
-                    "values": "dimensions needed and location",
+                    "values": "location needed",
                     "type": "string"
                   }
                 }
@@ -2373,7 +2860,72 @@
                   "values": "NXslit"
                 }
               ],
-              "children": []
+              "children": [
+                {
+                  "name": "x_gap",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "x_gap_size",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "mm"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "y_gap",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "f142",
+                      "config": {
+                        "source": "y_gap",
+                        "topic": "odin_topic",
+                        "dtype": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "mm"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "description",
+                    "values": "location needed",
+                    "type": "string"
+                  }
+                }
+              ]
             }
           ]
         },
