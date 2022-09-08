@@ -318,7 +318,14 @@
                         "source": "delay_source_chopper",
                         "topic": "ymir_motion",
                         "dtype": "double"
-                      }
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "ns"
+                        }
+                      ]
                     }
                   ]
                 },
