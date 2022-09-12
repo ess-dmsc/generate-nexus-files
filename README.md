@@ -4,6 +4,7 @@ Generate example NeXus files in the proposed format for ESS from existing NeXus 
 
 Tested with Python 3.7, >=3.6 should be fine. You can install dependencies with
 ```
+pip install -r requirements-base.txt
 pip install -r requirements.txt
 ```
 
