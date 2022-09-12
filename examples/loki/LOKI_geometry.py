@@ -51,6 +51,7 @@ ATTR = 'attributes'
 CHILDREN = 'children'
 CONFIG = 'config'
 DATASET = 'dataset'
+DATATYPE = "dtype"
 DEPENDS_ON = 'depends_on'
 ENTRY = 'entry'
 INSTRUMENT = 'instrument'
@@ -64,6 +65,7 @@ NXLOG_NAME = 'nx_log'
 ROTATION = 'rotation'
 SAMPLE = 'sample'
 SOURCE = 'source'
+STREAM_MODULE = 'stream_module'
 TIME = 'time'
 TOF = 'tof'
 TOPIC = 'topic'
@@ -248,7 +250,8 @@ class NexusInfo:
 
     @staticmethod
     def get_nx_log_group(nx_log_data=None, time=None, time_unit='tof',
-                         x_label=None, y_label=None):
+                         x_label=None, y_label=None, topic="topic", source="source",
+                         module="f142"):
         if time is None:
             if isinstance(nx_log_data[VALUES], list):
                 time = list(range(0, len(nx_log_data[VALUES])))
@@ -276,6 +279,14 @@ class NexusInfo:
                         {
                             VALUES: time,
                             ATTR: {UNITS: time_unit}
+                        },
+                    MODULE:
+                        {
+                            MODULE: module,
+                            CONFIG: {
+                                TOPIC: topic,
+                                SOURCE: source
+                            }
                         }
                 },
             ATTR: {**NexusInfo.get_nx_log_class_attr(), **attributes}
@@ -968,7 +979,7 @@ class DiskChopper(SimpleNexus):
         return self._nexus_dict
 
     def compound_geometry_extended(self, transform_path, rot_speed,
-                                   disk_radius, slits,
+                                   disk_radius, slits, delay,
                                    transform_as_nxlog=False):
         """
             Creates a dictionary of the disk chopper geometry suitable for
@@ -979,6 +990,12 @@ class DiskChopper(SimpleNexus):
             rot_speed, {UNITS: 'Hz'})
         geo_data['rotation_speed'] = \
             NexusInfo.get_nx_log_group(rotation_speed_nexus)
+        geo_data['top_dead_center'] = \
+            NexusInfo.get_nx_log_group(NexusInfo.get_values_attrs_as_dict('1970-01-01T00:00:00.0Z'), module="tdct")
+        delay_nexus = NexusInfo.get_values_attrs_as_dict(
+            delay, {UNITS: 'ns'})
+        geo_data['delay'] = \
+            NexusInfo.get_nx_log_group(delay_nexus)
         geo_data['radius'] = NexusInfo.get_values_attrs_as_dict(
             disk_radius, {UNITS: LENGTH_UNIT})
         geo_data['slits'] = NexusInfo.get_values_attrs_as_dict(slits)
@@ -1024,15 +1041,20 @@ class Slit(SimpleNexus):
 
     def compound_geometry_extended(self, transform_path, x_gap, y_gap,
                                    gap_unit='m',
-                                   transform_as_nxlog=False):
+                                   transform_as_nxlog=False,
+                                   gaps_as_nx_log=False):
         """
             Creates a dictionary of the slit geometry suitable for
             the NexusFileBuilder class.
         """
-        x_gap_nexus = NexusInfo.get_values_attrs_as_dict(x_gap,
-                                                         {UNITS: gap_unit})
-        y_gap_nexus = NexusInfo.get_values_attrs_as_dict(y_gap,
-                                                         {UNITS: gap_unit})
+        if gaps_as_nx_log:
+            x_gap_nexus = NexusInfo.get_nx_log_group(nx_log_data=NexusInfo.get_values_attrs_as_dict(x_gap))
+            y_gap_nexus = NexusInfo.get_nx_log_group(nx_log_data=NexusInfo.get_values_attrs_as_dict(y_gap))
+        else:
+            x_gap_nexus = NexusInfo.get_values_attrs_as_dict(x_gap,
+                                                             {UNITS: gap_unit})
+            y_gap_nexus = NexusInfo.get_values_attrs_as_dict(y_gap,
+                                                             {UNITS: gap_unit})
         geo_data = self._get_transformation(transform_path, transform_as_nxlog)
         geo_data['x_gap'] = x_gap_nexus
         geo_data['y_gap'] = y_gap_nexus
@@ -1112,7 +1134,9 @@ class NexusFileBuilder:
 
     def _construct_nxs_file(self, nxs_data, group):
         for element in nxs_data:
-            if isinstance(nxs_data[element][VALUES], VALID_ARRAY_TYPES_NXS):
+            if element == MODULE:
+                pass
+            elif isinstance(nxs_data[element][VALUES], VALID_ARRAY_TYPES_NXS):
                 d_set = group.create_dataset(element,
                                              data=nxs_data[element][VALUES])
                 self._add_attributes(nxs_data[element], d_set)
@@ -1252,10 +1276,13 @@ class JsonConfigTranslator:
                 nexus_dict[MODULE]
             )
         else:
-            for name, value in nexus_dict[VALUES].items():
-                child = self._translate(name, value)
-                if child:
-                    children.append(child)
+            if NX_CLASS in nexus_dict[ATTR] and nexus_dict[ATTR][NX_CLASS] == 'NXlog':
+                children.append(nexus_dict[VALUES][MODULE])
+            else:
+                for name, value in nexus_dict[VALUES].items():
+                    child = self._translate(name, value)
+                    if child:
+                        children.append(child)
         output_dict = {
             NAME: object_name,
             TYPE: 'group',
@@ -1272,6 +1299,7 @@ class JsonConfigTranslator:
         with open(self._json_filename, 'w', encoding='utf-8') as file:
             # json.dump(self._json_config, file, indent=4)
             json.dump(self._json_config, file, separators=(',', ':'))
+
 
 def run_create_geometry():
     plot_tube_locations = False
@@ -1474,7 +1502,7 @@ def run_create_geometry():
                 disk_chopper.compound_geometry_extended(
                     trans_path, loki_chopper['rotation_speed'],
                     loki_chopper['disk_rad'] * SCALE_FACTOR,
-                    loki_chopper['slits'])
+                    loki_chopper['slits'], loki_chopper['delay'])
             print(f'Chopper {loki_chopper[NAME]} is done!')
 
         # Create monitors.
@@ -1499,7 +1527,7 @@ def run_create_geometry():
                 slit.compound_geometry_extended(
                     trans_path, loki_slit['x_gap'] * SCALE_FACTOR,
                                 loki_slit['y_gap'] * SCALE_FACTOR,
-                    gap_unit=LENGTH_UNIT)
+                    gap_unit=LENGTH_UNIT, gaps_as_nx_log=True)
             print(f'Slit {loki_slit[NAME]} is done!')
 
         # Create users.

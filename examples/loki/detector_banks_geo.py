@@ -48,16 +48,16 @@ data_source = {
 
 data_disk_choppers = [{'name': 'chopper_1A', 'location': (0, 0, -17100),
                        'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2},
+                       'disk_rad': 700.0 / 2, 'delay': 1.0},
                       {'name': 'chopper_1B', 'location': (0, 0, -8570),
                        'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2},
+                       'disk_rad': 700.0 / 2, 'delay': 1.0},
                       {'name': 'chopper_2A', 'location': (0, 0, -17100),
                        'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2},
+                       'disk_rad': 700.0 / 2, 'delay': 1.0},
                       {'name': 'chopper_2B', 'location': (0, 0, -8570),
                        'rotation_speed': 14.0, 'slits': 2,
-                       'disk_rad': 700.0 / 2}
+                       'disk_rad': 700.0 / 2, 'delay': 1.0}
                       ]
 
 data_monitors = [{'location': (0, 0, -16800), 'name': 'monitor_0',
