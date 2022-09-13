@@ -3,9 +3,13 @@ from typing import List
 
 import numpy as np
 
-from examples.bifrost.triplet_specifications import TRIPLETS_SPECS, TUBE_RADIUS, \
-    PIXEL_LENGTH, NUMBER_OF_TUBES_PER_BANK, DIST_BETWEEN_TUBES, \
-    PIXEL_RESOLUTION_PER_TUBE
+from examples.bifrost.triplet_specifications import TRIPLETS_SPECS, \
+    TUBE_RADIUS, PIXEL_LENGTH, NUMBER_OF_TUBES_PER_BANK, DIST_BETWEEN_TUBES, \
+    PIXEL_RESOLUTION_PER_TUBE, INSTRUMENT_NAME
+
+
+CHILDREN = 'children'
+NAME = 'name'
 
 
 def generate_detector_pixel_shape():
@@ -171,14 +175,32 @@ def create_entry_and_instrument(nexus_det_dict):
     }
 
 
-def save_to_json(file_name, dict_to_save):
+def add_detector_to_baseline_json(file_name, nexus_dict, target_file):
+    from os import path
+    path_to_file_dir = path.dirname(__file__)
+    file_path = path.join(path_to_file_dir, file_name)
+    with open(file_path) as json_file:
+        entry_dict = json.load(json_file)
+    entry = entry_dict[CHILDREN][0]
+    for child in entry[CHILDREN]:
+        if child[NAME] == INSTRUMENT_NAME:
+            child[CHILDREN].append(nexus_dict)
+            break
+    target_file_path = path.join(path_to_file_dir, target_file)
+    save_to_json(target_file_path, entry)
+
+
+def save_to_json(file_name, dict_to_save, compress=False):
     with open(file_name, 'w', encoding='utf-8') as file:
-        json.dump(dict_to_save, file, indent=4)
-        # json.dump(dict_to_save, file, separators=(',', ':'))
+        if compress:
+            json.dump(dict_to_save, file, separators=(',', ':'))
+        else:
+            json.dump(dict_to_save, file, indent=4)
 
 
 if __name__ == "__main__":
-    cylinders, vertices = generate_detector_pixel_shape()
+    create_new_json = False
+    cylinder_ids, cylinder_vertices = generate_detector_pixel_shape()
     loc_offsets = local_bank_offsets()
     x_offset_total, y_offset_total, z_offset_total = [], [], []
     for key in TRIPLETS_SPECS:
@@ -187,11 +209,16 @@ if __name__ == "__main__":
         x_offset_total += x_offset
         y_offset_total += y_offset
         z_offset_total += z_offset
-    detector_number = list(range(len(x_offset_total)))
-    nexus_detector_dict = get_nexus_detector_dict(detector_number, cylinders,
-                                                  vertices,
+    pixel_ids = list(range(len(x_offset_total)))
+    nexus_detector_dict = get_nexus_detector_dict(pixel_ids, cylinder_ids,
+                                                  cylinder_vertices,
                                                   x_offset_total,
                                                   y_offset_total,
                                                   z_offset_total)
-    nexus_entry_dict = create_entry_and_instrument(nexus_detector_dict)
-    save_to_json("bifrost_detector_baseline.json", nexus_entry_dict)
+    if create_new_json:
+        nexus_entry_dict = create_entry_and_instrument(nexus_detector_dict)
+        save_to_json("bifrost_detector_baseline.json", nexus_entry_dict)
+    else:
+        add_detector_to_baseline_json('bifrost_baseline.json',
+                                      nexus_detector_dict,
+                                      'bifrost_baseline_with_detector.json')
