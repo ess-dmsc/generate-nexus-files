@@ -7,41 +7,10 @@ import numpy as np
 from examples.bifrost.triplet_specifications import TUBE_RADIUS, PIXEL_LENGTH, \
     NUMBER_OF_TUBES_PER_BANK, DIST_BETWEEN_TUBES, \
     PIXEL_RESOLUTION_PER_TUBE, INSTRUMENT_NAME, COLUMNS, ROWS, RADIAL_OFFSETS, \
-    MIN_ANGLE_ROTATION, MAX_ANGLE_ROTATION, NOMINAL_RADIAL_DISTANCE
+    MIN_ANGLE_ROTATION, MAX_ANGLE_ROTATION, NOMINAL_RADIAL_DISTANCE, CURVATURE
 
 CHILDREN = 'children'
 NAME = 'name'
-
-
-def generate_detector_pixel_shape():
-    return [0, 1, 2], [[0, 0, 0], [0, TUBE_RADIUS, 0], [PIXEL_LENGTH, 0, 0]]
-
-
-def local_bank_offsets():
-    offsets: List[np.array] = []
-    for i in range(NUMBER_OF_TUBES_PER_BANK):
-        dist_y_direction = i * (TUBE_RADIUS * 2 + DIST_BETWEEN_TUBES)
-        for j in range(PIXEL_RESOLUTION_PER_TUBE):
-            dist_x_direction = PIXEL_LENGTH * j
-            offsets.append(np.array([dist_x_direction, dist_y_direction, 0]))
-    return offsets
-
-
-def rotation(theta):
-    return np.array(
-        [[np.cos(theta), 0, np.sin(theta)],
-         [0, 1, 0],
-         [-np.sin(theta), 0, np.cos(theta)]])
-
-
-def add_global_rotation_and_offset(local_offsets, bank_specs):
-    rotation_matrix = rotation(bank_specs['rotation'])
-    position = np.array(bank_specs['position'])
-    xyz_offsets = []
-    for offset in local_offsets:
-        global_position = np.dot(rotation_matrix, offset + position)
-        xyz_offsets.append(global_position.tolist())
-    return list(zip(*xyz_offsets))
 
 
 def get_nexus_detector_dict(detector_number, cylinders, vertices, x_off, y_off,
@@ -176,6 +145,46 @@ def create_entry_and_instrument(nexus_det_dict):
     }
 
 
+def generate_detector_pixel_shape():
+    return [0, 1, 2], [[0, 0, 0], [0, TUBE_RADIUS, 0], [PIXEL_LENGTH, 0, 0]]
+
+
+def local_bank_offsets():
+    offsets: List[np.array] = []
+    for i in range(NUMBER_OF_TUBES_PER_BANK):
+        dist_y_direction = i * (TUBE_RADIUS * 2 + DIST_BETWEEN_TUBES)
+        for j in range(PIXEL_RESOLUTION_PER_TUBE):
+            dist_x_direction = PIXEL_LENGTH * j
+            offsets.append(np.array([dist_x_direction, dist_y_direction, 0]))
+    return offsets
+
+
+def rotation_x_axis(theta):
+    return np.array(
+        [[1, 0, 0],
+         [0, np.cos(theta), -np.sin(theta)],
+         [0, np.sin(theta), np.cos(theta)]])
+
+
+def rotation_y_axis(theta):
+    return np.array(
+        [[np.cos(theta), 0, np.sin(theta)],
+         [0, 1, 0],
+         [-np.sin(theta), 0, np.cos(theta)]])
+
+
+def add_global_rotation_and_offset(local_offsets, bank_specs):
+    rotation_matrix_x = rotation_x_axis(np.deg2rad(90))
+    rotation_matrix_y = rotation_y_axis(bank_specs['rotation'])
+    position = np.array(bank_specs['position'])
+    xyz_offsets = []
+    for offset in local_offsets:
+        rotated_offset = np.dot(rotation_matrix_x, offset)
+        global_position = np.dot(rotation_matrix_y, rotated_offset + position)
+        xyz_offsets.append(global_position.tolist())
+    return list(zip(*xyz_offsets))
+
+
 def add_detector_to_baseline_json(file_name, nexus_dict, target_file):
     from os import path
     path_to_file_dir = path.dirname(__file__)
@@ -204,14 +213,15 @@ def generate_triplet_specs():
     angles = np.linspace(np.deg2rad(MIN_ANGLE_ROTATION),
                          np.deg2rad(MAX_ANGLE_ROTATION), COLUMNS)
     triplet_specs = OrderedDict()
-    for c, angle in enumerate(angles):
-        distances = np.linspace(RADIAL_OFFSETS[c],
-                                NOMINAL_RADIAL_DISTANCE + RADIAL_OFFSETS[c], ROWS)
-        for distance in distances:
+    for col, angle in enumerate(angles):
+        distances = np.linspace(RADIAL_OFFSETS[col],
+                                NOMINAL_RADIAL_DISTANCE + RADIAL_OFFSETS[col],
+                                ROWS)
+        for row, distance in enumerate(distances):
             counter += 1
             triplet_specs[counter] = {
                 'rotation': angle,
-                'position': [0, 0, distance]
+                'position': [0, CURVATURE[row], distance]
             }
     return triplet_specs
 

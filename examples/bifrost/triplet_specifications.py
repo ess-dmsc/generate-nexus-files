@@ -1,6 +1,8 @@
 # rotation angle in degrees.
 # triplet upper left coordinate in meters and should be cartesian where
 # origin is in sample position.
+import numpy
+
 TUBE_LENGTH = 0.2  # [m]
 TUBE_RADIUS = 0.05  # [m]
 DIST_BETWEEN_TUBES = 0.02  # [m]
@@ -19,3 +21,5 @@ RADIAL_OFFSETS = [MIN_RADIAL_DISTANCE + 0.1,
 NOMINAL_RADIAL_DISTANCE = 2.
 MIN_ANGLE_ROTATION = -30
 MAX_ANGLE_ROTATION = 30
+X = numpy.linspace(0.5, 1, ROWS)
+CURVATURE = [1 / x - 2 for x in X]
