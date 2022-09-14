@@ -187,7 +187,7 @@ def add_detector_to_baseline_json(file_name, nexus_dict, target_file):
             child[CHILDREN].append(nexus_dict)
             break
     target_file_path = path.join(path_to_file_dir, target_file)
-    save_to_json(target_file_path, entry)
+    save_to_json(target_file_path, entry_dict)
 
 
 def save_to_json(file_name, dict_to_save, compress=False):
