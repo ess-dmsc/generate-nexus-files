@@ -1,12 +1,13 @@
 import json
+from collections import OrderedDict
 from typing import List
 
 import numpy as np
 
-from examples.bifrost.triplet_specifications import TRIPLETS_SPECS, \
-    TUBE_RADIUS, PIXEL_LENGTH, NUMBER_OF_TUBES_PER_BANK, DIST_BETWEEN_TUBES, \
-    PIXEL_RESOLUTION_PER_TUBE, INSTRUMENT_NAME
-
+from examples.bifrost.triplet_specifications import TUBE_RADIUS, PIXEL_LENGTH, \
+    NUMBER_OF_TUBES_PER_BANK, DIST_BETWEEN_TUBES, \
+    PIXEL_RESOLUTION_PER_TUBE, INSTRUMENT_NAME, COLUMNS, ROWS, RADIAL_OFFSETS, \
+    MIN_ANGLE_ROTATION, MAX_ANGLE_ROTATION, NOMINAL_RADIAL_DISTANCE
 
 CHILDREN = 'children'
 NAME = 'name'
@@ -34,11 +35,11 @@ def rotation(theta):
 
 
 def add_global_rotation_and_offset(local_offsets, bank_specs):
-    rotation_matrix = rotation(np.deg2rad(bank_specs['rotation']))
+    rotation_matrix = rotation(bank_specs['rotation'])
     position = np.array(bank_specs['position'])
     xyz_offsets = []
     for offset in local_offsets:
-        global_position = np.dot(rotation_matrix, offset) + position
+        global_position = np.dot(rotation_matrix, offset + position)
         xyz_offsets.append(global_position.tolist())
     return list(zip(*xyz_offsets))
 
@@ -198,14 +199,32 @@ def save_to_json(file_name, dict_to_save, compress=False):
             json.dump(dict_to_save, file, indent=4)
 
 
+def generate_triplet_specs():
+    counter = 0
+    angles = np.linspace(np.deg2rad(MIN_ANGLE_ROTATION),
+                         np.deg2rad(MAX_ANGLE_ROTATION), COLUMNS)
+    triplet_specs = OrderedDict()
+    for c, angle in enumerate(angles):
+        distances = np.linspace(RADIAL_OFFSETS[c],
+                                NOMINAL_RADIAL_DISTANCE + RADIAL_OFFSETS[c], ROWS)
+        for distance in distances:
+            counter += 1
+            triplet_specs[counter] = {
+                'rotation': angle,
+                'position': [0, 0, distance]
+            }
+    return triplet_specs
+
+
 if __name__ == "__main__":
     create_new_json = False
     cylinder_ids, cylinder_vertices = generate_detector_pixel_shape()
     loc_offsets = local_bank_offsets()
     x_offset_total, y_offset_total, z_offset_total = [], [], []
-    for key in TRIPLETS_SPECS:
+    triplet_specifications = generate_triplet_specs()
+    for triplet_specification in triplet_specifications.values():
         x_offset, y_offset, z_offset = \
-            add_global_rotation_and_offset(loc_offsets, TRIPLETS_SPECS[key])
+            add_global_rotation_and_offset(loc_offsets, triplet_specification)
         x_offset_total += x_offset
         y_offset_total += y_offset
         z_offset_total += z_offset
