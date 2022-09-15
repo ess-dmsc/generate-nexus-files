@@ -12,6 +12,22 @@
       ],
       "children": [
         {
+          "module": "dataset",
+          "config": {
+            "name": "experiment_identifier",
+            "values": "$EXP_ID$",
+            "type": "string"
+          }
+        },
+        {
+          "module": "dataset",
+          "config": {
+            "name": "title",
+            "values": "$TITLE$",
+            "type": "string"
+          }
+        },
+        {
           "name": "instrument",
           "type": "group",
           "attributes": [
@@ -54262,11 +54278,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -54447,11 +54458,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -54639,11 +54645,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -54829,11 +54830,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55021,11 +55017,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55068,26 +55059,129 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "crystal",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXcrystal"
+                }
+              ],
+              "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 2.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/crystal/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation1",
+                        "values": 2.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/bifrost_detector/transformations/rotation_y_axis",
+                          "dtype": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/crystal/transformations/translation"
+                  }
+                }
+              ]
             }
           ]
         },
         "$SAMPLE$",
-        {
-          "module": "dataset",
-          "config": {
-            "name": "experiment_identifier",
-            "values": "$EXP_ID$",
-            "type": "string"
-          }
-        },
-        {
-          "module": "dataset",
-          "config": {
-            "name": "title",
-            "values": "$TITLE$",
-            "type": "string"
-          }
-        },
         "$USERS$"
       ]
     }
