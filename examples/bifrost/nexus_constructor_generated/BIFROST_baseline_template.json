@@ -1225,7 +1225,7 @@
               ]
             },
             {
-              "name": "analyzer_3",
+              "name": "focusing_analyzer_3",
               "type": "group",
               "attributes": [
                 {
@@ -1309,11 +1309,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "degrees"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "rotation"
@@ -1334,7 +1329,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_3/transformations/translation",
+                          "values": "/entry/instrument/focusing_analyzer_3/transformations/translation",
                           "dtype": "string"
                         }
                       ]
@@ -1347,11 +1342,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1373,7 +1363,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_2/transformations/rotation",
+                          "values": "/entry/instrument/focusing_analyzer_2/transformations/rotation",
                           "dtype": "string"
                         }
                       ]
@@ -1391,13 +1381,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_3/transformations/rotation"
+                    "values": "/entry/instrument/focusing_analyzer_3/transformations/rotation"
                   }
                 }
               ]
             },
             {
-              "name": "analyzer_5",
+              "name": "focusing_analyzer_5",
               "type": "group",
               "attributes": [
                 {
@@ -1481,11 +1471,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "degrees"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "rotation"
@@ -1506,7 +1491,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_5/transformations/translation",
+                          "values": "/entry/instrument/focusing_analyzer_5/transformations/translation",
                           "dtype": "string"
                         }
                       ]
@@ -1519,11 +1504,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1545,7 +1525,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_4/transformations/rotation",
+                          "values": "/entry/instrument/focusing_analyzer_4/transformations/rotation",
                           "dtype": "string"
                         }
                       ]
@@ -1563,7 +1543,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_5/transformations/rotation"
+                    "values": "/entry/instrument/focusing_analyzer_5/transformations/rotation"
                   }
                 }
               ]
@@ -55811,7 +55791,7 @@
               ]
             },
             {
-              "name": "analyzer_2",
+              "name": "focusing_analyzer_2",
               "type": "group",
               "attributes": [
                 {
@@ -55895,11 +55875,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "degrees"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "rotation"
@@ -55920,7 +55895,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_2/transformations/translation",
+                          "values": "/entry/instrument/focusing_analyzer_2/transformations/translation",
                           "dtype": "string"
                         }
                       ]
@@ -55933,11 +55908,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55959,7 +55929,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_1/transformations/rotation",
+                          "values": "/entry/instrument/focusing_analyzer_1/transformations/rotation",
                           "dtype": "string"
                         }
                       ]
@@ -55977,13 +55947,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_2/transformations/rotation"
+                    "values": "/entry/instrument/focusing_analyzer_2/transformations/rotation"
                   }
                 }
               ]
             },
             {
-              "name": "analyzer_1",
+              "name": "focusing_analyzer_1",
               "type": "group",
               "attributes": [
                 {
@@ -56084,6 +56054,84 @@
                             0.0,
                             0.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/focusing_analyzer_1/transformations/translation",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": 0.8,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/focusing_analyzer_1/transformations/rotation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "rotation1",
+                        "values": -30.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "rotation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
                         }
                       ]
                     }
@@ -56100,13 +56148,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_1/transformations/rotation"
+                    "values": "/entry/instrument/focusing_analyzer_1/transformations/rotation"
                   }
                 }
               ]
             },
             {
-              "name": "analyzer_4",
+              "name": "focusing_analyzer_4",
               "type": "group",
               "attributes": [
                 {
@@ -56190,11 +56238,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "degrees"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "rotation"
@@ -56215,7 +56258,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_4/transformations/translation",
+                          "values": "/entry/instrument/focusing_analyzer_4/transformations/translation",
                           "dtype": "string"
                         }
                       ]
@@ -56228,11 +56271,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -56254,7 +56292,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_3/transformations/rotation",
+                          "values": "/entry/instrument/focusing_analyzer_3/transformations/rotation",
                           "dtype": "string"
                         }
                       ]
@@ -56272,7 +56310,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_4/transformations/rotation"
+                    "values": "/entry/instrument/focusing_analyzer_4/transformations/rotation"
                   }
                 }
               ]
