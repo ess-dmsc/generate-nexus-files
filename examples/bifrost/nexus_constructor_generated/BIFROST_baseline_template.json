@@ -54215,6 +54215,11 @@
                             0.0,
                             0.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/bifrost_detector/transformations/translation",
+                          "dtype": "string"
                         }
                       ],
                       "children": [
@@ -54225,6 +54230,118 @@
                             "topic": "topic",
                             "dtype": "double"
                           }
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation",
+                        "values": -0.2,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/bifrost_detector/transformations/rotation",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "rotation",
+                        "values": -20.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "rotation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            1.0,
+                            0.0,
+                            0.0
+                          ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/bifrost_detector/transformations/translation1",
+                          "dtype": "string"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "translation1",
+                        "values": -0.3,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "translation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            0.0,
+                            1.0,
+                            0.0
+                          ]
                         }
                       ]
                     }
@@ -55086,45 +55203,16 @@
                     {
                       "module": "dataset",
                       "config": {
-                        "name": "translation",
-                        "values": 0.3,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            1.0,
-                            0.0
-                          ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/focusing_analyzer_1/transformations/translation1",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
                         "name": "translation1",
                         "values": 0.8,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55143,11 +55231,6 @@
                             0.0,
                             1.0
                           ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/bifrost_detector/transformations/rotation_y_axis",
-                          "dtype": "string"
                         }
                       ]
                     }
@@ -55164,7 +55247,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/focusing_analyzer_1/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_1/transformations/translation1"
                   }
                 }
               ]
@@ -55590,40 +55673,6 @@
                             0.0,
                             1.0
                           ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/focusing_analyzer_2/transformations/translation1",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "translation1",
-                        "values": 0.15,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            1.0,
-                            0.0
-                          ]
                         }
                       ]
                     }
@@ -55693,40 +55742,6 @@
                             0.0,
                             0.0,
                             1.0
-                          ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/focusing_analyzer_3/transformations/translation1",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "translation1",
-                        "values": -0.05,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            1.0,
-                            0.0
                           ]
                         }
                       ]
@@ -55798,40 +55813,6 @@
                             0.0,
                             1.0
                           ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/focusing_analyzer_4/transformations/translation1",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "translation1",
-                        "values": -0.27,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            1.0,
-                            0.0
-                          ]
                         }
                       ]
                     }
@@ -55901,40 +55882,6 @@
                             0.0,
                             0.0,
                             1.0
-                          ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/focusing_analyzer_5/transformations/translation1",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "translation1",
-                        "values": -0.6,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            1.0,
-                            0.0
                           ]
                         }
                       ]
