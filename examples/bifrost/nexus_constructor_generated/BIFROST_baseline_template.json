@@ -1262,7 +1262,7 @@
                           "config": {
                             "name": "size",
                             "values": [
-                              0.5,
+                              0.1,
                               0.2,
                               0.02
                             ],
@@ -1304,10 +1304,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "rotation",
-                        "values": 20.0,
+                        "values": 10.0,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1338,10 +1343,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 1.9,
+                        "values": 0.1,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1360,6 +1370,11 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/analyzer_2/transformations/rotation",
+                          "dtype": "string"
                         }
                       ]
                     }
@@ -1377,163 +1392,6 @@
                     "name": "depends_on",
                     "dtype": "string",
                     "values": "/entry/instrument/analyzer_3/transformations/rotation"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "analyzer_4",
-              "type": "group",
-              "attributes": [
-                {
-                  "name": "NX_class",
-                  "dtype": "string",
-                  "values": "NXcrystal"
-                }
-              ],
-              "children": [
-                {
-                  "name": "geometry",
-                  "type": "group",
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "dtype": "string",
-                      "values": "NXgeometry"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "name": "shape",
-                      "type": "group",
-                      "attributes": [
-                        {
-                          "name": "NX_class",
-                          "dtype": "string",
-                          "values": "NXshape"
-                        }
-                      ],
-                      "children": [
-                        {
-                          "module": "dataset",
-                          "config": {
-                            "name": "size",
-                            "values": [
-                              0.5,
-                              0.2,
-                              0.02
-                            ],
-                            "type": "double"
-                          },
-                          "attributes": [
-                            {
-                              "name": "units",
-                              "dtype": "string",
-                              "values": "m"
-                            }
-                          ]
-                        },
-                        {
-                          "module": "dataset",
-                          "config": {
-                            "name": "shape",
-                            "values": "nxbox",
-                            "type": "string"
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "usage",
-                    "values": "Bragg",
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "group",
-                  "name": "transformations",
-                  "children": [
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "rotation",
-                        "values": 20.0,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "rotation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "degrees"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            1.0,
-                            0.0,
-                            0.0
-                          ]
-                        },
-                        {
-                          "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_4/transformations/translation",
-                          "dtype": "string"
-                        }
-                      ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "translation",
-                        "values": 2.4,
-                        "type": "double"
-                      },
-                      "attributes": [
-                        {
-                          "name": "transformation_type",
-                          "dtype": "string",
-                          "values": "translation"
-                        },
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
-                          "name": "vector",
-                          "dtype": "string",
-                          "values": [
-                            0.0,
-                            0.0,
-                            1.0
-                          ]
-                        }
-                      ]
-                    }
-                  ],
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "values": "NXtransformations"
-                    }
-                  ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/analyzer_4/transformations/rotation"
                   }
                 }
               ]
@@ -1576,7 +1434,7 @@
                           "config": {
                             "name": "size",
                             "values": [
-                              0.5,
+                              0.1,
                               0.2,
                               0.02
                             ],
@@ -1618,10 +1476,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "rotation",
-                        "values": 20.0,
+                        "values": 12.0,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1652,10 +1515,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 3.0,
+                        "values": 0.1,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -1674,6 +1542,11 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/analyzer_4/transformations/rotation",
+                          "dtype": "string"
                         }
                       ]
                     }
@@ -55899,11 +55772,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55980,7 +55848,7 @@
                           "config": {
                             "name": "size",
                             "values": [
-                              0.5,
+                              0.1,
                               0.2,
                               0.02
                             ],
@@ -56022,10 +55890,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "rotation",
-                        "values": 20.0,
+                        "values": 15.0,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -56056,10 +55929,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 1.4,
+                        "values": 0.1,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -56078,6 +55956,11 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/analyzer_1/transformations/rotation",
+                          "dtype": "string"
                         }
                       ]
                     }
@@ -56137,7 +56020,7 @@
                           "config": {
                             "name": "size",
                             "values": [
-                              0.5,
+                              0.1,
                               0.2,
                               0.02
                             ],
@@ -56201,10 +56084,138 @@
                             0.0,
                             0.0
                           ]
+                        }
+                      ]
+                    }
+                  ],
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "dtype": "string",
+                    "values": "/entry/instrument/analyzer_1/transformations/rotation"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "analyzer_4",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "dtype": "string",
+                  "values": "NXcrystal"
+                }
+              ],
+              "children": [
+                {
+                  "name": "geometry",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXgeometry"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "shape",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXshape"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "module": "dataset",
+                          "config": {
+                            "name": "size",
+                            "values": [
+                              0.1,
+                              0.2,
+                              0.02
+                            ],
+                            "type": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "m"
+                            }
+                          ]
+                        },
+                        {
+                          "module": "dataset",
+                          "config": {
+                            "name": "shape",
+                            "values": "nxbox",
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "group",
+                  "name": "transformations",
+                  "children": [
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "rotation",
+                        "values": 15.0,
+                        "type": "double"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "transformation_type",
+                          "dtype": "string",
+                          "values": "rotation"
+                        },
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "degrees"
+                        },
+                        {
+                          "name": "vector",
+                          "dtype": "string",
+                          "values": [
+                            1.0,
+                            0.0,
+                            0.0
+                          ]
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/analyzer_1/transformations/translation",
+                          "values": "/entry/instrument/analyzer_4/transformations/translation",
                           "dtype": "string"
                         }
                       ]
@@ -56213,10 +56224,15 @@
                       "module": "dataset",
                       "config": {
                         "name": "translation",
-                        "values": 0.8,
+                        "values": 0.1,
                         "type": "double"
                       },
                       "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -56235,6 +56251,11 @@
                             0.0,
                             1.0
                           ]
+                        },
+                        {
+                          "name": "depends_on",
+                          "values": "/entry/instrument/analyzer_3/transformations/rotation",
+                          "dtype": "string"
                         }
                       ]
                     }
@@ -56251,7 +56272,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/analyzer_1/transformations/rotation"
+                    "values": "/entry/instrument/analyzer_4/transformations/rotation"
                   }
                 }
               ]
