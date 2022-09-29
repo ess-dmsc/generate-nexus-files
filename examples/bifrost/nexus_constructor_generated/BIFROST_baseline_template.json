@@ -55061,7 +55061,7 @@
               ]
             },
             {
-              "name": "crystal_1",
+              "name": "focusing_analyzer_1",
               "type": "group",
               "attributes": [
                 {
@@ -55092,11 +55092,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55117,7 +55112,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/crystal_1/transformations/translation1",
+                          "values": "/entry/instrument/focusing_analyzer_1/transformations/translation1",
                           "dtype": "string"
                         }
                       ]
@@ -55130,11 +55125,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55174,7 +55164,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/crystal_1/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_1/transformations/translation"
                   }
                 }
               ]
@@ -55552,7 +55542,7 @@
               ]
             },
             {
-              "name": "crystal_2",
+              "name": "focusing_analyzer_2",
               "type": "group",
               "attributes": [
                 {
@@ -55562,6 +55552,14 @@
                 }
               ],
               "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
                 {
                   "type": "group",
                   "name": "transformations",
@@ -55575,11 +55573,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55600,7 +55593,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/crystal_2/transformations/translation1",
+                          "values": "/entry/instrument/focusing_analyzer_2/transformations/translation1",
                           "dtype": "string"
                         }
                       ]
@@ -55614,11 +55607,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55652,13 +55640,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/crystal_2/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_2/transformations/translation"
                   }
                 }
               ]
             },
             {
-              "name": "crystal_3",
+              "name": "focusing_analyzer_3",
               "type": "group",
               "attributes": [
                 {
@@ -55668,6 +55656,14 @@
                 }
               ],
               "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
                 {
                   "type": "group",
                   "name": "transformations",
@@ -55681,11 +55677,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55706,7 +55697,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/crystal_3/transformations/translation1",
+                          "values": "/entry/instrument/focusing_analyzer_3/transformations/translation1",
                           "dtype": "string"
                         }
                       ]
@@ -55720,11 +55711,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55758,13 +55744,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/crystal_3/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_3/transformations/translation"
                   }
                 }
               ]
             },
             {
-              "name": "crystal_4",
+              "name": "focusing_analyzer_4",
               "type": "group",
               "attributes": [
                 {
@@ -55774,6 +55760,14 @@
                 }
               ],
               "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
                 {
                   "type": "group",
                   "name": "transformations",
@@ -55787,11 +55781,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55812,7 +55801,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/crystal_4/transformations/translation1",
+                          "values": "/entry/instrument/focusing_analyzer_4/transformations/translation1",
                           "dtype": "string"
                         }
                       ]
@@ -55826,11 +55815,6 @@
                       },
                       "attributes": [
                         {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
-                        {
                           "name": "transformation_type",
                           "dtype": "string",
                           "values": "translation"
@@ -55864,13 +55848,13 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/crystal_4/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_4/transformations/translation"
                   }
                 }
               ]
             },
             {
-              "name": "crystal_5",
+              "name": "focusing_analyzer_5",
               "type": "group",
               "attributes": [
                 {
@@ -55880,6 +55864,14 @@
                 }
               ],
               "children": [
+                {
+                  "module": "dataset",
+                  "config": {
+                    "name": "usage",
+                    "values": "Bragg",
+                    "type": "string"
+                  }
+                },
                 {
                   "type": "group",
                   "name": "transformations",
@@ -55892,11 +55884,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55918,7 +55905,7 @@
                         },
                         {
                           "name": "depends_on",
-                          "values": "/entry/instrument/crystal_5/transformations/translation1",
+                          "values": "/entry/instrument/focusing_analyzer_5/transformations/translation1",
                           "dtype": "string"
                         }
                       ]
@@ -55931,11 +55918,6 @@
                         "type": "double"
                       },
                       "attributes": [
-                        {
-                          "name": "units",
-                          "dtype": "string",
-                          "values": "m"
-                        },
                         {
                           "name": "transformation_type",
                           "dtype": "string",
@@ -55970,7 +55952,7 @@
                   "config": {
                     "name": "depends_on",
                     "dtype": "string",
-                    "values": "/entry/instrument/crystal_5/transformations/translation"
+                    "values": "/entry/instrument/focusing_analyzer_5/transformations/translation"
                   }
                 }
               ]
