@@ -318,6 +318,13 @@
                   }
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/foc1/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -362,14 +369,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/foc1/transformations/translation"
-                  }
                 }
               ]
             },
@@ -503,6 +502,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/bpc1/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -547,14 +553,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/bpc1/transformations/translation"
-                  }
                 }
               ]
             },
@@ -688,6 +686,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/t0/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -732,14 +737,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/t0/transformations/translation"
-                  }
                 }
               ]
             },
@@ -883,6 +880,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/foc2/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -927,14 +931,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/foc2/transformations/translation"
-                  }
                 }
               ]
             },
@@ -1067,6 +1063,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/bpc2/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -1111,14 +1114,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/bpc2/transformations/translation"
-                  }
                 }
               ]
             },
@@ -1262,6 +1257,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/foc3/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -1306,14 +1308,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/foc3/transformations/translation"
-                  }
                 }
               ]
             },
@@ -1457,6 +1451,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/foc4/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -1501,14 +1502,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/foc4/transformations/translation"
-                  }
                 }
               ]
             },
@@ -1652,6 +1645,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/foc5/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -1696,14 +1696,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/foc5/transformations/translation"
-                  }
                 }
               ]
             },
@@ -1922,6 +1914,13 @@
                   ]
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/source/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -1961,14 +1960,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/source/transformations/translation"
-                  }
                 }
               ]
             },
@@ -2112,6 +2103,13 @@
                   }
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/wfm1/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -2201,14 +2199,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/wfm1/transformations/translation"
-                  }
                 }
               ]
             },
@@ -2352,6 +2342,13 @@
                   }
                 },
                 {
+                  "module": "dataset",
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/wfm2/transformations/translation"
+                  }
+                },
+                {
                   "type": "group",
                   "name": "transformations",
                   "children": [
@@ -2441,14 +2438,6 @@
                       "values": "NXtransformations"
                     }
                   ]
-                },
-                {
-                  "module": "dataset",
-                  "config": {
-                    "name": "depends_on",
-                    "dtype": "string",
-                    "values": "/entry/instrument/wfm2/transformations/translation"
-                  }
                 }
               ]
             },
@@ -2493,14 +2482,6 @@
                           }
                         }
                       ]
-                    },
-                    {
-                      "module": "dataset",
-                      "config": {
-                        "name": "description",
-                        "values": "Field of view, position with some reference point on the detector, scintillator type and other data related to conversion from photons to neutrons.",
-                        "type": "string"
-                      }
                     },
                     {
                       "name": "x_pixel_size",
@@ -2557,6 +2538,195 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "description",
+                        "values": "Field of view, position with some reference point on the detector, scintillator type and other data related to conversion from photons to neutrons.",
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "name": "geometry",
+                      "type": "group",
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "dtype": "string",
+                          "values": "NXgeometry"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "name": "shape",
+                          "type": "group",
+                          "attributes": [
+                            {
+                              "name": "NX_class",
+                              "dtype": "string",
+                              "values": "NXshape"
+                            }
+                          ],
+                          "children": [
+                            {
+                              "module": "dataset",
+                              "config": {
+                                "name": "size",
+                                "values": [
+                                  0.2,
+                                  1.0,
+                                  0.8
+                                ],
+                                "type": "double"
+                              },
+                              "attributes": [
+                                {
+                                  "name": "units",
+                                  "dtype": "string",
+                                  "values": "m"
+                                }
+                              ]
+                            },
+                            {
+                              "module": "dataset",
+                              "config": {
+                                "name": "shape",
+                                "values": "nxbox",
+                                "type": "string"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "x_pixel_offset",
+                        "values": [
+                          [
+                            0.0
+                          ]
+                        ],
+                        "type": "float"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "y_pixel_offset",
+                        "values": [
+                          [
+                            0.0
+                          ]
+                        ],
+                        "type": "float"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "z_pixel_offset",
+                        "values": [
+                          [
+                            0.0
+                          ]
+                        ],
+                        "type": "float"
+                      },
+                      "attributes": [
+                        {
+                          "name": "units",
+                          "dtype": "string",
+                          "values": "m"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "detector_number",
+                        "values": [
+                          [
+                            0
+                          ]
+                        ],
+                        "type": "int32"
+                      }
+                    },
+                    {
+                      "type": "group",
+                      "name": "transformations",
+                      "children": [
+                        {
+                          "module": "dataset",
+                          "config": {
+                            "name": "translation",
+                            "values": 0.0,
+                            "type": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "m"
+                            },
+                            {
+                              "name": "transformation_type",
+                              "dtype": "string",
+                              "values": "translation"
+                            },
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "m"
+                            },
+                            {
+                              "name": "vector",
+                              "dtype": "string",
+                              "values": [
+                                0.0,
+                                0.0,
+                                1.0
+                              ]
+                            },
+                            {
+                              "name": "offset",
+                              "dtype": "string",
+                              "values": 2.0
+                            }
+                          ]
+                        }
+                      ],
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "values": "NXtransformations"
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "depends_on",
+                        "dtype": "string",
+                        "values": "/entry/instrument/event_mode_detectors/timepix3/transformations/translation"
+                      }
                     }
                   ]
                 }
@@ -2693,6 +2863,64 @@
                               "values": "mm"
                             }
                           ]
+                        }
+                      ]
+                    },
+                    {
+                      "module": "dataset",
+                      "config": {
+                        "name": "depends_on",
+                        "values": "/entry/instrument/histogram_mode_detectors/orca/transformations/translation"
+                      }
+                    },
+                    {
+                      "type": "group",
+                      "name": "transformations",
+                      "children": [
+                        {
+                          "module": "dataset",
+                          "config": {
+                            "name": "translation",
+                            "values": 0.0,
+                            "type": "double"
+                          },
+                          "attributes": [
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "m"
+                            },
+                            {
+                              "name": "transformation_type",
+                              "dtype": "string",
+                              "values": "translation"
+                            },
+                            {
+                              "name": "units",
+                              "dtype": "string",
+                              "values": "m"
+                            },
+                            {
+                              "name": "vector",
+                              "dtype": "string",
+                              "values": [
+                                1.0,
+                                0.0,
+                                0.0
+                              ]
+                            },
+                            {
+                              "name": "offset",
+                              "dtype": "string",
+                              "values": 2.0
+                            }
+                          ]
+                        }
+                      ],
+                      "attributes": [
+                        {
+                          "name": "NX_class",
+                          "values": "NXtransformations"
                         }
                       ]
                     }
