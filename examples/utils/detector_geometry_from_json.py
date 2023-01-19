@@ -12,6 +12,7 @@ X_PIXEL_OFFSET = "x_pixel_offset"
 Y_PIXEL_OFFSET = "y_pixel_offset"
 Z_PIXEL_OFFSET = "z_pixel_offset"
 DETECTOR_NUMBER = "detector_number"
+VERTICES = "vertices"
 
 
 def retrieve_data_from_json(data, data_name, data_array):

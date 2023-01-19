@@ -14,9 +14,9 @@ pixels. Most of the time we can test relative positions instead.
 
 Generally the linkage between logical and physical geometry requires information
 from
-  * ECDC ICDs where the logical geometry is specified
-  * Technical drawings, Excel sheets, Power Point slides describing physical
-  distances, offsets, translations and rotations of the individual pixels (or voxels)
+  * ECDC ICDs where the logical geometry is specified.
+  * Technical drawings, Excel sheets, PowerPoint slides describing physical
+  distances, offsets, translations and rotations of the individual pixels (or voxels).
 
 The idea is that from one or more pixel values we can calculate points or
 vectors for important detector directions and then compare these with the
@@ -31,7 +31,7 @@ The following is a catalogue of testing ideas
 
 ### Min and max pixels
   * Test that all pixel values specified in the ICD can be queried for (x, y, z) values
-  * Test that max_pixe + 1 is invalid
+  * Test that max_pixel + 1 is invalid
 
 ### Basic sanity checks
   * Test that all positions are within the physical boundary of the instrument
@@ -40,9 +40,11 @@ The following is a catalogue of testing ideas
 for LoKI are at a greater z distance than all other banks.
 
 ### Intra-detector tests
-These are tests within a small scope. Typically bounded electronically. Example are blades, tubes and straws.
+These are tests within a small scope. Typically, bounded electronically. 
+Example are blades, tubes and straws.
   * Check distances between adjacent pixels (or adjacent wires, strips, straw, ...)
   * Check relative positions: back straws have larger z than front straws, etc.
 
 ### Inter-detector tests
-This scope compares distances (and angles, etc.) between electrical components. For example the distances between tubes in a detector panel or between cassettes.
+This scope compares distances (and angles, etc.) between electrical components. 
+For example the distances between tubes in a detector panel or between cassettes.
