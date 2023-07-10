@@ -1,0 +1,761 @@
+{
+  "children": [
+    {
+      "attributes": [
+        {
+          "dtype": "string",
+          "name": "NX_class",
+          "values": "NXentry"
+        }
+      ],
+      "children": [
+        {
+          "config": {
+            "name": "title",
+            "type": "string",
+            "values": "$TITLE$"
+          },
+          "module": "dataset"
+        },
+        {
+          "config": {
+            "name": "experiment_identifier",
+            "type": "string",
+            "values": "$EXP_ID$"
+          },
+          "module": "dataset"
+        },
+        {
+          "config": {
+            "name": "entry_identifier",
+            "type": "string",
+            "values": "$ENTRY_ID$"
+          },
+          "module": "dataset"
+        },
+        {
+          "config": {
+            "name": "entry_identifier_uuid",
+            "type": "string",
+            "values": "$JOB_ID$"
+          },
+          "module": "dataset"
+        },
+        {
+          "attributes": [
+            {
+              "dtype": "string",
+              "name": "NX_class",
+              "values": "NXinstrument"
+            }
+          ],
+          "children": [
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "slits",
+                    "type": "int64",
+                    "values": 1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "deg"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_edges",
+                    "type": "double",
+                    "values": [
+                      0.0,
+                      86.0
+                    ]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_height",
+                    "type": "double",
+                    "values": 0.1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "radius",
+                    "type": "double",
+                    "values": 0.35
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpXXX:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "Hz"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-XXX:YYY:Spd_R",
+                        "topic": "nmx_choppers",
+                        "value_units": "Hz"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "config": {
+                        "source": "NMX-XXX:YYY:tdct",
+                        "topic": "nmx_choppers"
+                      },
+                      "module": "tdct"
+                    }
+                  ],
+                  "name": "tdct",
+                  "type": "group"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/WLS-1_chopper/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation"
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 28.67
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "WLS-1_chopper",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXsource"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "type",
+                    "type": "string",
+                    "values": "Spallation Neutron Source"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/source/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": -162.0
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "source",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "slits",
+                    "type": "int64",
+                    "values": 1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "deg"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_edges",
+                    "type": "double",
+                    "values": [
+                      0.0,
+                      170.0
+                    ]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_height",
+                    "type": "double",
+                    "values": 0.1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "radius",
+                    "type": "double",
+                    "values": 0.35
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "Hz"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-XXX:YYY:wls-2a-rotationspeed",
+                        "topic": "nmx_choppers",
+                        "value_units": "Hz"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/WLS-2A_chopper/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation"
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 50.95
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "WLS-2A_chopper",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "slits",
+                    "type": "int64",
+                    "values": 1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "deg"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_edges",
+                    "type": "double",
+                    "values": [
+                      0.0,
+                      170.0
+                    ]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_height",
+                    "type": "double",
+                    "values": 0.1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "radius",
+                    "type": "double",
+                    "values": 0.35
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "Hz"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-XXX:YYY:wls-2b-rotationspeed",
+                        "topic": "nmx_choppers",
+                        "value_units": "Hz"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/WLS-2B_chopper/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "depends_on",
+                          "values": "/entry/instrument/WLS-2A_chopper/transformations/translation"
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 0.1
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "WLS-2B_chopper",
+              "type": "group"
+            },
+            {
+              "config": {
+                "name": "name",
+                "type": "string",
+                "values": "NMX"
+              },
+              "module": "dataset"
+            }
+            {% if j2_instrument_detector_panel_0 %}
+            ,
+            {{ j2_instrument_detector_panel_0 }}
+            {% endif %}
+            {% if j2_instrument_detector_panel_1 %}
+            ,
+            {{ j2_instrument_detector_panel_1 }}
+            {% endif %}
+            {% if j2_instrument_detector_panel_2 %}
+            ,
+            {{ j2_instrument_detector_panel_2 }}
+            {% endif %}
+
+          ],
+          "name": "instrument",
+          "type": "group"
+        },
+        {
+          "attributes": [
+            {
+              "dtype": "string",
+              "name": "NX_class",
+              "values": "NXsample"
+            }
+          ],
+          "children": [
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXenvironment"
+                }
+              ],
+              "children": [],
+              "name": "sample_environment",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXlog"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "dtype": "double",
+                    "source": "todo:changer:position",
+                    "topic": "nmx_sample"
+                  },
+                  "module": "f144"
+                }
+              ],
+              "name": "changer_position",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXlog"
+                }
+              ],
+              "children": [
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "K"
+                    }
+                  ],
+                  "config": {
+                    "dtype": "double",
+                    "source": "todo:temperature",
+                    "topic": "nmx_sample",
+                    "value_units": "K"
+                  },
+                  "module": "f144"
+                }
+              ],
+              "name": "temperature",
+              "type": "group"
+            },
+            {
+              "config": {
+                "name": "name",
+                "type": "string",
+                "values": "Single_crystal"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "preparation_date",
+                "type": "string",
+                "values": "$SAMPLE_PREPARATION_DATE$"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "type",
+                "type": "string",
+                "values": "sample"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "description",
+                "type": "string",
+                "values": "$SAMPLE_DESCRIPTION$"
+              },
+              "module": "dataset"
+            }
+          ],
+          "name": "sample",
+          "type": "group"
+        }
+      ],
+      "name": "entry",
+      "type": "group"
+    }
+  ]
+}

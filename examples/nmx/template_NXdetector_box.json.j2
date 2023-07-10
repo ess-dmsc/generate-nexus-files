@@ -1,0 +1,135 @@
+            {
+              "name": "{{ j2_detector_name }}",
+              "type": "group",
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXdetector"
+                }
+              ],
+              "children": [
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXgeometry"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "NX_class",
+                          "values": "NXshape"
+                        }
+                      ],
+                      "children": [
+                        {
+                          "attributes": [
+                            {
+                              "dtype": "string",
+                              "name": "units",
+                              "values": "mm"
+                            }
+                          ],
+                          "config": {
+                            "name": "size",
+                            "type": "double",
+                            "values": {{ j2_detector_sizes }}
+                          },
+                          "module": "dataset"
+                        },
+                        {
+                          "config": {
+                            "name": "shape",
+                            "type": "string",
+                            "values": "nxbox"
+                          },
+                          "module": "dataset"
+                        }
+                      ],
+                      "name": "shape",
+                      "type": "group"
+                    }
+                  ],
+                  "name": "geometry",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "x_pixel_offset",
+                    "type": "float",
+                    "values": [{% for row in j2_x_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "y_pixel_offset",
+                    "type": "float",
+                    "values": [{% for row in j2_y_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "z_pixel_offset",
+                    "type": "float",
+                    "values": [{% for row in j2_z_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "config": {
+                    "name": "detector_number",
+                    "type": "int32",
+                    "values": {{ j2_detector_numbers }}
+                  },
+                  "module": "dataset"
+                }
+                {%- if j2_detector_transformations|length > 0 %},
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/{{ j2_detector_name }}/transformations/{{ j2_detector_transformations|last|get_item('config')|get_item('name') }}"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "name": "transformations",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": {{ j2_detector_transformations | tojson }}
+                }
+                {%- endif %}
+              ]
+            }
