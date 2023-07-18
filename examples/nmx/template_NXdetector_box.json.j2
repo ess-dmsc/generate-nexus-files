@@ -69,7 +69,7 @@
                   "config": {
                     "name": "x_pixel_offset",
                     "type": "float",
-                    "values": [{% for row in j2_x_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                    "values": [{% for value in j2_x_pixel_offsets %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]
                   },
                   "module": "dataset"
                 },
@@ -84,7 +84,7 @@
                   "config": {
                     "name": "y_pixel_offset",
                     "type": "float",
-                    "values": [{% for row in j2_y_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                    "values": [{% for value in j2_y_pixel_offsets %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]
                   },
                   "module": "dataset"
                 },
@@ -99,7 +99,8 @@
                   "config": {
                     "name": "z_pixel_offset",
                     "type": "float",
-                    "values": [{% for row in j2_z_pixel_offsets %}[{% for value in row %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]{% if not loop.last %}, {% endif %}{% endfor %}]
+                    "values": [{% for value in j2_z_pixel_offsets %}{{ "%.6f" | format(value) }}{% if not loop.last %}, {% endif %}{% endfor %}]
+
                   },
                   "module": "dataset"
                 },

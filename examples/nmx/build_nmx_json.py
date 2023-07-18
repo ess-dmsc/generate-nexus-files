@@ -130,31 +130,27 @@ class BoxNXDetector(NXDetector):
             yield slice_gen
 
     def get_x_pixel_offsets(self):
-        """Generator of pixel offsets. Returns one detector row at a time."""
-        for row in self.get_detector_numbers():
-            offsets = []
-            for pixel in row:
-                x, _, _ = self.get_pixel_coordinates(pixel)
-                offsets.append(x)
-            yield offsets
+        """Return list of x pixel offsets for the first row of the detector.
+        Assumes that all rows have identical offsets."""
+        row = next(self.get_detector_numbers(), [])
+        offsets = []
+        for pixel in row:
+            x, _, _ = self.get_pixel_coordinates(pixel)
+            offsets.append(x)
+        return offsets
 
     def get_y_pixel_offsets(self):
-        """Generator of pixel offsets. Returns one detector row at a time."""
+        """Return list of y pixel offsets for the first column of the detector.
+        Assumes that all columns have identical offsets."""
+        offsets = []
         for row in self.get_detector_numbers():
-            offsets = []
-            for pixel in row:
-                _, y, _ = self.get_pixel_coordinates(pixel)
-                offsets.append(y)
-            yield offsets
+            _, y, _ = self.get_pixel_coordinates(row[0])
+            offsets.append(y)
+        return offsets
 
     def get_z_pixel_offsets(self):
-        """Generator of pixel offsets. Returns one detector row at a time."""
-        for row in self.get_detector_numbers():
-            offsets = []
-            for pixel in row:
-                _, _, z = self.get_pixel_coordinates(pixel)
-                offsets.append(z)
-            yield offsets
+        """Return a list of z pixel offsets, with a single item of value zero."""
+        return [0]
 
     def is_valid_pixel_id(self, pixel_id: int) -> bool:
         """
@@ -227,15 +223,10 @@ class BoxNXDetector(NXDetector):
             "j2_detector_name": self.name,
             "j2_detector_sizes": [self.size_z, self.size_y, self.size_x],
             "j2_detector_numbers": list(self.get_detector_numbers()),
-            "j2_x_pixel_offsets": list(self.get_x_pixel_offsets()),
-            "j2_y_pixel_offsets": list(self.get_y_pixel_offsets()),
-            "j2_z_pixel_offsets": list(self.get_z_pixel_offsets()),
+            "j2_x_pixel_offsets": self.get_x_pixel_offsets(),
+            "j2_y_pixel_offsets": self.get_y_pixel_offsets(),
+            "j2_z_pixel_offsets": self.get_z_pixel_offsets(),
             "j2_detector_transformations": self.transformations,
-            # "j2_detector_last_transformation_name": self.transformations[-1]["config"][
-            #     "name"
-            # ]
-            # if self.transformations
-            # else "",
         }
         return self._render(
             "examples/nmx", "template_NXdetector_box.json.j2", **context
