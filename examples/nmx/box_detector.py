@@ -120,11 +120,15 @@ class BoxNXDetector(NXDetector):
         output = deepcopy(self._transformations)
         for idx, transformation in enumerate(output):
             if idx != 0:
+                if "config" in output[idx-1]:
+                    parent_name = output[idx-1]['config']['name']
+                else:
+                    parent_name = output[idx-1]['name']
                 transformation["attributes"].append(
                     {
                         "dtype": "string",
                         "name": "depends_on",
-                        "values": f"/entry/instrument/{self.name}/transformations/{output[idx-1]['config']['name']}",
+                        "values": f"/entry/instrument/{self.name}/transformations/{parent_name}",
                     }
                 )
         return output
@@ -198,6 +202,58 @@ class BoxNXDetector(NXDetector):
             ],
         }
 
+    def _build_nxlog_rotation(
+        self,
+        name: str,
+        vector: List[float],
+        schema: str,
+        topic: str,
+        source: str,
+        units: str = "degrees",
+        offset: List[float] = None,
+    ):
+        x, y, z = vector[:3]
+        assert (
+            sum([1 for i in (x, y, z) if i]) <= 1
+        ), f"You can only rotate on one axis at a time, got x={x}, y={y}, z={z}"
+        output = {
+            "name": name,
+            "type": "group",
+            "attributes": [
+                {"dtype": "string", "name": "NX_class", "values": "NXlog"},
+                {
+                    "dtype": "string",
+                    "name": "transformation_type",
+                    "values": "rotation",
+                },
+                {"dtype": "string", "name": "units", "values": units},
+                {"dtype": "double", "name": "vector", "values": vector},
+            ],
+            "children": [
+                {
+                  "module": schema,
+                  "config": {
+                    "source": source,
+                    "topic": topic,
+                    "dtype": "double",
+                    "value_units": units
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": units
+                    }
+                  ]
+                }
+            ]
+        }
+        if offset:
+            output["attributes"].append(
+                {"dtype": "double", "name": "offset", "values": offset},
+            )
+        return output
+
     def rotate(
         self,
         name: str,
@@ -208,6 +264,21 @@ class BoxNXDetector(NXDetector):
     ):
         self._transformations.append(
             self._build_rotation(name, x=x, y=y, z=z, units=units)
+        )
+        return self
+
+    def rotate_from_nxlog(
+        self,
+        name: str,
+        vector: List[float],
+        schema: str,
+        topic: str,
+        source: str,
+        units: str = "degrees",
+        offset: List[float] = None,
+    ):
+        self._transformations.append(
+            self._build_nxlog_rotation(name, vector, schema, topic, source, units=units, offset=offset)
         )
         return self
 
@@ -230,6 +301,58 @@ class BoxNXDetector(NXDetector):
             ],
         }
 
+    def _build_nxlog_translation(
+        self,
+        name: str,
+        vector: List[float],
+        schema: str,
+        topic: str,
+        source: str,
+        units: str = "m",
+        offset: List[float] = None,
+    ):
+        x, y, z = vector[:3]
+        assert (
+            sum([1 for i in (x, y, z) if i]) <= 1
+        ), f"You can only translate on one axis at a time, got x={x}, y={y}, z={z}"
+        output = {
+            "name": name,
+            "type": "group",
+            "attributes": [
+                {"dtype": "string", "name": "NX_class", "values": "NXlog"},
+                {
+                    "dtype": "string",
+                    "name": "transformation_type",
+                    "values": "translation",
+                },
+                {"dtype": "string", "name": "units", "values": units},
+                {"dtype": "double", "name": "vector", "values": vector},
+            ],
+            "children": [
+                {
+                  "module": schema,
+                  "config": {
+                    "source": source,
+                    "topic": topic,
+                    "dtype": "double",
+                    "value_units": units
+                  },
+                  "attributes": [
+                    {
+                      "name": "units",
+                      "dtype": "string",
+                      "values": units
+                    }
+                  ]
+                }
+            ]
+        }
+        if offset:
+            output["attributes"].append(
+                {"dtype": "double", "name": "offset", "values": offset},
+            )
+        return output
+
     def translate(
         self,
         name: str,
@@ -240,6 +363,21 @@ class BoxNXDetector(NXDetector):
     ):
         self._transformations.append(
             self._build_translation(name, x=x, y=y, z=z, units=units)
+        )
+        return self
+
+    def translate_from_nxlog(
+        self,
+        name: str,
+        vector: List[float],
+        schema: str,
+        topic: str,
+        source: str,
+        units: str = "m",
+        offset: List[float] = None,
+    ):
+        self._transformations.append(
+            self._build_nxlog_translation(name, vector, schema, topic, source, units=units, offset=offset)
         )
         return self
 
