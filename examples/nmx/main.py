@@ -1,18 +1,17 @@
+import argparse
 import json
+import os
+
 import jinja2
 
 try:
-    from build_nmx_json import BoxNXDetector
+    from box_detector import BoxNXDetector
 except ModuleNotFoundError:
-    from examples.nmx.build_nmx_json import BoxNXDetector
+    from examples.nmx.box_detector import BoxNXDetector
 
 
-TEMPLATES_DIR = "examples/nmx"
-TEMPLATE_NAME = "template_nmx_v3.0_baseline.json.j2"
-OUTPUT_FILE_NAME = "nmx_v3.0_small.json"
-OUTPUT_FILE_NAME = "nmx_v3.0_compact.json"
-
-FACTOR = 80  # used to reduce file size while testing. Set to 1 for actual numbers.
+FACTOR = 1  # used to reduce file size while testing. Set to 1 for actual numbers.
+# FACTOR = 80  # used to reduce file size while testing. Set to 1 for actual numbers.
 PIXELS_X = int(1280 / FACTOR)  # actual=1280
 PIXELS_Y = int(1280 / FACTOR)  # actual=1280
 CHANNEL_PITCH_X = 0.4 * FACTOR  # actual=0.4mm
@@ -32,16 +31,7 @@ def render_template(template_dir, template_file_name, **context):
     )
 
 
-def is_valid_json(file_path):
-    try:
-        with open(file_path, "r") as f:
-            json.load(f)
-        return True, None
-    except json.JSONDecodeError as exc:
-        return False, exc
-
-
-def render():
+def render(template_dir, template_file_name):
     print(f"Creating detectors...")
     detector_panel_0 = BoxNXDetector(
         "detector_panel_0",
@@ -59,7 +49,7 @@ def render():
     (
         detector_panel_0.translate("x_offset_sample_to_stageZ", x=-0.4)
         .translate("y_offset_sample_to_stageZ", y=-0.7)
-        .translate("stageZ", z=1.1)
+        .translate("stageZ", z=0.8)
         .translate("y_offset_stageZ_to_axis1", y=0.1)
         .rotate("axis1", y=90)
         .translate("x_offset_axis1_to_axis2", x=0.12)
@@ -91,9 +81,9 @@ def render():
         gap_width_y=GAP_WIDTH_Y,
     )
     (
-        detector_panel_1.translate("x_offset_sample_to_stageZ", x=-0.1)
+        detector_panel_1.translate("x_offset_sample_to_stageZ", x=-0.9)
         .translate("y_offset_sample_to_stageZ", y=0)
-        .translate("stageZ", z=1)
+        .translate("stageZ", z=0.3)
         .translate("y_offset_stageZ_to_axis1", y=0.1)
         .rotate("axis1", y=0)
         .translate("x_offset_axis1_to_axis2", x=0.12)
@@ -111,7 +101,6 @@ def render():
         .rotate("axis6", x=0)
     )
 
-
     detector_panel_2 = BoxNXDetector(
         "detector_panel_2",
         number_of_pixels_x=PIXELS_X,
@@ -127,7 +116,7 @@ def render():
     )
     (
         detector_panel_2.translate("x_offset_sample_to_stageZ", x=0.4)
-        .translate("y_offset_sample_to_stageZ", y=0)
+        .translate("y_offset_sample_to_stageZ", y=-0.2)
         .translate("stageZ", z=-0.5)
         .rotate("rotate_arm_chair", y=180)
         .translate("y_offset_stageZ_to_axis1", y=0.1)
@@ -155,47 +144,28 @@ def render():
     }
 
     print(f"Rendering template...")
-    return render_template(TEMPLATES_DIR, TEMPLATE_NAME, **context)
+    output = render_template(template_dir, template_file_name, **context)
+    json.loads(output)  # raises json.JSONDecodeError if invalid JSON
+    return output
 
 
 def main():
-    # detector = BoxNXDetector(
-    #     "test_detector",
-    #     number_of_pixels_x=2,
-    #     number_of_pixels_y=2,
-    #     size_z=10.0,
-    #     channel_pitch_x=128,
-    #     channel_pitch_y=128,
-    #     first_pixel_id=1,  # Set the first pixel to start at 1
-    # )
-    # with open("output-1.json", "w", encoding="utf-8") as file:
-    #     file.write(detector.to_json())
+    parser = argparse.ArgumentParser(description="Process output file name.")
+    parser.add_argument(
+        "-t",
+        "--template-file",
+        required=True,
+        help="Baseline jinja2 template for the instrument",
+    )
+    parser.add_argument("-o", "--output-file", required=True, help="Output file name")
+    args = parser.parse_args()
+    template_dir, template_file_name = os.path.split(args.template_file)
+    output_file_name = args.output_file
 
-    # detector = BoxNXDetector(
-    #     "test_detector",
-    #     number_of_pixels_x=2,
-    #     number_of_pixels_y=2,
-    #     size_z=10.0,
-    #     channel_pitch_x=128,
-    #     channel_pitch_y=128,
-    #     first_pixel_id=1,  # Set the first pixel to start at 1
-    #     gap_every_x_pixels=1,
-    #     gap_every_y_pixels=1,
-    #     gap_width_x=10,
-    #     gap_width_y=10,
-    # )
-    # with open("output-2.json", "w", encoding="utf-8") as file:
-    #     file.write(detector.to_json())
-
-    output = render()
-    with open(OUTPUT_FILE_NAME, "w", encoding="utf-8") as file:
+    output = render(template_dir, template_file_name)
+    with open(output_file_name, "w", encoding="utf-8") as file:
         file.write(output)
-    is_valid, exc = is_valid_json(OUTPUT_FILE_NAME)
-    if is_valid:
-        print(f"File passed JSON validation: {OUTPUT_FILE_NAME}")
-    else:
-        print(f"JSON validation failed: {exc}")
-        raise exc
+    print(f"Written JSON file: {output_file_name}")
 
 
 if __name__ == "__main__":

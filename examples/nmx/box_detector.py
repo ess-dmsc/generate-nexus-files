@@ -1,24 +1,35 @@
 from copy import deepcopy
 import itertools
-from typing import List
+from typing import Any, Dict, List
 
 import jinja2
 
 
 class Template:
-    def _render(self, template_dir, template_file_name, **context):
+    def _render(self, template_dir: str, template_file_name: str, **context):
         def get_item(dictionary, key):
             return dictionary.get(key)
+
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir + "/"))
-        env.filters['get_item'] = get_item
-        return (
-            env.get_template(template_file_name).render(context)
-        )
+        env.filters["get_item"] = get_item
+        return env.get_template(template_file_name).render(context)
 
 
 class NXDetector(Template):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
+
+    def get_detector_numbers(self):
+        raise NotImplementedError
+
+    def get_x_pixel_offsets(self):
+        raise NotImplementedError
+
+    def get_y_pixel_offsets(self):
+        raise NotImplementedError
+
+    def get_z_pixel_offsets(self):
+        raise NotImplementedError
 
 
 class BoxNXDetector(NXDetector):
@@ -41,6 +52,7 @@ class BoxNXDetector(NXDetector):
         self.number_of_pixels_y = number_of_pixels_y
         self.channel_pitch_x = channel_pitch_x
         self.channel_pitch_y = channel_pitch_y
+        self.first_pixel_id = first_pixel_id
         self.gap_every_x_pixels = gap_every_x_pixels
         self.gap_every_y_pixels = gap_every_y_pixels
         self.gap_width_x = gap_width_x
@@ -58,8 +70,7 @@ class BoxNXDetector(NXDetector):
             else number_of_pixels_y * channel_pitch_y
         )
         self.size_z = size_z
-        self.first_pixel_id = first_pixel_id
-        self._transformations = []
+        self._transformations: List[Dict[str, Any]] = []
 
     def get_pixel_coordinates(self, pixel_id: int) -> List[float]:
         assert self.is_valid_pixel_id(
@@ -168,7 +179,7 @@ class BoxNXDetector(NXDetector):
             < self.first_pixel_id + self.number_of_pixels
         )
 
-    def _build_rotation(self, name, x=0.0, y=0.0, z=0.0, units="degrees"):
+    def _build_rotation(self, name: str, x=0.0, y=0.0, z=0.0, units="degrees"):
         vector = [1.0 if x else 0.0, 1.0 if y else 0.0, 1.0 if z else 0.0]
         assert (
             sum([1 for i in (x, y, z) if i]) <= 1
@@ -187,13 +198,20 @@ class BoxNXDetector(NXDetector):
             ],
         }
 
-    def rotate(self, name, x=0.0, y=0.0, z=0.0, units="degrees"):
+    def rotate(
+        self,
+        name: str,
+        x: float = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
+        units: str = "degrees",
+    ):
         self._transformations.append(
             self._build_rotation(name, x=x, y=y, z=z, units=units)
         )
         return self
 
-    def _build_translation(self, name, x=0.0, y=0.0, z=0.0, units="m"):
+    def _build_translation(self, name: str, x=0.0, y=0.0, z=0.0, units="m"):
         vector = [1.0 if x else 0.0, 1.0 if y else 0.0, 1.0 if z else 0.0]
         assert (
             sum([1 for i in (x, y, z) if i]) <= 1
@@ -212,7 +230,14 @@ class BoxNXDetector(NXDetector):
             ],
         }
 
-    def translate(self, name, x=0.0, y=0.0, z=0.0, units="m"):
+    def translate(
+        self,
+        name: str,
+        x: float = 0.0,
+        y: float = 0.0,
+        z: float = 0.0,
+        units: str = "m",
+    ):
         self._transformations.append(
             self._build_translation(name, x=x, y=y, z=z, units=units)
         )
