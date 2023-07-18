@@ -51,6 +51,83 @@
           ],
           "children": [
             {
+              "config": {
+                "name": "name",
+                "type": "string",
+                "values": "NMX"
+              },
+              "module": "dataset"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXsource"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "type",
+                    "type": "string",
+                    "values": "Spallation Neutron Source"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/source/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": -162.0
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "source",
+              "type": "group"
+            },
+            {
               "attributes": [
                 {
                   "dtype": "string",
@@ -249,75 +326,6 @@
                 }
               ],
               "name": "WLS-1_chopper",
-              "type": "group"
-            },
-            {
-              "attributes": [
-                {
-                  "dtype": "string",
-                  "name": "NX_class",
-                  "values": "NXsource"
-                }
-              ],
-              "children": [
-                {
-                  "config": {
-                    "name": "type",
-                    "type": "string",
-                    "values": "Spallation Neutron Source"
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "config": {
-                    "name": "depends_on",
-                    "values": "/entry/instrument/source/transformations/translation"
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "values": "NXtransformations"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "attributes": [
-                        {
-                          "dtype": "string",
-                          "name": "transformation_type",
-                          "values": "translation"
-                        },
-                        {
-                          "dtype": "string",
-                          "name": "units",
-                          "values": "m"
-                        },
-                        {
-                          "dtype": "string",
-                          "name": "vector",
-                          "values": [
-                            0.0,
-                            0.0,
-                            1.0
-                          ]
-                        }
-                      ],
-                      "config": {
-                        "name": "translation",
-                        "type": "double",
-                        "values": -162.0
-                      },
-                      "module": "dataset"
-                    }
-                  ],
-                  "name": "transformations",
-                  "type": "group"
-                }
-              ],
-              "name": "source",
               "type": "group"
             },
             {
@@ -729,14 +737,6 @@
               ],
               "name": "WLS-2B_chopper",
               "type": "group"
-            },
-            {
-              "config": {
-                "name": "name",
-                "type": "string",
-                "values": "NMX"
-              },
-              "module": "dataset"
             }
             {% if j2_instrument_detector_panel_0 %}
             ,
