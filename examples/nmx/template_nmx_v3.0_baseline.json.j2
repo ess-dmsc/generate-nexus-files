@@ -125,6 +125,27 @@
                   ],
                   "children": [
                     {
+                      "config": {
+                        "source": "NMX-ChpWLS1:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "tdct"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
                       "attributes": [
                         {
                           "dtype": "string",
@@ -134,7 +155,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-ChpXXX:YYY:Delay",
+                        "source": "NMX-ChpWLS1:YYY:Delay",
                         "topic": "nmx_choppers",
                         "value_units": "ns"
                       },
@@ -163,7 +184,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-XXX:YYY:Spd_R",
+                        "source": "NMX-ChpWLS1:YYY:Spd_R",
                         "topic": "nmx_choppers",
                         "value_units": "Hz"
                       },
@@ -171,26 +192,6 @@
                     }
                   ],
                   "name": "rotation_speed",
-                  "type": "group"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "NX_class",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "config": {
-                        "source": "NMX-XXX:YYY:tdct",
-                        "topic": "nmx_choppers"
-                      },
-                      "module": "tdct"
-                    }
-                  ],
-                  "name": "tdct",
                   "type": "group"
                 },
                 {
@@ -403,7 +404,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-XXX:YYY:wls-2a-rotationspeed",
+                        "source": "NMX-ChpWLS2A:YYY:wls-2a-rotationspeed",
                         "topic": "nmx_choppers",
                         "value_units": "Hz"
                       },
@@ -411,6 +412,56 @@
                     }
                   ],
                   "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "config": {
+                        "source": "NMX-ChpWLS2B:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "tdct"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2A:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
                   "type": "group"
                 },
                 {
@@ -554,7 +605,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-XXX:YYY:wls-2b-rotationspeed",
+                        "source": "NMX-ChpWLS2B:YYY:wls-2b-rotationspeed",
                         "topic": "nmx_choppers",
                         "value_units": "Hz"
                       },
@@ -562,6 +613,64 @@
                     }
                   ],
                   "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2B:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2B:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
                   "type": "group"
                 },
                 {
