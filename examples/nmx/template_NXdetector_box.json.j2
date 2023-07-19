@@ -111,6 +111,26 @@
                     "values": {{ j2_detector_numbers }}
                   },
                   "module": "dataset"
+                },
+                {
+                  "name": "event_data",
+                  "type": "group",
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "dtype": "string",
+                      "values": "NXevent_data"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "module": "ev44",
+                      "config": {
+                        "source": "{{ j2_instrument_name }}",
+                        "topic": "{{ j2_instrument_name }}_detector"
+                      }
+                    }
+                  ]
                 }
                 {%- if j2_detector_transformations|length > 0 %},
                 {

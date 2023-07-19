@@ -35,6 +35,7 @@ def render(template_dir, template_file_name):
     print(f"Creating detectors...")
     detector_panel_0 = BoxNXDetector(
         "detector_panel_0",
+        "nmx",
         number_of_pixels_x=PIXELS_X,
         number_of_pixels_y=PIXELS_Y,
         size_z=DEPTH_OF_DETECTOR,
@@ -93,6 +94,7 @@ def render(template_dir, template_file_name):
 
     detector_panel_1 = BoxNXDetector(
         "detector_panel_1",
+        "nmx",
         number_of_pixels_x=PIXELS_X,
         number_of_pixels_y=PIXELS_Y,
         size_z=DEPTH_OF_DETECTOR,
@@ -151,6 +153,7 @@ def render(template_dir, template_file_name):
 
     detector_panel_2 = BoxNXDetector(
         "detector_panel_2",
+        "nmx",
         number_of_pixels_x=PIXELS_X,
         number_of_pixels_y=PIXELS_Y,
         size_z=DEPTH_OF_DETECTOR,
@@ -211,6 +214,7 @@ def render(template_dir, template_file_name):
 
     print(f"Rendering detectors...")
     context = {
+        # "j2_instrument_name": instrument_name,
         "j2_instrument_detector_panel_0": detector_panel_0.to_json(),
         "j2_instrument_detector_panel_1": detector_panel_1.to_json(),
         "j2_instrument_detector_panel_2": detector_panel_2.to_json(),

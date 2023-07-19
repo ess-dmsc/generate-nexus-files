@@ -36,6 +36,7 @@ def assert_all_are_close(iterable_a, iterable_b):
 def test_detector_boundaries(number_of_pixels_x, number_of_pixels_y, first_pixel_id):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
         number_of_pixels_y=number_of_pixels_y,
         size_z=1.0,
@@ -72,6 +73,7 @@ def test_detector_boundaries(number_of_pixels_x, number_of_pixels_y, first_pixel
 def test_pixel_ids(number_of_pixels_x, number_of_pixels_y, first_pixel_id):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
         number_of_pixels_y=number_of_pixels_y,
         size_z=1.0,
@@ -107,6 +109,7 @@ def test_detector_size(
 ):
     detector = BoxNXDetector(
         "test",
+        "nmx",
         x_length,
         y_length,
         10.0,
@@ -138,6 +141,7 @@ def test_detector_size(
 def test_detector_size_simple_with_no_gaps():
     detector = BoxNXDetector(
         name="Detector1",
+        instrument_name="nmx",
         number_of_pixels_x=4,
         number_of_pixels_y=4,
         size_z=1.0,
@@ -156,6 +160,7 @@ def test_detector_size_simple_with_no_gaps():
 def test_detector_size_simple_with_gaps():
     detector = BoxNXDetector(
         name="Detector2",
+        instrument_name="nmx",
         number_of_pixels_x=4,
         number_of_pixels_y=4,
         size_z=1.0,
@@ -174,6 +179,7 @@ def test_detector_size_simple_with_gaps():
 def test_get_pixel_coordinates_simple_2x2_example_no_gaps():
     detector = BoxNXDetector(
         name="Detector1",
+        instrument_name="nmx",
         number_of_pixels_x=2,
         number_of_pixels_y=2,
         size_z=10.0,
@@ -202,6 +208,7 @@ def test_get_pixel_coordinates_simple_2x2_example_no_gaps():
 def test_get_pixel_coordinates_simple_2x2_example_with_gaps():
     detector = BoxNXDetector(
         name="Detector1",
+        instrument_name="nmx",
         number_of_pixels_x=2,
         number_of_pixels_y=2,
         size_z=10.0,
@@ -230,6 +237,7 @@ def test_get_pixel_coordinates_simple_2x2_example_with_gaps():
 def test_get_pixel_coordinates_simple_4x4_no_gaps():
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=4,
         number_of_pixels_y=4,
         size_z=1.0,
@@ -256,6 +264,7 @@ def test_get_pixel_coordinates_simple_4x4_no_gaps():
 def test_get_pixel_coordinates_simple_4x4_with_gaps():
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=4,
         number_of_pixels_y=4,
         size_z=1.0,
@@ -283,6 +292,7 @@ def test_get_pixel_coordinates_simple_4x4_with_gaps():
 def test_first_pixel_id_does_not_affect_pixel_coordinates(first_pixel_id):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=4,
         number_of_pixels_y=4,
         size_z=1.0,
@@ -314,6 +324,7 @@ def test_get_detector_numbers_simple_2x2_example(
 ):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
         number_of_pixels_y=number_of_pixels_y,
         size_z=1.0,
@@ -332,6 +343,7 @@ def test_get_detector_numbers_simple_2x2_example(
 def test_get_detector_numbers(first_pixel_id, number_of_pixels_x, number_of_pixels_y):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
         number_of_pixels_y=number_of_pixels_y,
         size_z=1.0,
@@ -361,6 +373,7 @@ def test_pixel_offsets_simple_4x2_example_with_gaps(
 ):
     detector = BoxNXDetector(
         name="Detector",
+        instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
         number_of_pixels_y=number_of_pixels_y,
         size_z=1.0,

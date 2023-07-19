@@ -8,8 +8,9 @@ except ModuleNotFoundError:
 
 
 class NXDetector(NXComponent):
-    def __init__(self, name: str):
+    def __init__(self, name: str, instrument_name: str):
         super().__init__(name)
+        self.instrument_name = instrument_name
 
     def get_detector_numbers(self):
         raise NotImplementedError
@@ -28,6 +29,7 @@ class BoxNXDetector(NXDetector):
     def __init__(
         self,
         name: str,
+        instrument_name: str,
         number_of_pixels_x: int,
         number_of_pixels_y: int,
         size_z: float,
@@ -39,7 +41,7 @@ class BoxNXDetector(NXDetector):
         gap_width_x: float = 0,
         gap_width_y: float = 0,
     ):
-        super().__init__(name)
+        super().__init__(name, instrument_name)
         self.number_of_pixels_x = number_of_pixels_x
         self.number_of_pixels_y = number_of_pixels_y
         self.channel_pitch_x = channel_pitch_x
@@ -151,6 +153,7 @@ class BoxNXDetector(NXDetector):
     def to_json(self):
         context = {
             "j2_detector_name": self.name,
+            "j2_instrument_name": self.instrument_name,
             "j2_detector_sizes": [self.size_z, self.size_y, self.size_x],
             "j2_detector_numbers": list(self.get_detector_numbers()),
             "j2_x_pixel_offsets": self.get_x_pixel_offsets(),
