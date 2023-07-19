@@ -5,9 +5,9 @@ import os
 import jinja2
 
 try:
-    from box_detector import BoxNXDetector
+    from nx_detector import BoxNXDetector
 except ModuleNotFoundError:
-    from examples.nmx.box_detector import BoxNXDetector
+    from examples.nmx.nx_detector import BoxNXDetector
 
 
 FACTOR = 1  # used to reduce file size while testing. Set to 1 for actual numbers.

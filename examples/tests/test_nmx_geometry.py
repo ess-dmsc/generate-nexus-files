@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from examples.nmx.box_detector import BoxNXDetector
+from examples.nmx.nx_detector import BoxNXDetector
 from examples.nmx.main import render
 
 
