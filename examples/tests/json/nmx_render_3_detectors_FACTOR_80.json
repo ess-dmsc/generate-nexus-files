@@ -51,204 +51,12 @@
           ],
           "children": [
             {
-              "attributes": [
-                {
-                  "dtype": "string",
-                  "name": "NX_class",
-                  "values": "NXdisk_chopper"
-                }
-              ],
-              "children": [
-                {
-                  "config": {
-                    "name": "slits",
-                    "type": "int64",
-                    "values": 1
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "units",
-                      "values": "deg"
-                    }
-                  ],
-                  "config": {
-                    "name": "slit_edges",
-                    "type": "double",
-                    "values": [
-                      0.0,
-                      86.0
-                    ]
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "units",
-                      "values": "m"
-                    }
-                  ],
-                  "config": {
-                    "name": "slit_height",
-                    "type": "double",
-                    "values": 0.1
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "units",
-                      "values": "m"
-                    }
-                  ],
-                  "config": {
-                    "name": "radius",
-                    "type": "double",
-                    "values": 0.35
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "NX_class",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "attributes": [
-                        {
-                          "dtype": "string",
-                          "name": "units",
-                          "values": "ns"
-                        }
-                      ],
-                      "config": {
-                        "dtype": "double",
-                        "source": "NMX-ChpXXX:YYY:Delay",
-                        "topic": "nmx_choppers",
-                        "value_units": "ns"
-                      },
-                      "module": "f144"
-                    }
-                  ],
-                  "name": "delay",
-                  "type": "group"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "NX_class",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "attributes": [
-                        {
-                          "dtype": "string",
-                          "name": "units",
-                          "values": "Hz"
-                        }
-                      ],
-                      "config": {
-                        "dtype": "double",
-                        "source": "NMX-XXX:YYY:Spd_R",
-                        "topic": "nmx_choppers",
-                        "value_units": "Hz"
-                      },
-                      "module": "f144"
-                    }
-                  ],
-                  "name": "rotation_speed",
-                  "type": "group"
-                },
-                {
-                  "attributes": [
-                    {
-                      "dtype": "string",
-                      "name": "NX_class",
-                      "values": "NXlog"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "config": {
-                        "source": "NMX-XXX:YYY:tdct",
-                        "topic": "nmx_choppers"
-                      },
-                      "module": "tdct"
-                    }
-                  ],
-                  "name": "tdct",
-                  "type": "group"
-                },
-                {
-                  "config": {
-                    "name": "depends_on",
-                    "values": "/entry/instrument/WLS-1_chopper/transformations/translation"
-                  },
-                  "module": "dataset"
-                },
-                {
-                  "attributes": [
-                    {
-                      "name": "NX_class",
-                      "values": "NXtransformations"
-                    }
-                  ],
-                  "children": [
-                    {
-                      "attributes": [
-                        {
-                          "dtype": "string",
-                          "name": "transformation_type",
-                          "values": "translation"
-                        },
-                        {
-                          "dtype": "string",
-                          "name": "units",
-                          "values": "m"
-                        },
-                        {
-                          "dtype": "string",
-                          "name": "vector",
-                          "values": [
-                            0.0,
-                            0.0,
-                            1.0
-                          ]
-                        },
-                        {
-                          "dtype": "string",
-                          "name": "depends_on",
-                          "values": "/entry/instrument/source/transformations/translation"
-                        }
-                      ],
-                      "config": {
-                        "name": "translation",
-                        "type": "double",
-                        "values": 28.67
-                      },
-                      "module": "dataset"
-                    }
-                  ],
-                  "name": "transformations",
-                  "type": "group"
-                }
-              ],
-              "name": "WLS-1_chopper",
-              "type": "group"
+              "config": {
+                "name": "name",
+                "type": "string",
+                "values": "NMX"
+              },
+              "module": "dataset"
             },
             {
               "attributes": [
@@ -349,6 +157,207 @@
                     "type": "double",
                     "values": [
                       0.0,
+                      86.0
+                    ]
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_height",
+                    "type": "double",
+                    "values": 0.1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "m"
+                    }
+                  ],
+                  "config": {
+                    "name": "radius",
+                    "type": "double",
+                    "values": 0.35
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "config": {
+                        "source": "NMX-ChpWLS1:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "tdct"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS1:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "Hz"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS1:YYY:Spd_R",
+                        "topic": "nmx_choppers",
+                        "value_units": "Hz"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/WLS-1_chopper/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "depends_on",
+                          "values": "/entry/instrument/source/transformations/translation"
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 28.67
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "WLS-1_chopper",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXdisk_chopper"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "name": "slits",
+                    "type": "int64",
+                    "values": 1
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "deg"
+                    }
+                  ],
+                  "config": {
+                    "name": "slit_edges",
+                    "type": "double",
+                    "values": [
+                      0.0,
                       170.0
                     ]
                   },
@@ -403,7 +412,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-XXX:YYY:wls-2a-rotationspeed",
+                        "source": "NMX-ChpWLS2A:YYY:wls-2a-rotationspeed",
                         "topic": "nmx_choppers",
                         "value_units": "Hz"
                       },
@@ -411,6 +420,56 @@
                     }
                   ],
                   "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "config": {
+                        "source": "NMX-ChpWLS2B:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "tdct"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2A:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
                   "type": "group"
                 },
                 {
@@ -554,7 +613,7 @@
                       ],
                       "config": {
                         "dtype": "double",
-                        "source": "NMX-XXX:YYY:wls-2b-rotationspeed",
+                        "source": "NMX-ChpWLS2B:YYY:wls-2b-rotationspeed",
                         "topic": "nmx_choppers",
                         "value_units": "Hz"
                       },
@@ -562,6 +621,64 @@
                     }
                   ],
                   "name": "rotation_speed",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2B:YYY:tdct",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "top_dead_center",
+                  "type": "group"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "NX_class",
+                      "values": "NXlog"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "ns"
+                        }
+                      ],
+                      "config": {
+                        "dtype": "double",
+                        "source": "NMX-ChpWLS2B:YYY:Delay",
+                        "topic": "nmx_choppers",
+                        "value_units": "ns"
+                      },
+                      "module": "f144"
+                    }
+                  ],
+                  "name": "delay",
                   "type": "group"
                 },
                 {
@@ -620,14 +737,6 @@
               ],
               "name": "WLS-2B_chopper",
               "type": "group"
-            },
-            {
-              "config": {
-                "name": "name",
-                "type": "string",
-                "values": "NMX"
-              },
-              "module": "dataset"
             }
             
             ,
@@ -748,7 +857,8 @@
                 {
                   "config": {
                     "name": "depends_on",
-                    "values": "/entry/instrument/detector_panel_0/transformations/axis6"
+                    "values": "/entry/instrument/detector_panel_0/transformations/orientation"
+
                   },
                   "module": "dataset"
                 },
@@ -761,7 +871,7 @@
                       "values": "NXtransformations"
                     }
                   ],
-                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": -0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": -0.7}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "stageZ", "type": "double", "values": 0.8}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/stageZ"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_stageZ_to_axis1"}], "config": {"name": "axis1", "type": "double", "values": 90.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis1_to_axis2"}], "config": {"name": "axis2", "type": "double", "values": -45.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis2_to_axis3"}], "config": {"name": "axis3", "type": "double", "values": 45.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/z_offset_axis3_to_axis4"}], "config": {"name": "axis4", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis4_to_axis5"}], "config": {"name": "axis5", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis5_to_axis6"}], "config": {"name": "axis6", "type": "double", "values": 0.0}, "module": "dataset"}]
+                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": -0.8}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": -0.7}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "z_offset_sample_to_stageZ", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/z_offset_sample_to_stageZ"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "m"}], "config": {"dtype": "double", "source": "NMX:Robot0:stageZ", "topic": "nmx_robot", "value_units": "m"}, "module": "f144"}], "name": "stageZ", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/stageZ"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 1, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_stageZ_to_axis1"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis1", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis1", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis1_to_axis2"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis2", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis2", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis2_to_axis3"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis3", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis3", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/z_offset_axis3_to_axis4"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis4", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis4", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis4_to_axis5"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis5", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis5", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/x_offset_axis5_to_axis6"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot0:axis6", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis6", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_0/transformations/axis6"}], "config": {"name": "orientation", "type": "double", "values": 90.0}, "module": "dataset"}]
                 }
               ]
             }
@@ -885,7 +995,8 @@
                 {
                   "config": {
                     "name": "depends_on",
-                    "values": "/entry/instrument/detector_panel_1/transformations/axis6"
+                    "values": "/entry/instrument/detector_panel_1/transformations/orientation"
+
                   },
                   "module": "dataset"
                 },
@@ -898,7 +1009,7 @@
                       "values": "NXtransformations"
                     }
                   ],
-                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": -0.9}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "stageZ", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/stageZ"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_stageZ_to_axis1"}], "config": {"name": "axis1", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis1_to_axis2"}], "config": {"name": "axis2", "type": "double", "values": -45.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis2_to_axis3"}], "config": {"name": "axis3", "type": "double", "values": -40.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/z_offset_axis3_to_axis4"}], "config": {"name": "axis4", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis4_to_axis5"}], "config": {"name": "axis5", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis5_to_axis6"}], "config": {"name": "axis6", "type": "double", "values": 0.0}, "module": "dataset"}]
+                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": -0.8}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": -0.7}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "z_offset_sample_to_stageZ", "type": "double", "values": -0.7}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/z_offset_sample_to_stageZ"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "m"}], "config": {"dtype": "double", "source": "NMX:Robot1:stageZ", "topic": "nmx_robot", "value_units": "m"}, "module": "f144"}], "name": "stageZ", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/stageZ"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 1, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_stageZ_to_axis1"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis1", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis1", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis1_to_axis2"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis2", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis2", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis2_to_axis3"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis3", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis3", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/z_offset_axis3_to_axis4"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis4", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis4", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis4_to_axis5"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis5", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis5", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/x_offset_axis5_to_axis6"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot1:axis6", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis6", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_1/transformations/axis6"}], "config": {"name": "orientation", "type": "double", "values": 90.0}, "module": "dataset"}]
                 }
               ]
             }
@@ -1022,7 +1133,8 @@
                 {
                   "config": {
                     "name": "depends_on",
-                    "values": "/entry/instrument/detector_panel_2/transformations/axis6"
+                    "values": "/entry/instrument/detector_panel_2/transformations/orientation"
+
                   },
                   "module": "dataset"
                 },
@@ -1035,7 +1147,7 @@
                       "values": "NXtransformations"
                     }
                   ],
-                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": -0.2}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "stageZ", "type": "double", "values": -0.5}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/stageZ"}], "config": {"name": "rotate_arm_chair", "type": "double", "values": 180.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/rotate_arm_chair"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_stageZ_to_axis1"}], "config": {"name": "axis1", "type": "double", "values": 90.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis1_to_axis2"}], "config": {"name": "axis2", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis2_to_axis3"}], "config": {"name": "axis3", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/z_offset_axis3_to_axis4"}], "config": {"name": "axis4", "type": "double", "values": 90.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis4_to_axis5"}], "config": {"name": "axis5", "type": "double", "values": 0.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis5_to_axis6"}], "config": {"name": "axis6", "type": "double", "values": 0.0}, "module": "dataset"}]
+                  "children": [{"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}], "config": {"name": "x_offset_sample_to_stageZ", "type": "double", "values": 0.8}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_sample_to_stageZ"}], "config": {"name": "y_offset_sample_to_stageZ", "type": "double", "values": -0.7}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_sample_to_stageZ"}], "config": {"name": "z_offset_sample_to_stageZ", "type": "double", "values": -0.6}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/z_offset_sample_to_stageZ"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "m"}], "config": {"dtype": "double", "source": "NMX:Robot2:stageZ", "topic": "nmx_robot", "value_units": "m"}, "module": "f144"}], "name": "stageZ", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/stageZ"}], "config": {"name": "arm_chair", "type": "double", "values": 180.0}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/arm_chair"}], "config": {"name": "y_offset_stageZ_to_axis1", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 1, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_stageZ_to_axis1"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis1", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis1", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis1"}], "config": {"name": "x_offset_axis1_to_axis2", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis1_to_axis2"}], "config": {"name": "y_offset_axis1_to_axis2", "type": "double", "values": 0.1}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis1_to_axis2"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis2", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis2", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis2"}], "config": {"name": "y_offset_axis2_to_axis3", "type": "double", "values": 0.4}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis2_to_axis3"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis3", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis3", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis3"}], "config": {"name": "x_offset_axis3_to_axis4", "type": "double", "values": 0.05}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis3_to_axis4"}], "config": {"name": "y_offset_axis3_to_axis4", "type": "double", "values": 0.12}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [0.0, 0.0, 1.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/y_offset_axis3_to_axis4"}], "config": {"name": "z_offset_axis3_to_axis4", "type": "double", "values": 0.06}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/z_offset_axis3_to_axis4"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis4", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis4", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis4"}], "config": {"name": "x_offset_axis4_to_axis5", "type": "double", "values": 0.3}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [0, 0, 1]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis4_to_axis5"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis5", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis5", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "translation"}, {"dtype": "string", "name": "units", "values": "m"}, {"dtype": "string", "name": "vector", "values": [1.0, 0.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis5"}], "config": {"name": "x_offset_axis5_to_axis6", "type": "double", "values": 0.15}, "module": "dataset"}, {"attributes": [{"dtype": "string", "name": "NX_class", "values": "NXlog"}, {"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "double", "name": "vector", "values": [1, 0, 0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/x_offset_axis5_to_axis6"}], "children": [{"attributes": [{"dtype": "string", "name": "units", "values": "degrees"}], "config": {"dtype": "double", "source": "NMX:Robot2:axis6", "topic": "nmx_robot", "value_units": "degrees"}, "module": "f144"}], "name": "axis6", "type": "group"}, {"attributes": [{"dtype": "string", "name": "transformation_type", "values": "rotation"}, {"dtype": "string", "name": "units", "values": "degrees"}, {"dtype": "string", "name": "vector", "values": [0.0, 1.0, 0.0]}, {"dtype": "string", "name": "depends_on", "values": "/entry/instrument/detector_panel_2/transformations/axis6"}], "config": {"name": "orientation", "type": "double", "values": -90.0}, "module": "dataset"}]
                 }
               ]
             }

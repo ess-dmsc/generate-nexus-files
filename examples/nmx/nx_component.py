@@ -29,7 +29,6 @@ class NXComponent:
                 )
         return output
 
-
     def _render(self, template_dir: str, template_file_name: str, **context):
         def get_item(dictionary, key):
             return dictionary.get(key)
