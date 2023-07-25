@@ -100,6 +100,7 @@ class BoxNXDetector(NXDetector):
 
     @property
     def pixel_ids(self):
+        """Generator"""
         for pixel_id in range(
             self.first_pixel_id,
             self.first_pixel_id + (self.number_of_pixels_x * self.number_of_pixels_y),
