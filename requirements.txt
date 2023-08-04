@@ -9,4 +9,5 @@ matplotlib
 nexusformat
 ipython
 file-writer-control
+jinja2
 pytest

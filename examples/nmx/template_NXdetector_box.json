@@ -1,0 +1,155 @@
+{
+  "name": "panel2_detector",
+  "type": "group",
+  "attributes": [
+    {
+      "dtype": "string",
+      "name": "NX_class",
+      "values": "NXdetector"
+    }
+  ],
+  "children": [
+    {
+      "attributes": [
+        {
+          "dtype": "string",
+          "name": "NX_class",
+          "values": "NXgeometry"
+        }
+      ],
+      "children": [
+        {
+          "attributes": [
+            {
+              "dtype": "string",
+              "name": "NX_class",
+              "values": "NXshape"
+            }
+          ],
+          "children": [
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "units",
+                  "values": "mm"
+                }
+              ],
+              "config": {
+                "name": "size",
+                "type": "double",
+                "values": [
+                  10,
+                  256,
+                  256
+                ]
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "shape",
+                "type": "string",
+                "values": "nxbox"
+              },
+              "module": "dataset"
+            }
+          ],
+          "name": "shape",
+          "type": "group"
+        }
+      ],
+      "name": "geometry",
+      "type": "group"
+    },
+    {
+      "attributes": [
+        {
+          "dtype": "string",
+          "name": "units",
+          "values": "mm"
+        }
+      ],
+      "config": {
+        "name": "x_pixel_offset",
+        "type": "float",
+        "values": [
+          [
+            -64,
+            64
+          ],
+          [
+            -64,
+            64
+          ]
+        ]
+      },
+      "module": "dataset"
+    },
+    {
+      "attributes": [
+        {
+          "dtype": "string",
+          "name": "units",
+          "values": "mm"
+        }
+      ],
+      "config": {
+        "name": "y_pixel_offset",
+        "type": "float",
+        "values": [
+          [
+            64,
+            64
+          ],
+          [
+            -64,
+            -64
+          ]
+        ]
+      },
+      "module": "dataset"
+    },
+    {
+      "attributes": [
+        {
+          "dtype": "string",
+          "name": "units",
+          "values": "mm"
+        }
+      ],
+      "config": {
+        "name": "z_pixel_offset",
+        "type": "float",
+        "values": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      "module": "dataset"
+    },
+    {
+      "config": {
+        "name": "detector_number",
+        "type": "int32",
+        "values": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ]
+      },
+      "module": "dataset"
+    }
+  ]
+}
