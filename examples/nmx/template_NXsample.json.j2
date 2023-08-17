@@ -1,0 +1,128 @@
+        {
+          "name": "{{ j2_name }}",
+          "type": "group",
+          "attributes": [
+            {
+              "dtype": "string",
+              "name": "NX_class",
+              "values": "NXsample"
+            }
+          ],
+          "children": [
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXenvironment"
+                }
+              ],
+              "children": [],
+              "name": "sample_environment",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXlog"
+                }
+              ],
+              "children": [
+                {
+                  "config": {
+                    "dtype": "double",
+                    "source": "todo:changer:position",
+                    "topic": "nmx_sample"
+                  },
+                  "module": "f144"
+                }
+              ],
+              "name": "changer_position",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXlog"
+                }
+              ],
+              "children": [
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "K"
+                    }
+                  ],
+                  "config": {
+                    "dtype": "double",
+                    "source": "todo:temperature",
+                    "topic": "nmx_sample",
+                    "value_units": "K"
+                  },
+                  "module": "f144"
+                }
+              ],
+              "name": "temperature",
+              "type": "group"
+            },
+            {
+              "config": {
+                "name": "name",
+                "type": "string",
+                "values": "{{ j2_sample_name }}"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "preparation_date",
+                "type": "string",
+                "values": "$SAMPLE_PREPARATION_DATE$"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "type",
+                "type": "string",
+                "values": "sample"
+              },
+              "module": "dataset"
+            },
+            {
+              "config": {
+                "name": "description",
+                "type": "string",
+                "values": "$SAMPLE_DESCRIPTION$"
+              },
+              "module": "dataset"
+            }
+            {%- if j2_sample_transformations|length > 0 %},
+            {
+              "config": {
+                "name": "depends_on",
+                "values": "/entry/instrument/{{ j2_name }}/transformations/{% if j2_sample_transformations|last|get_item('config') is not none %}{{ j2_sample_transformations|last|get_item('config')|get_item('name') }}{% else %}{{ j2_sample_transformations|last|get_item('name') }}{% endif %}"
+
+              },
+              "module": "dataset"
+            },
+            {
+              "name": "transformations",
+              "type": "group",
+              "attributes": [
+                {
+                  "name": "NX_class",
+                  "values": "NXtransformations"
+                }
+              ],
+              "children": {{ j2_sample_transformations | tojson }}
+            }
+            {%- endif %}
+          ]
+        }

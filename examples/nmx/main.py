@@ -6,8 +6,10 @@ import jinja2
 
 try:
     from nx_detector import BoxNXDetector
+    from nx_sample import NXSample
 except ModuleNotFoundError:
     from examples.nmx.nx_detector import BoxNXDetector
+    from examples.nmx.nx_sample import NXSample
 
 
 FACTOR = 1  # used to reduce file size while testing. Set to 1 for actual numbers.
@@ -32,7 +34,15 @@ def render_template(template_dir, template_file_name, **context):
 
 
 def render(template_dir, template_file_name):
-    print(f"Creating detectors...")
+    print("Creating sample and detectors...")
+    sample = NXSample(name="sample", sample_name="sample name", instrument_name="nmx")
+    (
+        sample
+        .translate("x_offset_sample_to_stageZ", x=0.8)
+        .translate("y_offset_sample_to_stageZ", y=-0.7)
+        .translate("z_offset_sample_to_stageZ", z=-0.6)
+    )
+
     detector_panel_0 = BoxNXDetector(
         "detector_panel_0",
         "nmx",
@@ -212,6 +222,10 @@ def render(template_dir, template_file_name):
         .rotate("orientation", y=-90)
     )
 
+
+
+    # rendering
+
     print(f"Rendering detectors...")
     context = {
         # "j2_instrument_name": instrument_name,
@@ -220,9 +234,13 @@ def render(template_dir, template_file_name):
         "j2_instrument_detector_panel_2": detector_panel_2.to_json(),
     }
 
+    print(f"Rendering sample...")
+    context.update({
+        "j2_nxsample": sample.to_json(),
+    })
+
     print(f"Rendering template...")
     output = render_template(template_dir, template_file_name, **context)
-    json.loads(output)  # raises json.JSONDecodeError if invalid JSON
     return output
 
 
@@ -242,6 +260,7 @@ def main():
     output = render(template_dir, template_file_name)
     with open(output_file_name, "w", encoding="utf-8") as file:
         file.write(output)
+    json.loads(output)  # raises json.JSONDecodeError if invalid JSON
     print(f"Written JSON file: {output_file_name}")
 
 
