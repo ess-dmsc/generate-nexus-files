@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 from pathlib import PurePosixPath
+from operator import itemgetter
 
 import jinja2
 
@@ -318,7 +319,30 @@ def main():
     with open(output_file_name, "w", encoding="utf-8") as file:
         file.write(output)
     json.loads(output)  # raises json.JSONDecodeError if invalid JSON
+    with open(output_file_name + ".sorted.json", "w", encoding="utf-8") as file_sorted:
+        json.dump(custom_sort(output, CUSTOM_SORT_ORDER), file_sorted, indent=2, sort_keys=False)
     print(f"Written JSON file: {output_file_name}")
+
+
+def custom_sort(obj, key_order):
+    if isinstance(obj, dict):
+        sorted_keys = sorted(obj.keys(), key=lambda k: key_order.get(k, key_order.get('__default__', float('inf'))))
+        return {k: custom_sort(obj[k], key_order) for k in sorted_keys}
+    else:
+        return obj
+
+
+CUSTOM_SORT_ORDER = {
+    'name': 10,
+    'module': 30,
+    'values': 31,
+    'config': 40,
+    'type': 40,
+    'dtype': 40,
+    '__default__': 80,  # Default order for unknown keys
+    'attributes': 90,
+    'children': 99,
+}
 
 
 if __name__ == "__main__":

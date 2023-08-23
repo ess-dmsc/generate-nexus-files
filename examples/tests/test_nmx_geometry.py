@@ -1,4 +1,5 @@
 import json
+from pathlib import PurePosixPath
 from itertools import zip_longest
 from math import isclose
 import os
@@ -35,6 +36,7 @@ def assert_all_are_close(iterable_a, iterable_b):
 @pytest.mark.parametrize("first_pixel_id", [0, 1, 1024])
 def test_detector_boundaries(number_of_pixels_x, number_of_pixels_y, first_pixel_id):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
@@ -72,6 +74,7 @@ def test_detector_boundaries(number_of_pixels_x, number_of_pixels_y, first_pixel
 @pytest.mark.parametrize("first_pixel_id", [0, 1, 1024])
 def test_pixel_ids(number_of_pixels_x, number_of_pixels_y, first_pixel_id):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
@@ -108,6 +111,7 @@ def test_detector_size(
     gap_width_y,
 ):
     detector = BoxNXDetector(
+        PurePosixPath("/entry/instrument"),
         "test",
         "nmx",
         x_length,
@@ -140,6 +144,7 @@ def test_detector_size(
 
 def test_detector_size_simple_with_no_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector1",
         instrument_name="nmx",
         number_of_pixels_x=4,
@@ -159,6 +164,7 @@ def test_detector_size_simple_with_no_gaps():
 
 def test_detector_size_simple_with_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector2",
         instrument_name="nmx",
         number_of_pixels_x=4,
@@ -178,6 +184,7 @@ def test_detector_size_simple_with_gaps():
 
 def test_get_pixel_coordinates_simple_2x2_example_no_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector1",
         instrument_name="nmx",
         number_of_pixels_x=2,
@@ -207,6 +214,7 @@ def test_get_pixel_coordinates_simple_2x2_example_no_gaps():
 
 def test_get_pixel_coordinates_simple_2x2_example_with_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector1",
         instrument_name="nmx",
         number_of_pixels_x=2,
@@ -236,6 +244,7 @@ def test_get_pixel_coordinates_simple_2x2_example_with_gaps():
 
 def test_get_pixel_coordinates_simple_4x4_no_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=4,
@@ -263,6 +272,7 @@ def test_get_pixel_coordinates_simple_4x4_no_gaps():
 
 def test_get_pixel_coordinates_simple_4x4_with_gaps():
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=4,
@@ -291,6 +301,7 @@ def test_get_pixel_coordinates_simple_4x4_with_gaps():
 @pytest.mark.parametrize("first_pixel_id", [0, 1, 1024])
 def test_first_pixel_id_does_not_affect_pixel_coordinates(first_pixel_id):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=4,
@@ -323,6 +334,7 @@ def test_get_detector_numbers_simple_2x2_example(
     first_pixel_id, number_of_pixels_x, number_of_pixels_y
 ):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
@@ -342,6 +354,7 @@ def test_get_detector_numbers_simple_2x2_example(
 @pytest.mark.parametrize("number_of_pixels_y", [5, 180])
 def test_get_detector_numbers(first_pixel_id, number_of_pixels_x, number_of_pixels_y):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
@@ -372,6 +385,7 @@ def test_pixel_offsets_simple_4x2_example_with_gaps(
     first_pixel_id, number_of_pixels_x, number_of_pixels_y
 ):
     detector = BoxNXDetector(
+        parent=PurePosixPath("/entry/instrument"),
         name="Detector",
         instrument_name="nmx",
         number_of_pixels_x=number_of_pixels_x,
