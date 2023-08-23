@@ -788,44 +788,10 @@
           ],
           "name": "instrument",
           "type": "group"
-        },
-        {%- if j2_nxsample %}
-{{ j2_nxsample }},
-        {%- endif %}
-        {
-          "name": "data",
-          "type": "group",
-          "attributes": [
-            {
-              "name": "NX_class",
-              "dtype": "string",
-              "values": "NXdata"
-            }
-          ],
-          "children": [
-            {
-              "module": "link",
-              "config": {
-                "name": "detector0_event_data",
-                "source": "/entry/instrument/detector_panel_0/event_data"
-              }
-            },
-            {
-              "module": "link",
-              "config": {
-                "name": "detector1_event_data",
-                "source": "/entry/instrument/detector_panel_1/event_data"
-              }
-            },
-            {
-              "module": "link",
-              "config": {
-                "name": "detector2_event_data",
-                "source": "/entry/instrument/detector_panel_2/event_data"
-              }
-            }
-          ]
         }
+        {%- if j2_nxsample %},
+{{ j2_nxsample }}
+        {%- endif %}
       ],
       "name": "entry",
       "type": "group"
