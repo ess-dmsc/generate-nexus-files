@@ -74,8 +74,7 @@
             {
               "config": {
                 "name": "depends_on",
-                "values": "/entry/instrument/{{ j2_name }}/transformations/{% if j2_sample_transformations|last|get_item('config') is not none %}{{ j2_sample_transformations|last|get_item('config')|get_item('name') }}{% else %}{{ j2_sample_transformations|last|get_item('name') }}{% endif %}"
-
+                "values": "/entry/{{ j2_name }}/transformations/{% if j2_sample_transformations|last|get_item('config') is not none %}{{ j2_sample_transformations|last|get_item('config')|get_item('name') }}{% else %}{{ j2_sample_transformations|last|get_item('name') }}{% endif %}"
               },
               "module": "dataset"
             },
