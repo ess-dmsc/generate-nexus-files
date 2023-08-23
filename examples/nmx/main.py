@@ -38,6 +38,7 @@ def render_template(template_dir, template_file_name, **context):
 def render(template_dir, template_file_name):
     print("Creating sample and detectors...")
 
+    # detector_0: seen from the incoming beam, the panel to the left and behind the sample
     detector_panel_0 = BoxNXDetector(
         PurePosixPath("/entry/instrument"),
         "detector_panel_0",
@@ -77,28 +78,29 @@ def render(template_dir, template_file_name):
     # Detector positioning from NXlog:
     (
         detector_panel_0
-        .translate("x_offset_sample_to_stageZ", x=-0.8)
+        .translate("x_offset_sample_to_stageZ", x=0.8)
         .translate("y_offset_sample_to_stageZ", y=-0.7)
-        .translate("z_offset_sample_to_stageZ", z=0.1)
+        .translate("z_offset_sample_to_stageZ", z=0.6)
         .translate_from_nxlog("stageZ", [0,0,1], "f144", "nmx_robot", "NMX:Robot0:stageZ")
         .translate("y_offset_stageZ_to_axis1", y=0.1)
         .rotate_from_nxlog("axis1", [0,1,0], "f144", "nmx_robot", "NMX:Robot0:axis1")
-        .translate("x_offset_axis1_to_axis2", x=0.12)
-        .translate("y_offset_axis1_to_axis2", x=0.1)
+        .translate("x_offset_axis1_to_axis2", x=-0.12)
+        .translate("y_offset_axis1_to_axis2", x=-0.1)
         .rotate_from_nxlog("axis2", [0,0,1], "f144", "nmx_robot", "NMX:Robot0:axis2")
         .translate("y_offset_axis2_to_axis3", y=0.4)
         .rotate_from_nxlog("axis3", [0,0,1], "f144", "nmx_robot", "NMX:Robot0:axis3")
-        .translate("x_offset_axis3_to_axis4", x=0.05)
+        .translate("x_offset_axis3_to_axis4", x=-0.05)
         .translate("y_offset_axis3_to_axis4", y=0.12)
         .translate("z_offset_axis3_to_axis4", z=0.06)
         .rotate_from_nxlog("axis4", [1,0,0], "f144", "nmx_robot", "NMX:Robot0:axis4")
-        .translate("x_offset_axis4_to_axis5", x=0.3)
+        .translate("x_offset_axis4_to_axis5", x=-0.3)
         .rotate_from_nxlog("axis5", [0,0,1], "f144", "nmx_robot", "NMX:Robot0:axis5")
-        .translate("x_offset_axis5_to_axis6", x=0.15)
+        .translate("x_offset_axis5_to_axis6", x=-0.15)
         .rotate_from_nxlog("axis6", [1,0,0], "f144", "nmx_robot", "NMX:Robot0:axis6")
-        .rotate("orientation", y=90)
+        .rotate("orientation", y=-90)
     )
 
+    # detector_1: seen from the incoming beam, the panel to the right
     detector_panel_1 = BoxNXDetector(
         PurePosixPath("/entry/instrument"),
         "detector_panel_1",
@@ -160,6 +162,7 @@ def render(template_dir, template_file_name):
         .rotate("orientation", y=90)
     )
 
+    # detector_2: seen from the incoming beam, the panel to the left
     detector_panel_2 = BoxNXDetector(
         PurePosixPath("/entry/instrument"),
         "detector_panel_2",
