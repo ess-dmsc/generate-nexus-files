@@ -771,6 +771,203 @@
               ],
               "name": "WLS-2B_chopper",
               "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXslit"
+                }
+              ],
+              "children": [
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "x_gap",
+                    "type": "double",
+                    "values": 30.0
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "y_gap",
+                    "type": "double",
+                    "values": 30.0
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/slit_1/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "offset",
+                          "values": 0.0
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 2.0
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "slit_1",
+              "type": "group"
+            },
+            {
+              "attributes": [
+                {
+                  "dtype": "string",
+                  "name": "NX_class",
+                  "values": "NXslit"
+                }
+              ],
+              "children": [
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "x_gap",
+                    "type": "double",
+                    "values": 30.0
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "dtype": "string",
+                      "name": "units",
+                      "values": "mm"
+                    }
+                  ],
+                  "config": {
+                    "name": "y_gap",
+                    "type": "double",
+                    "values": 30.0
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "config": {
+                    "name": "depends_on",
+                    "values": "/entry/instrument/slit_2/transformations/translation"
+                  },
+                  "module": "dataset"
+                },
+                {
+                  "attributes": [
+                    {
+                      "name": "NX_class",
+                      "values": "NXtransformations"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "attributes": [
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "transformation_type",
+                          "values": "translation"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "units",
+                          "values": "m"
+                        },
+                        {
+                          "dtype": "string",
+                          "name": "vector",
+                          "values": [
+                            0.0,
+                            0.0,
+                            1.0
+                          ]
+                        }
+                      ],
+                      "config": {
+                        "name": "translation",
+                        "type": "double",
+                        "values": 0.5
+                      },
+                      "module": "dataset"
+                    }
+                  ],
+                  "name": "transformations",
+                  "type": "group"
+                }
+              ],
+              "name": "slit_2",
+              "type": "group"
             }
             {% if j2_instrument_detector_panel_0 %}
             ,
