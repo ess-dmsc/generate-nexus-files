@@ -1,5 +1,6 @@
 import itertools
 from typing import List
+from pathlib import PurePosixPath
 
 try:
     from nx_component import NXComponent
@@ -8,8 +9,8 @@ except ModuleNotFoundError:
 
 
 class NXSample(NXComponent):
-    def __init__(self, name: str, sample_name: str, instrument_name: str):
-        super().__init__(name)
+    def __init__(self, parent: PurePosixPath, name: str, sample_name: str, instrument_name: str):
+        super().__init__(parent, name)
         self.name = name
         self.sample_name = sample_name
         self.instrument_name = instrument_name

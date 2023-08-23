@@ -1,5 +1,6 @@
 import itertools
 from typing import List
+from pathlib import PurePosixPath
 
 try:
     from nx_component import NXComponent
@@ -8,8 +9,8 @@ except ModuleNotFoundError:
 
 
 class NXDetector(NXComponent):
-    def __init__(self, name: str, instrument_name: str):
-        super().__init__(name)
+    def __init__(self, parent: PurePosixPath, name: str, instrument_name: str):
+        super().__init__(parent, name)
         self.instrument_name = instrument_name
 
     def get_detector_numbers(self):
@@ -28,6 +29,7 @@ class NXDetector(NXComponent):
 class BoxNXDetector(NXDetector):
     def __init__(
         self,
+        parent: PurePosixPath,
         name: str,
         instrument_name: str,
         number_of_pixels_x: int,
@@ -41,7 +43,7 @@ class BoxNXDetector(NXDetector):
         gap_width_x: float = 0,
         gap_width_y: float = 0,
     ):
-        super().__init__(name, instrument_name)
+        super().__init__(parent, name, instrument_name)
         self.number_of_pixels_x = number_of_pixels_x
         self.number_of_pixels_y = number_of_pixels_y
         self.channel_pitch_x = channel_pitch_x

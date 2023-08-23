@@ -137,7 +137,6 @@
                   "config": {
                     "name": "depends_on",
                     "values": "/entry/instrument/{{ j2_detector_name }}/transformations/{% if j2_detector_transformations|last|get_item('config') is not none %}{{ j2_detector_transformations|last|get_item('config')|get_item('name') }}{% else %}{{ j2_detector_transformations|last|get_item('name') }}{% endif %}"
-
                   },
                   "module": "dataset"
                 },
