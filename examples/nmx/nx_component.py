@@ -1,11 +1,13 @@
 from copy import deepcopy
 from typing import Any, Dict, List
+from pathlib import PurePosixPath
 
 import jinja2
 
 
 class NXComponent:
-    def __init__(self, name):
+    def __init__(self, parent: PurePosixPath, name):
+        self.parent = PurePosixPath(parent)
         self.name = name
         self._transformations: List[Dict[str, Any]] = []
 
@@ -24,7 +26,7 @@ class NXComponent:
                     {
                         "dtype": "string",
                         "name": "depends_on",
-                        "values": f"/entry/instrument/{self.name}/transformations/{parent_name}",
+                        "values": f"{self.parent / self.name}/transformations/{parent_name}",
                     }
                 )
         return output
