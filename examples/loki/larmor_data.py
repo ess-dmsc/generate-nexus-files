@@ -12,7 +12,7 @@ NUM_BANKS = 1
 
 # Straw information.
 NUM_STRAWS_PER_TUBE = 7
-STRAW_DIAMETER = 7.75 * SCALE_FACTOR
+STRAW_DIAMETER = 7.5 * SCALE_FACTOR
 STRAW_RESOLUTION = 512  # Might need to switch to 512 though for commisiong tests.
 STRAW_Y_LOC = 1.14 * SCALE_FACTOR
 STRAW_Z_LOC = 7.67 * SCALE_FACTOR
