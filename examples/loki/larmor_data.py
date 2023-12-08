@@ -68,12 +68,12 @@ s_eq1 = s3 + 0.75 * (s2 - s3) / 4.82
 data_slits = []
 
 # Data from larmor document.
-d_x = 1.953
-dz_sample = 4431
-y_1 = 6.28
-y_2 = 28.4
-z_1 = 26.259
 tube_l = 1000
+d_x = tube_l/STRAW_RESOLUTION #pixel size (1000/512=1.953125)
+dz_sample = 4431
+y_1 = 6.28    #y dist of two tubes in subsequent layers
+y_2 = 28.4    #y dist of two tubes in a layer
+z_1 = 26.259  #z dist of the tubes in subsequent layers
 
 
 # pixel_num is pixel 1 to 512, n is tube 1 to 128
@@ -86,7 +86,7 @@ def r_n(n):
 
 
 def x_n(pixel_num):
-    return -tube_l/2 + d_x / 2 + d_x * (pixel_num - 1)
+    return tube_l/2 - d_x / 2 - d_x * (pixel_num - 1)
 
 
 def y_n(n):
