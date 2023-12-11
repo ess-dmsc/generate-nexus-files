@@ -67,7 +67,7 @@ class NXComponent:
                     "values": "rotation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "string", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
         }
 
@@ -111,7 +111,7 @@ class NXComponent:
                     "values": "rotation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "double", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
             "children": [
                 {
@@ -166,7 +166,7 @@ class NXComponent:
                     "values": "translation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "string", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
         }
 
@@ -210,7 +210,7 @@ class NXComponent:
                     "values": "translation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "double", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
             "children": [
                 {
