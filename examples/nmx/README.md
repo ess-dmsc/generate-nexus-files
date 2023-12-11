@@ -5,10 +5,10 @@ instrument template.
 
 ## Usage
 
-1. Prepare a jinja2 template for the instrument. This repo provides one at `examples/nmx/template_nmx_v3.0_baseline.json.j2`
+1. Prepare a jinja2 template for the instrument. This repo provides one at `examples/nmx/template_nmx_v3.2_baseline.json.j2`
 1. Create a virtual environment and install requirements.txt from this directory.
 1. Run main.py passing the template and an output file:
-`python examples/nmx/main.py -t examples/nmx/template_nmx_v3.0_baseline.json.j2 -o nmx_v3.0_with_detectors.json`
+`python examples/nmx/main.py -t examples/nmx/template_nmx_v3.2_baseline.json.j2 -o nmx.json`
 
 ## NMX parameters
 

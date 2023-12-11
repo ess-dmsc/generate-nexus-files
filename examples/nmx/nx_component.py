@@ -67,7 +67,7 @@ class NXComponent:
                     "values": "rotation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "string", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
         }
 
@@ -80,9 +80,10 @@ class NXComponent:
         source: str,
         units: str = "degrees",
         offset: List[float] = None,
+        offset_units: str = "m",
     ):
         self._transformations.append(
-            self._build_nxlog_rotation(name, vector, schema, topic, source, units=units, offset=offset)
+            self._build_nxlog_rotation(name, vector, schema, topic, source, units=units, offset=offset, offset_units=offset_units)
         )
         return self
 
@@ -95,6 +96,7 @@ class NXComponent:
         source: str,
         units: str = "degrees",
         offset: List[float] = None,
+        offset_units: str = "m",
     ):
         x, y, z = vector[:3]
         assert (
@@ -111,7 +113,7 @@ class NXComponent:
                     "values": "rotation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "double", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
             "children": [
                 {
@@ -134,7 +136,10 @@ class NXComponent:
         }
         if offset:
             output["attributes"].append(
-                {"dtype": "double", "name": "offset", "values": offset},
+                {"dtype": "float", "name": "offset", "values": offset},
+            )
+            output["attributes"].append(
+                {"dtype": "string", "name": "offset_units", "values": offset_units},
             )
         return output
 
@@ -166,7 +171,7 @@ class NXComponent:
                     "values": "translation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "string", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
         }
 
@@ -179,9 +184,10 @@ class NXComponent:
         source: str,
         units: str = "m",
         offset: List[float] = None,
+        offset_units: str = "m",
     ):
         self._transformations.append(
-            self._build_nxlog_translation(name, vector, schema, topic, source, units=units, offset=offset)
+            self._build_nxlog_translation(name, vector, schema, topic, source, units=units, offset=offset, offset_units=offset_units)
         )
         return self
 
@@ -194,6 +200,7 @@ class NXComponent:
         source: str,
         units: str = "m",
         offset: List[float] = None,
+        offset_units: str = "m",
     ):
         x, y, z = vector[:3]
         assert (
@@ -210,7 +217,7 @@ class NXComponent:
                     "values": "translation",
                 },
                 {"dtype": "string", "name": "units", "values": units},
-                {"dtype": "double", "name": "vector", "values": vector},
+                {"dtype": "float", "name": "vector", "values": vector},
             ],
             "children": [
                 {
@@ -233,6 +240,9 @@ class NXComponent:
         }
         if offset:
             output["attributes"].append(
-                {"dtype": "double", "name": "offset", "values": offset},
+                {"dtype": "float", "name": "offset", "values": offset},
+            )
+            output["attributes"].append(
+                {"dtype": "string", "name": "offset_units", "values": offset_units},
             )
         return output
