@@ -48,7 +48,13 @@ yet support offsets (see ECDC-3526).
   of 2-dimensional arrays.
   * `z_pixel_offset` is generated as a single value of zero: `[0]`.
 
+### Slits and pinholes
 
+Based on preliminary specifications available at ESS-4083584 and ESS-3833426.
+
+The specifics about pinholes are not available, so we have created 4 pinholes of different
+diameters and attached them to a NXpositioner. By moving the positioner, a pinhole can be
+selected by aligning it with the beam.
 
 ### Robot arms
 
