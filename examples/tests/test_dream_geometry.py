@@ -8,8 +8,22 @@ from examples.utils.detector_geometry_from_json import retrieve_data_from_json, 
     DETECTOR_NUMBER, BaseDetectorGeometry, X_PIXEL_OFFSET, Y_PIXEL_OFFSET, Z_PIXEL_OFFSET
 
 
-precision = 0.00002  # general precision aim (2/100 mm) [m]
-cuboid_precision = 0.001  # precision aim for cuboid (10/100 mm) [m]
+GLOBAL_FORWARD_ENDCAP_ID_OFFSET = 0
+GLOBAL_BACKWARD_ENDCAP_ID_OFFSET = 71680
+GLOBAL_MANTLE_ID_OFFSET = 229376
+GLOBAL_HR_ID_OFFSET = 1122304
+
+ENDCAP_X_OFFSET_PER_SECTOR = 56
+ENDCAP_Y_OFFSET_PER_STRIP = 16
+
+MANTLE_Y_OFFSET_PER_MODULE = 12
+MANTLE_NUM_STRIPS = 256
+
+CUBOID_Y_OFFSET_PER_STRIP = 112
+
+
+precision = 2e-5  # general precision aim (20nm) [mm]
+cuboid_precision = 1e-3  # precision aim for cuboid (1 um) [mm]
 endcap_rotation_precision = 0.01  # precision aim for endcap rotation (1/100 degree) [deg]
 
 
@@ -23,12 +37,11 @@ def calc_mantle_x(strip):
 
 
 def calc_mantle_y(mod, cass, ctr, wire, num_mods):
-    # num_mods = len(np.unique(mod))
-    return num_mods * 12 * wire + 12 * mod + 2 * cass + ctr
+    return num_mods * MANTLE_Y_OFFSET_PER_MODULE * wire + MANTLE_Y_OFFSET_PER_MODULE * mod + 2 * cass + ctr
 
 
 def calc_mantle_pixel(x, y):
-    return 256 * y + x + 1 + 229376
+    return MANTLE_NUM_STRIPS * y + x + 1 + GLOBAL_MANTLE_ID_OFFSET
 
 
 def get_mantle_pixels(strip, module, cass, counter, wire, num_mods):
@@ -47,9 +60,9 @@ The OFFSETS_HR and ROTATE_HR lookup tables are taken from the ICD drawing but en
 OFFSETS_HR = [
                         (32,  0), (48,  0), (64,  0),
               (16, 16), (32, 16), (48, 16), (64, 16), (80, 16),
-    ( 0, 32), (16, 32), (32, 32), (48, 32), (64, 32), (80, 32), (96, 32),
-    ( 0, 48), (16, 48), (32, 48),           (64, 48), (80, 48), (96, 48),
-    ( 0, 64), (16, 64), (32, 64),           (64, 64), (80, 64), (96, 64),
+     (0, 32), (16, 32), (32, 32), (48, 32), (64, 32), (80, 32), (96, 32),
+     (0, 48), (16, 48), (32, 48),           (64, 48), (80, 48), (96, 48),
+     (0, 64), (16, 64), (32, 64),           (64, 64), (80, 64), (96, 64),
               (16, 80), (32, 80),           (64, 80), (80, 80),
                         (32, 96),           (64, 96)
 ]
@@ -91,7 +104,7 @@ def rotate_cuboid(x, y, sect_seg):
 
 
 def calc_cuboid_y_global(strip):
-    return 112 * strip
+    return CUBOID_Y_OFFSET_PER_STRIP * strip
 
 
 def calc_cuboid_offset(sect_seg, module):
@@ -121,7 +134,7 @@ def calc_cuboid_y(y_global, y_local, y_offset):
 
 
 def calc_cuboid_pixel(x, y):
-    return 112 * y + x + 1 + 1122304
+    return CUBOID_Y_OFFSET_PER_STRIP * y + x + 1 + GLOBAL_HR_ID_OFFSET
 
 
 def get_cuboid_pixels(sect_seg, module, cass, wire, strip, counter):
@@ -155,7 +168,7 @@ def calc_endcap_sect(sumo, cass, ctr):
 
 
 def calc_endcap_offset(sect):
-    return 56 * sect
+    return ENDCAP_X_OFFSET_PER_SECTOR * sect
 
 
 def calc_endcap_x(sect, sumo, cass, ctr):
@@ -163,15 +176,15 @@ def calc_endcap_x(sect, sumo, cass, ctr):
 
 
 def calc_endcap_y(strip, wire):
-    return 16 * strip + 15 - wire
+    return ENDCAP_Y_OFFSET_PER_STRIP * strip + 15 - wire
 
 
 def calc_endcap_pixel(x, y, num_sectors, is_backward):
     if is_backward:
-        offset = 71680
+        offset = GLOBAL_BACKWARD_ENDCAP_ID_OFFSET
     else:
-        offset = 0
-    return 56 * num_sectors * y + x + 1 + offset
+        offset = GLOBAL_FORWARD_ENDCAP_ID_OFFSET
+    return ENDCAP_X_OFFSET_PER_SECTOR * num_sectors * y + x + 1 + offset
 
 
 def get_endcap_pixels(sumo, module, cass, ctr, strip, wire, num_sectors=1, is_backward=True):
@@ -205,26 +218,13 @@ class DreamDetectorGeometry(BaseDetectorGeometry):
         self.id_dict = dict(zip(pixel_ids, zip(x, y, z)))
 
 
-json_file_name = '/home/jonas/code/dream_data/DREAM_inverted_forward.json'
-# json_file_name = '/home/jonas/code/dream_data/DREAM_baseline_with_mantle_detector_new.json'
-
-file_dir = path.dirname(path.abspath(__file__))
-script_dir = path.join(file_dir, '..', 'dream')
-json_file_path = path.join(script_dir, json_file_name)
-GEO_OBJ = DreamDetectorGeometry(json_file_path)
-
-
-
 @pytest.fixture(scope='session')
 def dream_geometry():
-    # json_file_name = '/home/jonas/code/dream_data/DREAM_baseline_with_mantle_detector_new.json'
-    # json_file_name = '/home/jonas/code/dream_data/DREAM_inverted_forward.json'
-    # file_dir = path.dirname(path.abspath(__file__))
-    # script_dir = path.join(file_dir, '..', 'dream')
-    # json_file_path = path.join(script_dir, json_file_name)
-    # return DreamDetectorGeometry(json_file_path)
-
-    return GEO_OBJ  # If we load the JSON on each test it takes forever to run
+    json_file_name = "/home/jonas/code/dream_data/dream-with-mantle_detector.json"
+    file_dir = path.dirname(path.abspath(__file__))
+    script_dir = path.join(file_dir, '..', 'dream')
+    json_file_path = path.join(script_dir, json_file_name)
+    return DreamDetectorGeometry(json_file_path)
 
 
 # Testing that corner pixels in same layer are at right angles for mantle
