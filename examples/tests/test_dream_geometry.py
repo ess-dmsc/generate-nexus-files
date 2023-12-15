@@ -21,10 +21,17 @@ MANTLE_NUM_STRIPS = 256
 
 CUBOID_Y_OFFSET_PER_STRIP = 112
 
+# The geometries position is in [mm], define lengths for clarity
+m = 1e3
+mm = 1e-3 * m
+um = 1e-6 * m
+nm = 1e-9 * m
 
-precision = 2e-5  # [mm]
-cuboid_precision = 1e-3  # [mm]
-endcap_rotation_precision = 0.01  # [deg]
+udeg = 1e-6
+
+precision = 20 * nm
+cuboid_precision = 1 * um
+endcap_rotation_precision = 200 * udeg
 
 
 """
