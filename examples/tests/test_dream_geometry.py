@@ -1,12 +1,12 @@
 import json
 from os import path
+from typing import Tuple
 
 import numpy as np
 import pytest
-
-from examples.utils.detector_geometry_from_json import retrieve_data_from_json, \
-    DETECTOR_NUMBER, BaseDetectorGeometry, X_PIXEL_OFFSET, Y_PIXEL_OFFSET, Z_PIXEL_OFFSET
-
+from examples.utils.detector_geometry_from_json import (
+    DETECTOR_NUMBER, X_PIXEL_OFFSET, Y_PIXEL_OFFSET, Z_PIXEL_OFFSET,
+    BaseDetectorGeometry, retrieve_data_from_json)
 
 GLOBAL_FORWARD_ENDCAP_ID_OFFSET = 0
 GLOBAL_BACKWARD_ENDCAP_ID_OFFSET = 71680
@@ -22,9 +22,9 @@ MANTLE_NUM_STRIPS = 256
 CUBOID_Y_OFFSET_PER_STRIP = 112
 
 
-precision = 2e-5  # general precision aim (20nm) [mm]
-cuboid_precision = 1e-3  # precision aim for cuboid (1 um) [mm]
-endcap_rotation_precision = 0.01  # precision aim for endcap rotation (1/100 degree) [deg]
+precision = 2e-5  # [mm]
+cuboid_precision = 1e-3  # [mm]
+endcap_rotation_precision = 0.01  # [deg]
 
 
 """
@@ -32,22 +32,97 @@ Functions for calculating the mantle pixel ID. Expects inputs in ICD form, NOT G
 """
 
 
-def calc_mantle_x(strip):
+def calc_mantle_x(strip: np.ndarray) -> np.ndarray:
+    """
+    Calculate the mantle's x-coordinate.
+
+    Args:
+    strip (np.ndarray): NumPy array of strip numbers.
+
+    Returns:
+    np.ndarray: NumPy array of calculated x-coordinates.
+    """
+    if not isinstance(strip, np.ndarray) or strip.dtype.kind != "i":
+        raise TypeError("strip must be a NumPy array of integers")
+
     return strip
 
 
-def calc_mantle_y(mod, cass, ctr, wire, num_mods):
-    return num_mods * MANTLE_Y_OFFSET_PER_MODULE * wire + MANTLE_Y_OFFSET_PER_MODULE * mod + 2 * cass + ctr
+def calc_mantle_y(
+    mod: np.ndarray, cass: np.ndarray, ctr: np.ndarray, wire: np.ndarray, num_mods: int
+) -> np.ndarray:
+    """
+    Calculate the mantle's y-coordinate.
+
+    Args:
+    mod (np.ndarray): NumPy array of module numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    ctr (np.ndarray): NumPy array of counter numbers.
+    wire (np.ndarray): NumPy array of wire numbers.
+    num_mods (int): The total number of modules.
+
+    Returns:
+    np.ndarray: NumPy array of calculated y-coordinates.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [mod, cass, ctr, wire]
+    ) or not isinstance(num_mods, int):
+        raise TypeError(
+            "All arguments except num_mods must be NumPy arrays of integers, and num_mods must be an integer"
+        )
+
+    return (
+        num_mods * MANTLE_Y_OFFSET_PER_MODULE * wire
+        + MANTLE_Y_OFFSET_PER_MODULE * mod
+        + 2 * cass
+        + ctr
+    )
 
 
-def calc_mantle_pixel(x, y):
+def calc_mantle_pixel(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """
+    Calculate the mantle pixel ID.
+
+    Args:
+    x (np.ndarray): NumPy array of x-coordinates.
+    y (np.ndarray): NumPy array of y-coordinates.
+
+    Returns:
+    np.ndarray: NumPy array of calculated mantle pixel IDs.
+    """
+    if not all(isinstance(arg, np.ndarray) and arg.dtype.kind == "i" for arg in [x, y]):
+        raise TypeError("x and y must be NumPy arrays of integers")
+
     return MANTLE_NUM_STRIPS * y + x + 1 + GLOBAL_MANTLE_ID_OFFSET
 
 
-def get_mantle_pixels(strip, module, cass, counter, wire, num_mods):
+def get_mantle_pixels(
+    strip: np.ndarray,
+    module: np.ndarray,
+    cass: np.ndarray,
+    counter: np.ndarray,
+    wire: np.ndarray,
+    num_mods: int,
+) -> np.ndarray:
+    """
+    Get the mantle pixels based on various parameters.
+
+    Args:
+    strip (np.ndarray): NumPy array of strip numbers.
+    module (np.ndarray): NumPy array of module numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    counter (np.ndarray): NumPy array of counter numbers.
+    wire (np.ndarray): NumPy array of wire numbers.
+    num_mods (int): The number of modules.
+
+    Returns:
+    np.ndarray: NumPy array of calculated mantle pixels.
+    """
     x = calc_mantle_x(strip)
     y = calc_mantle_y(module, cass, counter, wire, num_mods)
     pixel = calc_mantle_pixel(x, y)
+
     return pixel
 
 
@@ -80,22 +155,70 @@ ROTATE_HR = [
 ICD_TO_GEANT_MAP = {i: ROTATE_HR[i] for i in range(len(ROTATE_HR))}
 
 
-def calc_cuboid_x_local(cass, ctr):
+def calc_cuboid_x_local(cass: np.ndarray, ctr: np.ndarray) -> np.ndarray:
+    """
+    Calculate the local x-coordinate for a cuboid.
+
+    Args:
+    cass (np.ndarray): NumPy array of cassette numbers.
+    ctr (np.ndarray): NumPy array of counter numbers.
+
+    Returns:
+    np.ndarray: NumPy array of calculated local x-coordinates.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i" for arg in [cass, ctr]
+    ):
+        raise TypeError("cass and ctr must be NumPy arrays of integers")
+
     return 2 * cass + ctr
 
 
-def calc_cuboid_y_local(wire):
+def calc_cuboid_y_local(wire: np.ndarray) -> np.ndarray:
+    """
+    Calculate the local y-coordinate for a cuboid.
+
+    Args:
+    wire (np.ndarray): NumPy array of wire numbers.
+
+    Returns:
+    np.ndarray: NumPy array of calculated local y-coordinates.
+    """
+    if not isinstance(wire, np.ndarray) or wire.dtype.kind != "i":
+        raise TypeError("wire must be a NumPy array of integers")
+
     return 15 - wire
 
 
-def rotate_cuboid(x, y, sect_seg):
+def rotate_cuboid(
+    x: np.ndarray, y: np.ndarray, sect_seg: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Rotate the cuboid coordinates based on the sector segment.
+
+    This function applies a transformation to the coordinates based on the sector segment.
+    There are four types of transformations depending on the sector segment (0 to 3):
+    - Segment 1: Reflect both coordinates across the line x = 15 and y = 15.
+    - Segment 2: Rotate 90 degrees clockwise.
+    - Segment 3: No change.
+    - Segment 0: Rotate 90 degrees counterclockwise.
+
+    Args:
+    x (np.ndarray): NumPy array of x-coordinates.
+    y (np.ndarray): NumPy array of y-coordinates.
+    sect_seg (np.ndarray): NumPy array of sector segment numbers.
+
+    Returns:
+    tuple[np.ndarray, np.ndarray]: Tuple of NumPy arrays representing the new x and y coordinates after rotation.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [x, y, sect_seg]
+    ):
+        raise TypeError("x, y, and sect_seg must be NumPy arrays of integers")
+
     x_new, y_new = np.empty_like(x), np.empty_like(y)
-    transformations = {
-        1: (15 - x, 15 - y),
-        2: (15 - y, x),
-        3: (x, y),
-        0: (y, 15 - x)
-    }
+    transformations = {1: (15 - x, 15 - y), 2: (15 - y, x), 3: (x, y), 0: (y, 15 - x)}
     for seg, (trans_x, trans_y) in transformations.items():
         mask = sect_seg == seg
         x_new[mask], y_new[mask] = trans_x[mask], trans_y[mask]
@@ -103,41 +226,145 @@ def rotate_cuboid(x, y, sect_seg):
     return x_new, y_new
 
 
-def calc_cuboid_y_global(strip):
+def calc_cuboid_y_global(strip: np.ndarray) -> np.ndarray:
+    """
+    Calculate the global y-coordinate for a cuboid.
+
+    Args:
+    strip (np.ndarray): NumPy array of strip numbers.
+
+    Returns:
+    np.ndarray: NumPy array of calculated global y-coordinates.
+    """
+    if not isinstance(strip, np.ndarray) or strip.dtype.kind != "i":
+        raise TypeError("strip must be a NumPy array of integers")
+
     return CUBOID_Y_OFFSET_PER_STRIP * strip
 
 
-def calc_cuboid_offset(sect_seg, module):
-    lut_idx = ROTATE_HR
-    lut_offsets = OFFSETS_HR
+def calc_cuboid_offset(
+    sect_seg: np.ndarray, module: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Calculate the offset for cuboid coordinates based on sector segment and module.
+
+    Args:
+    sect_seg (np.ndarray): NumPy array of sector segment numbers.
+    module (np.ndarray): NumPy array of module numbers.
+
+    Returns:
+    tuple[np.ndarray, np.ndarray]: Tuple of NumPy arrays representing x and y offsets.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [sect_seg, module]
+    ):
+        raise TypeError("sect_seg and module must be NumPy arrays of integers")
 
     x = []
     y = []
     for ss, m in zip(sect_seg, module):
-        if (ss, m) not in lut_idx:
+        if (ss, m) not in ROTATE_HR:
             print(f"sector-segment {ss} module {m} not found in lookup table")
             continue
-        idx = lut_idx.index((ss, m))
-        x_o, y_o = lut_offsets[idx]
+        idx = ROTATE_HR.index((ss, m))
+        x_o, y_o = OFFSETS_HR[idx]
         x.append(x_o)
         y.append(y_o)
 
     return np.array(x), np.array(y)
 
 
-def calc_cuboid_x(x_local, x_offset):
+def calc_cuboid_x(x_local: np.ndarray, x_offset: np.ndarray) -> np.ndarray:
+    """
+    Calculate the global x-coordinate for a cuboid.
+
+    Args:
+    x_local (np.ndarray): NumPy array of local x-coordinates.
+    x_offset (np.ndarray): NumPy array of x offsets.
+
+    Returns:
+    np.ndarray: NumPy array of calculated global x-coordinates.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [x_local, x_offset]
+    ):
+        raise TypeError("x_local and x_offset must be NumPy arrays of integers")
+
     return x_local + x_offset
 
 
-def calc_cuboid_y(y_global, y_local, y_offset):
+def calc_cuboid_y(
+    y_global: np.ndarray, y_local: np.ndarray, y_offset: np.ndarray
+) -> np.ndarray:
+    """
+    Calculate the final y-coordinate for a cuboid.
+
+    Args:
+    y_global (np.ndarray): NumPy array of global y-coordinates.
+    y_local (np.ndarray): NumPy array of local y-coordinates.
+    y_offset (np.ndarray): NumPy array of y offsets.
+
+    Returns:
+    np.ndarray: NumPy array of calculated final y-coordinates.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [y_global, y_local, y_offset]
+    ):
+        raise TypeError(
+            "y_global, y_local, and y_offset must be NumPy arrays of integers"
+        )
+
     return y_global + y_local + y_offset
 
 
-def calc_cuboid_pixel(x, y):
+def calc_cuboid_pixel(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """
+    Calculate the pixel ID for a cuboid.
+
+    Args:
+    x (np.ndarray): NumPy array of x-coordinates.
+    y (np.ndarray): NumPy array of y-coordinates.
+
+    Returns:
+    np.ndarray: NumPy array of calculated pixel IDs.
+    """
+    if not all(isinstance(arg, np.ndarray) and arg.dtype.kind == "i" for arg in [x, y]):
+        raise TypeError("x and y must be NumPy arrays of integers")
+
     return CUBOID_Y_OFFSET_PER_STRIP * y + x + 1 + GLOBAL_HR_ID_OFFSET
 
 
-def get_cuboid_pixels(sect_seg, module, cass, wire, strip, counter):
+def get_cuboid_pixels(
+    sect_seg: np.ndarray,
+    module: np.ndarray,
+    cass: np.ndarray,
+    wire: np.ndarray,
+    strip: np.ndarray,
+    counter: np.ndarray,
+) -> np.ndarray:
+    """
+    Get the pixel IDs for cuboids based on various parameters.
+
+    Args:
+    sect_seg (np.ndarray): NumPy array of sector segment numbers.
+    module (np.ndarray): NumPy array of module numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    wire (np.ndarray): NumPy array of wire numbers.
+    strip (np.ndarray): NumPy array of strip numbers.
+    counter (np.ndarray): NumPy array of counter numbers.
+
+    Returns:
+    np.ndarray: NumPy array of calculated pixel IDs.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [sect_seg, module, cass, wire, strip, counter]
+    ):
+        raise TypeError("All arguments must be NumPy arrays of integers")
+
     x_local = calc_cuboid_x_local(cass, counter)
     y_local = calc_cuboid_y_local(wire)
     y_global = calc_cuboid_y_global(strip)
@@ -146,6 +373,7 @@ def get_cuboid_pixels(sect_seg, module, cass, wire, strip, counter):
     x = calc_cuboid_x(x_local, x_offsets)
     y = calc_cuboid_y(y_global, y_local, y_offsets)
     pixel = calc_cuboid_pixel(x, y)
+
     return pixel
 
 
@@ -154,7 +382,19 @@ Functions for calculating the endcaps pixel ID. Expects inputs in ICD form, NOT 
 """
 
 
-def calc_endcap_sumo(sumo):
+def calc_endcap_sumo(sumo: np.ndarray) -> np.ndarray:
+    """
+    Calculate the endcap sumo-related array.
+
+    Args:
+    sumo (np.ndarray): NumPy array of sumo numbers.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated sumo-related values.
+    """
+    if not isinstance(sumo, np.ndarray) or sumo.dtype.kind != "i":
+        raise TypeError("sumo must be a NumPy array of integers")
+
     arr = np.zeros_like(sumo)
     arr[sumo == 6] = 0
     arr[sumo == 5] = 20
@@ -163,42 +403,148 @@ def calc_endcap_sumo(sumo):
     return arr
 
 
-def calc_endcap_sect(sumo, cass, ctr):
+def calc_endcap_sect(sumo: np.ndarray, cass: np.ndarray, ctr: np.ndarray) -> np.ndarray:
+    """
+    Calculate the endcap sector value.
+
+    Args:
+    sumo (np.ndarray): NumPy array of sumo numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    ctr (np.ndarray): NumPy array of counter numbers.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated sector values.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [sumo, cass, ctr]
+    ):
+        raise TypeError("sumo, cass, and ctr must be NumPy arrays of integers")
+
     return calc_endcap_sumo(sumo) + 2 * cass + ctr
 
 
-def calc_endcap_offset(sect):
+def calc_endcap_offset(sect: np.ndarray) -> np.ndarray:
+    """
+    Calculate the endcap offset.
+
+    Args:
+    sect (np.ndarray): NumPy array of sector numbers.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated endcap offsets.
+    """
+    if not isinstance(sect, np.ndarray) or sect.dtype.kind != "i":
+        raise TypeError("sect must be a NumPy array of integers")
+
     return ENDCAP_X_OFFSET_PER_SECTOR * sect
 
 
-def calc_endcap_x(sect, sumo, cass, ctr):
+def calc_endcap_x(
+    sect: np.ndarray, sumo: np.ndarray, cass: np.ndarray, ctr: np.ndarray
+) -> np.ndarray:
+    """
+    Calculate the endcap x-coordinate.
+
+    Args:
+    sect (np.ndarray): NumPy array of sector numbers.
+    sumo (np.ndarray): NumPy array of sumo numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    ctr (np.ndarray): NumPy array of counter numbers.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated x-coordinates.
+    """
     return calc_endcap_offset(sect) + calc_endcap_sect(sumo, cass, ctr)
 
 
-def calc_endcap_y(strip, wire):
+def calc_endcap_y(strip: np.ndarray, wire: np.ndarray) -> np.ndarray:
+    """
+    Calculate the endcap y-coordinate.
+
+    Args:
+    strip (np.ndarray): NumPy array of strip numbers.
+    wire (np.ndarray): NumPy array of wire numbers.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated y-coordinates.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i" for arg in [strip, wire]
+    ):
+        raise TypeError("strip and wire must be NumPy arrays of integers")
+
     return ENDCAP_Y_OFFSET_PER_STRIP * strip + 15 - wire
 
 
-def calc_endcap_pixel(x, y, num_sectors, is_backward):
-    if is_backward:
-        offset = GLOBAL_BACKWARD_ENDCAP_ID_OFFSET
-    else:
-        offset = GLOBAL_FORWARD_ENDCAP_ID_OFFSET
+def calc_endcap_pixel(
+    x: np.ndarray, y: np.ndarray, num_sectors: int, is_backward: bool
+) -> np.ndarray:
+    """
+    Calculate the endcap pixel ID.
+
+    Args:
+    x (np.ndarray): NumPy array of x-coordinates.
+    y (np.ndarray): NumPy array of y-coordinates.
+    num_sectors (int): Number of sectors.
+    is_backward (bool): Flag indicating whether the calculation is for backward direction.
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated pixel IDs.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i" for arg in [x, y]
+    ) or not isinstance(num_sectors, int):
+        raise TypeError(
+            "x and y must be NumPy arrays of integers, and num_sectors must be an integer"
+        )
+
+    offset = (
+        GLOBAL_BACKWARD_ENDCAP_ID_OFFSET
+        if is_backward
+        else GLOBAL_FORWARD_ENDCAP_ID_OFFSET
+    )
     return ENDCAP_X_OFFSET_PER_SECTOR * num_sectors * y + x + 1 + offset
 
 
-def get_endcap_pixels(sumo, module, cass, ctr, strip, wire, num_sectors=1, is_backward=True):
-    x = calc_endcap_x(
-        module,
-        sumo,
-        cass,
-        ctr
-    )
-    y = calc_endcap_y(
-        strip,
-        wire
-    )
+def get_endcap_pixels(
+    sumo: np.ndarray,
+    module: np.ndarray,
+    cass: np.ndarray,
+    ctr: np.ndarray,
+    strip: np.ndarray,
+    wire: np.ndarray,
+    num_sectors: int = 1,
+    is_backward: bool = True,
+) -> np.ndarray:
+    """
+    Get the pixel IDs for endcap components based on various parameters.
+
+    Args:
+    sumo (np.ndarray): NumPy array of sumo numbers.
+    module (np.ndarray): NumPy array of module numbers.
+    cass (np.ndarray): NumPy array of cassette numbers.
+    ctr (np.ndarray): NumPy array of counter numbers.
+    strip (np.ndarray): NumPy array of strip numbers.
+    wire (np.ndarray): NumPy array of wire numbers.
+    num_sectors (int): Number of sectors (default 1).
+    is_backward (bool): Flag indicating backward direction (default True).
+
+    Returns:
+    np.ndarray: NumPy array representing the calculated pixel IDs.
+    """
+    if not all(
+        isinstance(arg, np.ndarray) and arg.dtype.kind == "i"
+        for arg in [sumo, module, cass, ctr, strip, wire]
+    ):
+        raise TypeError(
+            "All arguments except num_sectors and is_backward must be NumPy arrays of integers"
+        )
+
+    x = calc_endcap_x(module, sumo, cass, ctr)
+    y = calc_endcap_y(strip, wire)
     pixel = calc_endcap_pixel(x, y, num_sectors, is_backward)
+
     return pixel
 
 
@@ -207,7 +553,7 @@ class DreamDetectorGeometry(BaseDetectorGeometry):
         self.debug = debug  # enable debug print
         self.fatal = fatal  # terminate on first error
         data: dict
-        with open(file_name, 'r') as json_file:
+        with open(file_name, "r") as json_file:
             data = json.load(json_file)
         x, y, z, pixel_ids, vertices, list_pixel_ids = [], [], [], [], [], []
         retrieve_data_from_json(data, DETECTOR_NUMBER, pixel_ids)
@@ -218,11 +564,11 @@ class DreamDetectorGeometry(BaseDetectorGeometry):
         self.id_dict = dict(zip(pixel_ids, zip(x, y, z)))
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def dream_geometry():
     json_file_name = "/home/jonas/code/dream_data/dream-with-mantle_detector.json"
     file_dir = path.dirname(path.abspath(__file__))
-    script_dir = path.join(file_dir, '..', 'dream')
+    script_dir = path.join(file_dir, "..", "dream")
     json_file_path = path.join(script_dir, json_file_name)
     return DreamDetectorGeometry(json_file_path)
 
@@ -250,28 +596,44 @@ def test_mantle_points(dream_geometry):
 
     angle_rad = np.deg2rad(90.0)
 
-    a = dream_geometry.pix2angle(front_upper_left, front_upper_right, front_upper_left, front_lower_left)
+    a = dream_geometry.pix2angle(
+        front_upper_left, front_upper_right, front_upper_left, front_lower_left
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(front_upper_right, front_upper_left, front_upper_right, front_lower_right)
+    a = dream_geometry.pix2angle(
+        front_upper_right, front_upper_left, front_upper_right, front_lower_right
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(front_lower_left, front_lower_right, front_lower_left, front_upper_left)
+    a = dream_geometry.pix2angle(
+        front_lower_left, front_lower_right, front_lower_left, front_upper_left
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(front_lower_right, front_lower_left, front_lower_right, front_upper_right)
+    a = dream_geometry.pix2angle(
+        front_lower_right, front_lower_left, front_lower_right, front_upper_right
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(back_upper_left, back_upper_right, back_upper_left, back_lower_left)
+    a = dream_geometry.pix2angle(
+        back_upper_left, back_upper_right, back_upper_left, back_lower_left
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(back_upper_right, back_upper_left, back_upper_right, back_lower_right)
+    a = dream_geometry.pix2angle(
+        back_upper_right, back_upper_left, back_upper_right, back_lower_right
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(back_lower_left, back_lower_right, back_lower_left, back_upper_left)
+    a = dream_geometry.pix2angle(
+        back_lower_left, back_lower_right, back_lower_left, back_upper_left
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
-    a = dream_geometry.pix2angle(back_lower_right, back_lower_left, back_lower_right, back_upper_right)
+    a = dream_geometry.pix2angle(
+        back_lower_right, back_lower_left, back_lower_right, back_upper_right
+    )
     assert dream_geometry.expect(a, angle_rad, precision)
 
 
@@ -315,8 +677,8 @@ def test_mantle_wire_increases_in_x(dream_geometry):
 
 # Test that the y position of the mantle pixels decreases as the modules increase
 def test_mantle_cass_ctr_decreases_in_y(dream_geometry):
-    modules = np.sort(np.array([i for i in range(5)]*12))
-    cassettes = np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]*5)
+    modules = np.sort(np.array([i for i in range(5)] * 12))
+    cassettes = np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5] * 5)
     ctr = np.array([0, 1] * 30)
     wires = np.array([0 for i in range(60)])
     strips = np.array([0 for i in range(60)])
@@ -355,28 +717,44 @@ def test_first_cuboid_points(dream_geometry):
 
     angle_rad = np.deg2rad(90.0)
 
-    a = dream_geometry.pix2angle(front_upper_left, front_upper_right, front_upper_left, front_lower_left)
+    a = dream_geometry.pix2angle(
+        front_upper_left, front_upper_right, front_upper_left, front_lower_left
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(front_upper_right, front_upper_left, front_upper_right, front_lower_right)
+    a = dream_geometry.pix2angle(
+        front_upper_right, front_upper_left, front_upper_right, front_lower_right
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(front_lower_left, front_lower_right, front_lower_left, front_upper_left)
+    a = dream_geometry.pix2angle(
+        front_lower_left, front_lower_right, front_lower_left, front_upper_left
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(front_lower_right, front_lower_left, front_lower_right, front_upper_right)
+    a = dream_geometry.pix2angle(
+        front_lower_right, front_lower_left, front_lower_right, front_upper_right
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(back_upper_left, back_upper_right, back_upper_left, back_lower_left)
+    a = dream_geometry.pix2angle(
+        back_upper_left, back_upper_right, back_upper_left, back_lower_left
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(back_upper_right, back_upper_left, back_upper_right, back_lower_right)
+    a = dream_geometry.pix2angle(
+        back_upper_right, back_upper_left, back_upper_right, back_lower_right
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(back_lower_left, back_lower_right, back_lower_left, back_upper_left)
+    a = dream_geometry.pix2angle(
+        back_lower_left, back_lower_right, back_lower_left, back_upper_left
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
-    a = dream_geometry.pix2angle(back_lower_right, back_lower_left, back_lower_right, back_upper_right)
+    a = dream_geometry.pix2angle(
+        back_lower_right, back_lower_left, back_lower_right, back_upper_right
+    )
     assert dream_geometry.expect(a, angle_rad, cuboid_precision)
 
 
@@ -412,7 +790,9 @@ def test_all_cuboids_sector_0_wires_increase_in_x(dream_geometry):
 
     for module in range(9):
         if (sector, module) not in ROTATE_HR:
-            print(f"Skipping sector {sector} module {module} because it does not exist in the lookup table")
+            print(
+                f"Skipping sector {sector} module {module} because it does not exist in the lookup table"
+            )
             continue
 
         sector_segment = np.array([sector for i in range(16)])
@@ -422,7 +802,9 @@ def test_all_cuboids_sector_0_wires_increase_in_x(dream_geometry):
         wires = np.array([15 - i for i in range(16)])
         strips = np.array([0 for i in range(16)])
 
-        pixels = get_cuboid_pixels(sector_segment, modules, cassettes, wires, strips, ctr)
+        pixels = get_cuboid_pixels(
+            sector_segment, modules, cassettes, wires, strips, ctr
+        )
         coords = np.array([dream_geometry.id_dict[pixel] for pixel in pixels])
 
         # Check that x decreases in instrument coordinate system (increases in detector coordinate system)
@@ -440,7 +822,9 @@ def test_all_cuboids_sector_1_cass_ctr_increase_in_x(dream_geometry):
 
     for module in range(9):
         if (sector, module) not in ROTATE_HR:
-            print(f"Skipping sector {sector} module {module} because it does not exist in the lookup table")
+            print(
+                f"Skipping sector {sector} module {module} because it does not exist in the lookup table"
+            )
             continue
 
         sector_segment = np.array([sector for i in range(16)])
@@ -450,7 +834,9 @@ def test_all_cuboids_sector_1_cass_ctr_increase_in_x(dream_geometry):
         wires = np.array([0 for i in range(16)])
         strips = np.array([0 for i in range(16)])
 
-        pixels = get_cuboid_pixels(sector_segment, modules, cassettes, wires, strips, ctr)
+        pixels = get_cuboid_pixels(
+            sector_segment, modules, cassettes, wires, strips, ctr
+        )
         coords = np.array([dream_geometry.id_dict[pixel] for pixel in pixels])
 
         # Check that x decreases in instrument coordinate system (increases in detector coordinate system)
@@ -468,7 +854,9 @@ def test_all_cuboids_sector_2_wires_increase_in_x(dream_geometry):
 
     for module in range(9):
         if (sector, module) not in ROTATE_HR:
-            print(f"Skipping sector {sector} module {module} because it does not exist in the lookup table")
+            print(
+                f"Skipping sector {sector} module {module} because it does not exist in the lookup table"
+            )
             continue
 
         sector_segment = np.array([sector for i in range(16)])
@@ -478,7 +866,9 @@ def test_all_cuboids_sector_2_wires_increase_in_x(dream_geometry):
         wires = np.array([i for i in range(16)])
         strips = np.array([0 for i in range(16)])
 
-        pixels = get_cuboid_pixels(sector_segment, modules, cassettes, wires, strips, ctr)
+        pixels = get_cuboid_pixels(
+            sector_segment, modules, cassettes, wires, strips, ctr
+        )
         coords = np.array([dream_geometry.id_dict[pixel] for pixel in pixels])
 
         # Check that x decreases in instrument coordinate system (increases in detector coordinate system)
@@ -496,7 +886,9 @@ def test_all_cuboids_sector_3_cass_ctr_increase_in_x(dream_geometry):
 
     for module in range(9):
         if (sector, module) not in ROTATE_HR:
-            print(f"Skipping sector {sector} module {module} because it does not exist in the lookup table")
+            print(
+                f"Skipping sector {sector} module {module} because it does not exist in the lookup table"
+            )
             continue
 
         sector_segment = np.array([sector for i in range(16)])
@@ -506,7 +898,9 @@ def test_all_cuboids_sector_3_cass_ctr_increase_in_x(dream_geometry):
         wires = np.array([15 for i in range(16)])
         strips = np.array([0 for i in range(16)])
 
-        pixels = get_cuboid_pixels(sector_segment, modules, cassettes, wires, strips, ctr)
+        pixels = get_cuboid_pixels(
+            sector_segment, modules, cassettes, wires, strips, ctr
+        )
         coords = np.array([dream_geometry.id_dict[pixel] for pixel in pixels])
 
         # Check that x decreases in instrument coordinate system (increases in detector coordinate system)
@@ -531,7 +925,9 @@ def test_forward_endcap_pixel_distance(dream_geometry):
     expected_pixels = np.array([1, 2])
     expected_distance = 7.45  # Where would we get a good distance from?
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False
+    )
 
     distance = dream_geometry.dist(pixels[0], pixels[1])
 
@@ -548,10 +944,12 @@ def test_forward_endcap_pixel_decreasing_radius_per_sumo(dream_geometry):
     wires = np.array([15, 15, 15, 15])
     strips = np.array([0, 0, 0, 0])
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False
+    )
     coords = np.array([dream_geometry.p2c(pixel) for pixel in pixels])
 
-    R = np.sqrt(coords[:, 0]**2 + coords[:, 1]**2 + coords[:, 2]**2)
+    R = np.sqrt(coords[:, 0] ** 2 + coords[:, 1] ** 2 + coords[:, 2] ** 2)
 
     # Make sure that the radius is smaller for each sumo
     assert np.all(R[1:] < R[:-1])
@@ -566,7 +964,9 @@ def test_forward_endcap_pixel_rotates_clockwise_per_sector(dream_geometry):
     wires = np.array([15 for i in range(5)])
     strips = np.array([0 for i in range(5)])
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False
+    )
     coords = np.array([dream_geometry.p2c(pixel) for pixel in pixels])
 
     phi = np.rad2deg(np.arctan2(coords[:, 1], coords[:, 0]))
@@ -594,7 +994,9 @@ def test_forward_endcap_first_and_last_pixel_clockwise(dream_geometry):
     wires = np.array([15, 0])
     strips = np.array([0, 15])
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=5, is_backward=False
+    )
     coords = np.array([dream_geometry.p2c(pixel) for pixel in pixels])
 
     phi = np.rad2deg(np.arctan2(coords[:, 1], coords[:, 0]))
@@ -627,7 +1029,9 @@ def test_backward_endcap_pixel_rotates_clockwise_per_sector(dream_geometry):
     wires = np.array([15 for i in range(11)])
     strips = np.array([0 for i in range(11)])
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=11, is_backward=True)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=11, is_backward=True
+    )
     coords = np.array([dream_geometry.p2c(pixel) for pixel in pixels])
 
     phi = np.rad2deg(np.arctan2(coords[:, 1], coords[:, 0]))
@@ -658,7 +1062,9 @@ def test_backward_endcap_first_and_last_pixel_clockwise(dream_geometry):
     wires = np.array([15, 0])
     strips = np.array([0, 15])
 
-    pixels = get_endcap_pixels(sumo, modules, cassettes, ctr, strips, wires, num_sectors=11, is_backward=True)
+    pixels = get_endcap_pixels(
+        sumo, modules, cassettes, ctr, strips, wires, num_sectors=11, is_backward=True
+    )
     coords = np.array([dream_geometry.p2c(pixel) for pixel in pixels])
 
     phi = np.rad2deg(np.arctan2(coords[:, 1], coords[:, 0]))
