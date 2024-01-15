@@ -12,7 +12,7 @@ NUM_BANKS = 1
 
 # Straw information.
 NUM_STRAWS_PER_TUBE = 7
-STRAW_DIAMETER = 7.75 * SCALE_FACTOR
+STRAW_DIAMETER = 7.5 * SCALE_FACTOR
 STRAW_RESOLUTION = 512  # Might need to switch to 512 though for commisiong tests.
 STRAW_Y_LOC = 1.14 * SCALE_FACTOR
 STRAW_Z_LOC = 7.67 * SCALE_FACTOR
@@ -68,12 +68,12 @@ s_eq1 = s3 + 0.75 * (s2 - s3) / 4.82
 data_slits = []
 
 # Data from larmor document.
-d_x = 1.953
-dz_sample = 4431
-y_1 = 6.28
-y_2 = 28.4
-z_1 = 26.259
 tube_l = 1000
+d_x = tube_l/STRAW_RESOLUTION #pixel size (1000/512=1.953125)
+dz_sample = 4431
+y_1 = 6.28    #y dist of two tubes in subsequent layers
+y_2 = 28.4    #y dist of two tubes in a layer
+z_1 = 26.259  #z dist of the tubes in subsequent layers
 
 
 # pixel_num is pixel 1 to 512, n is tube 1 to 128
@@ -86,7 +86,7 @@ def r_n(n):
 
 
 def x_n(pixel_num):
-    return -tube_l/2 + d_x / 2 + d_x * (pixel_num - 1)
+    return tube_l/2 - d_x / 2 - d_x * (pixel_num - 1)
 
 
 def y_n(n):
@@ -101,6 +101,7 @@ tube_dim_1 = 4
 tube_dim_2 = 32
 tube_dims = tube_dim_1 * tube_dim_2
 
+tube_radius = IMAGING_TUBE_D*0.5 / SCALE_FACTOR
 det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
 det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims), z_n(tube_dims - tube_dim_1 + 1)),
                             (x_n(1), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims)),
@@ -111,7 +112,7 @@ det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims), z_n(tube_dims - tube_dim_1 
                             (x_n(STRAW_RESOLUTION), y_n(tube_dim_1), z_n(1)),
                             (x_n(STRAW_RESOLUTION), y_n(1), z_n(tube_dim_1))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
-                      'bank_offset': (0, 0, 4099 - z_n(tube_dims - tube_dim_1 + 1)),
+                      'bank_offset': (0, 23.89, 4099 - z_n(tube_dims - tube_dim_1 + 1)+tube_radius),
                       'name': 'larmor_detector',
                       'topic': 'loki_detector',
                       'source': 'loki',
