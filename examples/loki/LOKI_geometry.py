@@ -91,6 +91,16 @@ def reorder_straw_offsets_in_list(straw_offs_unsorted: List):
     straw_offs_sorted[mid_point:] = reversed(straw_offs_unsorted[1:mid_point])
     return straw_offs_sorted
 
+def reorder_straw_offsets_to_flip_upside_down(straw_offs_unsorted: List):
+    straw_offs_sorted = [0] * len(straw_offs_unsorted)
+    straw_offs_sorted[0] = straw_offs_unsorted[0]
+    straw_offs_sorted[1] = straw_offs_unsorted[4]
+    straw_offs_sorted[2] = straw_offs_unsorted[5]
+    straw_offs_sorted[3] = straw_offs_unsorted[3]
+    straw_offs_sorted[4] = straw_offs_unsorted[1]
+    straw_offs_sorted[5] = straw_offs_unsorted[2]
+    straw_offs_sorted[6] = straw_offs_unsorted[6]
+    return straw_offs_sorted
 
 def write_csv_file(csv_data):
     column_names = ['bank id', 'tube id', 'straw id', 'local straw position',
@@ -495,7 +505,7 @@ class Straw:
         self._pixel = None
 
     def set_straw_offsets(self, alignment: DetectorAlignment, base_vector,
-                          plot_all: bool = False):
+                          upside_down: bool, plot_all: bool = False):
         straw_offs = [np.array([0, 0, 0])]
         if alignment is DetectorAlignment.HORIZONTAL:
             def rotation(theta):
@@ -512,7 +522,7 @@ class Straw:
         rotation_angle = np.deg2rad(360 / (NUM_STRAWS_PER_TUBE - 1))
         for straw_idx in range(NUM_STRAWS_PER_TUBE - 1):
             tmp_angle = rotation_angle * straw_idx + \
-                        STRAW_ALIGNMENT_OFFSET_ANGLE
+                        (STRAW_ALIGNMENT_OFFSET_ANGLE if not upside_down else -STRAW_ALIGNMENT_OFFSET_ANGLE)
             rotated_vector = np.dot(rotation(tmp_angle), base_vector)
             inter_res = \
                 (rotated_vector * TUBE_OUTER_STRAW_DIST_FROM_CP).tolist()
@@ -521,6 +531,8 @@ class Straw:
             inter_res = np.array(inter_res)
             straw_offs.append(inter_res)
         straw_offs = reorder_straw_offsets_in_list(straw_offs)
+        if upside_down:
+          straw_offs = reorder_straw_offsets_to_flip_upside_down(straw_offs)
         if plot_all:
             ax_tmp = plt.axes(projection='3d')
             for count, value in enumerate(straw_offs):
@@ -636,8 +648,10 @@ class Tube:
                             self._point_end,
                             detector_bank_id)
         base_vec_norm = base_vec_1 / np.linalg.norm(base_vec_1)
+        upside_down = detector_bank_id in [1,2,5,6]
         self._straw.set_straw_offsets(self._alignment,
                                       base_vec_norm,
+                                      upside_down,
                                       False)
         self._straw.populate_with_pixels()
 
