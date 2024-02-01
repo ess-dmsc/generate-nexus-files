@@ -85,8 +85,8 @@ def r_n(n):
     return int((n - 1) / 4) + 1 - 16
 
 
-def x_n(pixel_num):
-    return tube_l/2 - d_x / 2 - d_x * (pixel_num - 1)
+# def x_n(pixel_num):
+#     return tube_l/2 - d_x / 2 - d_x * (pixel_num - 1)
 
 
 def y_n(n):
@@ -103,14 +103,14 @@ tube_dims = tube_dim_1 * tube_dim_2
 
 tube_radius = IMAGING_TUBE_D*0.5 / SCALE_FACTOR
 det_pixel_id_start = 1  # starting pixel ID for the 'first' detector bank.
-det_banks_data = {0: {'A': [(x_n(1), y_n(tube_dims), z_n(tube_dims - tube_dim_1 + 1)),
-                            (x_n(1), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims)),
-                            (x_n(1), y_n(tube_dim_1), z_n(1)),
-                            (x_n(1), y_n(1), z_n(tube_dim_1))],
-                      'B': [(x_n(STRAW_RESOLUTION), y_n(tube_dims), z_n(tube_dims - tube_dim_1 + 1)),
-                            (x_n(STRAW_RESOLUTION), y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims)),
-                            (x_n(STRAW_RESOLUTION), y_n(tube_dim_1), z_n(1)),
-                            (x_n(STRAW_RESOLUTION), y_n(1), z_n(tube_dim_1))],
+det_banks_data = {0: {'A': [(500, y_n(tube_dims), z_n(tube_dims - tube_dim_1 + 1)),
+                            (500, y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims)),
+                            (500, y_n(tube_dim_1), z_n(1)),
+                            (500, y_n(1), z_n(tube_dim_1))],
+                      'B': [(-500, y_n(tube_dims), z_n(tube_dims - tube_dim_1 + 1)),
+                            (-500, y_n(tube_dims - tube_dim_1 + 1), z_n(tube_dims)),
+                            (-500, y_n(tube_dim_1), z_n(1)),
+                            (-500, y_n(1), z_n(tube_dim_1))],
                       'num_tubes': tube_dim_1 * tube_dim_2,
                       'bank_offset': (0, 23.89, 4099 - z_n(tube_dims - tube_dim_1 + 1)+tube_radius),
                       'name': 'larmor_detector',

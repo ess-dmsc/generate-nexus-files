@@ -187,7 +187,7 @@ def test_some_icd_values(geom, layer, bank):
 # TODO: check/fix precision
 @pytest.mark.parametrize('bank', [i for i in range(NUM_BANKS)])
 def test_pixel_pixel_dist(geom, bank):
-    pp_dist = strawlen[bank] / (STRAW_RESOLUTION - 1)
+    pp_dist = strawlen[bank] / STRAW_RESOLUTION
     if bank == 0:
         first_straw = 0
     else:

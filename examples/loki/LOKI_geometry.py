@@ -552,12 +552,12 @@ class Straw:
         Populates the tube straw with pixels according to its pixel resolution.
         """
         vector_along_straw = np.array(self._point_c) - np.array(self._point_a)
-        vector_along_straw /= (STRAW_RESOLUTION - 1)
+        vector_along_straw /= STRAW_RESOLUTION
         print("vector along straw", vector_along_straw)
         pixel_end_point = tuple(np.array(self._point_a) + vector_along_straw)
         vertices_first_pixel = [self._point_a, self._point_b, pixel_end_point]
         self._pixel = Pixel(vertices_first_pixel)
-        offsets_pixel = [vector_along_straw * j
+        offsets_pixel = [vector_along_straw * (j+0.5)
                          for j in range(STRAW_RESOLUTION)]
         if plot_all:
             ax_tmp = plt.axes(projection='3d')
