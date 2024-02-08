@@ -30,15 +30,12 @@ pytest examples/tests/test_nmx_geometry.py
 
 ### Detectors
 
-* Generated via python as NeXus Constructor does not support Box detectors 
-with gaps at this time.
+* Using detector specifications from [DigitalGeometry_NMX.pptx](https://jira.esss.lu.se/secure/attachment/175639/DigitalGeometry_NMX.pptx)
+  and [NMX strips.pptx](https://jira.esss.lu.se/secure/attachment/157298/NMX%20strips.pptx)
 * The three detector panels are generated in the x-y plane and then rotated 
 and moved into their base position. This means that panel pixels use x and y
 coordinates despite not being aligned with the x/y axes after the applied 
 transformations.
-
-  * Translations are used instead of offsets, as the NeXus Constructor does not
-yet support offsets (see ECDC-3526).
 
 * Pixel offsets:
 
