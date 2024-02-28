@@ -1,3 +1,5 @@
+This may deliver incomplete JSON and is not a maintained repo - up-to-date JSON for instruments can be found at https://gitlab.esss.lu.se/ecdc/nexus-json-templates
+
 # Generate NeXus Files
 
 Generate example NeXus files in the proposed format for ESS from existing NeXus files and Mantid IDFs. Uses https://github.com/ess-dmsc/python-nexus-utilities
