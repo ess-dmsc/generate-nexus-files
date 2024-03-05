@@ -1,5 +1,4 @@
 -e git+https://github.com/ess-dmsc/python-nexus-utilities#egg=nexusutils
--e git+https://github.com/ess-dmsc/nexus-json.git#egg=nexusjson
 -e git+https://github.com/ess-dmsc/python-streaming-data-types.git#egg=ess-streaming-data-types
 alive-progress
 h5py
