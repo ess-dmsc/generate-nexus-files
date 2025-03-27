@@ -1,5 +1,6 @@
 -e git+https://github.com/ess-dmsc/python-nexus-utilities#egg=nexusutils
 -e git+https://github.com/ess-dmsc/python-streaming-data-types.git#egg=ess-streaming-data-types
+-e git+https://github.com/ess-dmsc/file-writer-control#egg=file-writer-control
 alive-progress
 h5py
 tqdm
@@ -7,6 +8,5 @@ pandas
 matplotlib
 nexusformat
 ipython
-file-writer-control
 jinja2
 pytest
